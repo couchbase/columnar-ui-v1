@@ -21,6 +21,7 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
   vm.getServicePath = getServicePath;
   vm.isPathPresent = isPathPresent;
   vm.filterQuotaServices = filterQuotaServices;
+  vm.isOnlyColumnar = isOnlyColumnar;
 
   $scope.$watchCollection(() => ({
     stats: $scope.mnUIStats,
@@ -94,6 +95,14 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
       return vm.server.details[service + "MemoryQuota"] * 1024 * 1024;
     }
   }
+
+    function isOnlyColumnar(service) {
+    if (!vm.server || !vm.server.details.storage.hdd[0]) {
+      return;
+    }
+    return service === "cbas" && vm.server.details.storage.hdd[0].cbas_dirs.length ;
+  }
+
 
   function isPathPresent(service) {
     if (!vm.server || !vm.server.details.storage.hdd[0]) {
@@ -186,11 +195,11 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
       case "cbas":
         memoryUsages.push(
           mnServersListItemDetailsService.getBaseConfig(
-            'analytics service used',
+            'Columnar service used',
             vm.getLatestStat(statsNames[2], stats),
             getServiceQuota(serviceName), true));
         diskUsages.push(mnServersListItemDetailsService.getBaseConfig(
-          "analytics service",
+          "Columnar service",
           vm.getLatestStat(statsNames[3], stats),
           hdd ? hdd.free : 0))
         break;

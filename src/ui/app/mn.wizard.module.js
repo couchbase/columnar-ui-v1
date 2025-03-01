@@ -22,6 +22,7 @@ import {MnWizardSetupNewClusterComponent} from './mn.wizard.setup.new.cluster.co
 import {MnWizardNewClusterConfigComponent} from './mn.wizard.new.cluster.config.component.js';
 import {MnWizardTermsAndConditionsComponent} from './mn.wizard.terms.and.conditions.component.js';
 import {MnWizardJoinClusterComponent} from './mn.wizard.join.cluster.component.js';
+import {MnColumnarbucketConfig} from "./mn.columnar.bucket.config.component.js";
 import {MnSharedModule} from './mn.shared.module.js';
 import {MnPipesModule} from './mn.pipes.module.js';
 
@@ -67,6 +68,7 @@ class MnWizardModule {
         MnServicesConfigComponent,
         MnStorageModeComponent,
         MnPathFieldComponent,
+        MnColumnarbucketConfig,
 
         MnWizardComponent,
         MnWizardWelcomeComponent,

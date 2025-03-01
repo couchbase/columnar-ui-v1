@@ -55,7 +55,10 @@ angular
   .filter('decodeCompatVersion', decodeCompatVersion)
   .filter('mnMsToTime', mnMsToTime)
   .filter('mnServersListFilter', ["$filter", "mnFormatServicesFilter", mnServersListFilter])
-  .filter("formatFailoverWarnings", formatFailoverWarnings);
+  .filter("formatFailoverWarnings", formatFailoverWarnings)
+  .filter('mnColumnarService', mnColumnarService)
+  .filter('mnColumnarState', mnColumnarState)
+  .filter('mnReplaceWord', mnReplaceWord);
 
 
 
@@ -650,13 +653,37 @@ function mnFormatServices() {
     case 'index': return 'Index';
     case 'fts': return 'Search';
     case 'eventing': return 'Eventing';
-    case 'cbas': return 'Analytics';
+    case 'cbas': return 'Columnar';
     case 'backup': return 'Backup';
     default: return service;
     }
   }
 }
 
+function mnColumnarState() {
+  return function (service) {
+    return service.filter(function (s) {
+      return (s.name === "Administrative" || s.name === "Analytics");
+    })
+    
+  }
+}
+
+function mnColumnarService() {
+  return function (service) {
+    return service.filter(function (s) {
+      return s.items[0].name.toLowerCase().includes('columnar')
+    })
+  }
+}
+
+function mnReplaceWord() {
+  return function(input, target, replacement) {
+    
+      if (!input) return input; // Handle empty or undefined input
+      return input.replace(new RegExp(`\\b${target}\\b`, 'g'), replacement);
+    };
+}
 function mnOrderServices() {
   let order = ["kv", "n1ql", "index", "fts", "cbas", "eventing", "backup"];
   return function (services) {

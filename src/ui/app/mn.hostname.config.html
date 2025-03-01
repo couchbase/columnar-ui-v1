@@ -35,6 +35,31 @@
       {{(postClusterInitHttp.error | async)?.errors?.hostname}}
     </div>
   </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="port_hostname">Port</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="port"
+       id="port_hostname"
+       [mnFocus]="focusFieldSubject"
+       mnName="port"
+       formControlName="port">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.port">
+      {{(postNodeInitHttp.error | async)?.errors?.port}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.port">
+      {{(postClusterInitHttp.error | async)?.errors?.port}}
+    </div>
+  </div>
 
   <div
      formGroupName="hostConfig"

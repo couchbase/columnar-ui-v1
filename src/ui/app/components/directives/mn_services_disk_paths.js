@@ -25,7 +25,8 @@ function mnServicesDiskPathsDirective() {
       config: "=",
       postDiskStorageErrors: "=?",
       isEnterprise: "=",
-      isDisabled: "=?"
+      isDisabled: "=?",
+      mnIsColumnar: "=?",
     },
     template,
     controller: ["$scope", "mnClusterConfigurationService", controller],

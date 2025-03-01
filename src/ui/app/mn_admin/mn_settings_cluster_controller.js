@@ -52,6 +52,7 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
   vm.showAllXDCRLogLevels = showAllXDCRLogLevels;
   vm.reloadState = mnHelper.reloadState;
   vm.itemsSelect = [...Array(65).keys()].slice(1);
+  vm.isColumnar = true
 
   activate();
 

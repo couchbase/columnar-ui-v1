@@ -285,7 +285,7 @@
         help <span class="has-menu">&nbsp;</span>
       </a>
       <div uib-dropdown-menu class="dropdown-menu-select-like">
-        <a ng-href="https://docs.couchbase.com/server/{{adminCtl.implementationVersion | mnMajorMinorVersion}}/introduction/intro.html"
+        <a ng-href="https://docs.couchbase.com/home/columnar-sdk.html"
            rel="noopener noreferrer"
            target="_blank">
           Documentation<br>
@@ -502,7 +502,13 @@
        ui-sref="app.admin.servers.list">
       Servers
     </a>
-    <a
+    <!-- <a
+       ng-class="{currentnav: ('app.admin.collections' | includedByState) || ('app.admin.buckets' | includedByState)}"
+       ng-show="rbac.cluster.bucket['.'].settings.read"
+       ui-sref="app.admin.buckets">
+      Databases
+    </a> -->
+    <!-- <a
        mn-tab="buckets"
        ng-class="{currentnav: ('app.admin.collections' | includedByState) || ('app.admin.buckets' | includedByState)}"
        ng-show="rbac.cluster.bucket['.'].settings.read"
@@ -515,7 +521,7 @@
        ui-sref-active="currentnav"
        ui-sref="app.admin.replications">
       XDCR
-    </a>
+    </a> -->
     <a
        ng-show="rbac.cluster.admin.security.read || rbac.cluster.admin.users.read"
        mn-tab="security"
@@ -543,15 +549,21 @@
       Logs
     </a>
     <div class="margin-bottom-1"></div>
-    <div
+    <!-- <div
        mn-pluggable-ui-tabs
        mn-tab-bar-name="workbenchTab">
-    </div>
+    </div> -->
     <a
+       ng-class="{currentnav: ('app.admin.cbas' | includedByState)}"
+       ng-show="rbac.cluster.collection['.:.:.'].analytics.select || rbac.cluster.analytics.manage"
+       ui-sref="app.admin.cbas.workbench">
+      Columnar
+    </a>
+    <!-- <a
        ng-show="rbac.cluster.bucket['.'].settings.read && rbac.cluster.bucket['.'].views.read"
        ui-state="'app.admin.views.list'"
        ui-state-params="{bucket: rbac.bucketNames['.views!read'][0] || null}"
-       ng-class="{currentnav: ('app.admin.views' | includedByState)}">Views</a>
+       ng-class="{currentnav: ('app.admin.views' | includedByState)}">Views</a> -->
 
     <div
        class="sidebar-closer resp-hide-med"

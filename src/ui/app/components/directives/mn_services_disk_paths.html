@@ -21,7 +21,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div class="formrow">
+<div class="formrow" ng-if="!mnIsColumnar">
   <div class="row">
     <label for="setup_db_path_input">Data Disk Path</label>
     <small class="text-smaller">Path cannot be changed after setup</small>
@@ -40,7 +40,7 @@ licenses/APL2.txt.
   </p>
 </div>
 
-<div class="formrow">
+<div class="formrow" ng-if="!mnIsColumnar">
   <div class="row">
     <label for="setup_index_path_input">Indexes Disk Path</label>
     <small class="text-smaller">Path cannot be changed after setup</small>
@@ -59,7 +59,7 @@ licenses/APL2.txt.
   </p>
 </div>
 
-<div class="formrow" ng-if="isEnterprise">
+<div class="formrow" ng-if="!isEnterprise">
   <div class="row">
     <label for="setup_eventing_path_input">Eventing Disk Path</label>
     <small class="text-smaller">Path cannot be changed after setup</small>
@@ -80,9 +80,9 @@ licenses/APL2.txt.
 
 <div
    class="formrow"
-   ng-if="isEnterprise">
+   ng-if="isEnterprise && mnIsColumnar">
   <div class="row">
-    <label for="setup_cbas_dirs_input0">Analytics Disk Paths</label>
+    <label for="setup_cbas_dirs_input0">Columnar Disk Paths</label>
     <small class="text-smaller">Paths cannot be changed after setup</small>
   </div>
   <div

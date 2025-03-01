@@ -34,9 +34,12 @@ licenses/APL2.txt.
         {{serversCtl.getGroupsByHostname[node.hostname].name | mnLimitTo: 20}}
     </span>
     <span class="cbui-table-cell flex-grow-3 wrap resp-hide-xsml" style="display:flex;flex-wrap:wrap;">
+      
       <span
          ng-repeat="service in (node.services | mnOrderServices)"
-         class="label neutral nocaps">
+         class="label neutral nocaps"
+         ng-show="service === 'cbas'"
+         >
         {{service | mnFormatServices}}
       </span>
     </span>

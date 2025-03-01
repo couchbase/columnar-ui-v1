@@ -10,7 +10,10 @@
 
 <div
    class="checkbox-service"
-   ng-click="mnServicesCtl.change('kv', mnServicesCtl.config, $event)">
+   ng-click="mnServicesCtl.change('kv', mnServicesCtl.config, $event)"
+   ng-if="!mnServicesCtl.mnIsColumnar"
+   >
+   
   <input
      type="checkbox"
      id="for-kv-service"
@@ -22,6 +25,7 @@
 </div>
 <div
    class="checkbox-service"
+   ng-if="!mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('index', mnServicesCtl.config, $event)">
   <input
      type="checkbox"
@@ -34,6 +38,7 @@
 </div>
 <div
    class="checkbox-service"
+   ng-if="!mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('n1ql', mnServicesCtl.config, $event)">
   <input
      type="checkbox"
@@ -46,6 +51,7 @@
 </div>
 <div
    class="checkbox-service"
+   ng-if="!mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('fts', mnServicesCtl.config, $event)">
   <input
      type="checkbox"
@@ -58,7 +64,7 @@
 </div>
 <div
    class="checkbox-service"
-   ng-if="mnServicesCtl.mnIsEnterprise"
+   ng-if="mnServicesCtl.mnIsEnterprise && mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('cbas', mnServicesCtl.config, $event)">
   <input
      type="checkbox"
@@ -66,12 +72,12 @@
      ng-model="mnServicesCtl.config.services.model.cbas"
      ng-disabled="mnServicesCtl.config.services.disabled.cbas || mnServicesCtl.mnIsDisabled">
   <label for="for-cbas-service">
-    Analytics
+    Columnar
   </label>
 </div>
 <div
    class="checkbox-service"
-   ng-if="mnServicesCtl.mnIsEnterprise"
+   ng-if="mnServicesCtl.mnIsEnterprise && !mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('eventing', mnServicesCtl.config, $event)">
   <input
      type="checkbox"
@@ -84,7 +90,7 @@
 </div>
 <div
    class="checkbox-service"
-   ng-if="mnServicesCtl.mnIsEnterprise"
+   ng-if="mnServicesCtl.mnIsEnterprise && !mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('backup', mnServicesCtl.config, $event)">
   <input
      type="checkbox"

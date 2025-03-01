@@ -11,10 +11,10 @@ licenses/APL2.txt.
 
 import {FormGroup, FormControl, Validators, FormArray} from '@angular/forms';
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, HttpHeaders} from '@angular/common/http';
 import _ from 'lodash';
 import {BehaviorSubject, combineLatest} from 'rxjs';
-import {switchMap, shareReplay, map, pluck} from 'rxjs/operators';
+import {switchMap, shareReplay, map, pluck, catchError} from 'rxjs/operators';
 
 import {MnHelperService} from './mn.helper.service.js';
 import {MnAdminService} from './mn.admin.service.js';
@@ -58,6 +58,7 @@ function getIpvOnlyError(isKindV6, isValueV6) {
 
 var clusterStorage = new FormGroup({
   hostname: new FormControl(null, [Validators.required]),
+  port : new FormControl(null, [Validators.required]),
   hostConfig: new FormGroup({
     addressFamilyUI: new FormControl(null, [ipvOnlyValidator()]),
     nodeEncryption: new FormControl()
@@ -87,7 +88,13 @@ var wizardForm = {
       // field
     }),
     javaPath: new FormControl(),
-    storageMode: new FormControl(null)
+    storageMode: new FormControl(null),
+    bucketDetails: new FormGroup({
+      bucketHostName: new FormControl(null, [Validators.required]),
+      bucketPort: new FormControl(null, [Validators.required]),
+      bucketName: new FormControl(null, [Validators.required]),
+      bucketPathPrefix: new FormControl(null, [Validators.required]),
+    })
   }),
   termsAndConditions: new FormGroup({
     agree: new FormControl(false, [Validators.required]),
@@ -142,6 +149,8 @@ class MnWizardService {
       new MnHttpRequest(this.postNodeInit.bind(this))
       .addSuccess()
       .addError();
+
+    this.postClusterInitHttp = this.postClusterInit;
 
     this.stream.postClusterInitHttp =
       new MnHttpRequest(this.postClusterInit.bind(this))
@@ -372,9 +381,68 @@ class MnWizardService {
     return this.http.post('/nodeInit', data);
   }
 
+  // postClusterInit(data) {
+  //   const headers = new HttpHeaders().set(
+  //     'Content-Type',
+  //     'application/x-www-form-urlencoded'
+  //   );
+  //    delete data.bucketStorageScheme;
+  //           delete data.bucketHostName;
+  //           delete data.bucketPort;
+  //           delete data.bucketName;
+  //           delete data.bucketPathPrefix;
+  //           return this.http.post('/clusterInit', data);
+  //   const body = new URLSearchParams();
+  //   body.set('blobStoragePrefix', data.bucketPathPrefix);
+  //   body.set('blobStorageBucket', data.bucketName);
+  //   body.set('blobStorageRegion', 'us-east-2');
+  //   body.set('blobStorageScheme', data.bucketStorageScheme);
+  //   body.set('blobStorageAnonymousAuth', true);
+  //   body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
+
+  //  return this.http.post('/settings/analytics', body.toString(), { headers }).subscribe({
+  //     next: (response) => {
+  //       // const headUrl = `${data.bucketHostName}:${data.bucketPort}/${data.bucketPathPrefix}${data.bucketName}`;
+  //       // this.http.head(headUrl, {
+  //       //   headers: new HttpHeaders().set('Content-Type', 'text/plain')
+  //       // }).subscribe({
+  //       //   next: (headResponse) => {
+           
+  //       //   },
+  //       //   error: (headError) => {
+  //       //     console.error('HEAD Error:', headError);
+  //       //   }
+  //       // });
+  //     },
+  //     error: (error) => {
+  //       console.error('Error:', error);
+  //     }
+  //   });
+  // }
+
   postClusterInit(data) {
+const body = new URLSearchParams();
+body.set('blobStoragePrefix', data.bucketPathPrefix);
+body.set('blobStorageBucket', data.bucketName);
+body.set('blobStorageRegion', 'us-west-2');
+body.set('blobStorageScheme', data.bucketStorageScheme);
+body.set('blobStorageAnonymousAuth', 'true'); // 'true' as a string
+body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
+
+const analyticsObservable = this.http.post('/settings/analytics', body.toString());
+
+analyticsObservable.subscribe();
+
+
+            delete data.bucketStorageScheme;
+            delete data.bucketHostName;
+            delete data.bucketPort;
+            delete data.bucketName;
+            delete data.bucketPathPrefix;
     return this.http.post('/clusterInit', data);
+
   }
+
 
   postDiskStorage(config) {
     return this.http.post('/nodes/self/controller/settings', config);

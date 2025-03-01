@@ -66,7 +66,7 @@ let IEC = {
   Gi: 1073741824
 };
 
-let servicesEnterprise = ["kv", "n1ql", "index", "fts", "cbas", "eventing", "backup"];
+let servicesEnterprise = ["kv","cbas"];
 let servicesCE = ["kv", "index", "fts", "n1ql"];
 
 export {

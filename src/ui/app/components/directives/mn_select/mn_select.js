@@ -48,6 +48,7 @@ function mnSelectDirective(mnHelper) {
     controllerAs: "vm",
     bindToController: true
   };
+  
 
   return mnSelect;
 
@@ -88,7 +89,7 @@ function mnSelectDirective(mnHelper) {
       return option;
     }
 
-    function getPreparedValues() {
+    function getPreparedValues() {      
       vm.preparedValues = vm.labels ? vm.labels : (vm.values || []).map(vm.valuesMapping);
       return vm.preparedValues;
     }

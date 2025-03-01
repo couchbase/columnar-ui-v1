@@ -139,7 +139,7 @@ class MnSecurityAuditItemComponent extends MnLifeCycleHooksToStream {
     case "n1ql":
       return "Query and Index Service";
     case "eventing":
-      return "Eventing Service";
+      return "Columnar Service";
     case "memcached":
       return "Data Service";
     case "xdcr":

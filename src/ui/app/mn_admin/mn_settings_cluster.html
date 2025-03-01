@@ -39,6 +39,7 @@
              mn-is-enterprise="adminCtl.poolDefault.isEnterprise"
              rbac="rbac"
              mn-memory-quota="settingsClusterCtl.memoryQuotaConfig"
+             is-columnar="settingsClusterCtl.isColumnar"
              errors="settingsClusterCtl.memoryQuotaErrors">
           </div>
         </div>
@@ -158,7 +159,7 @@
             </div>
           </div>
         </div>
-
+<div ng-if="!settingsClusterCtl.isColumnar" >
         <div ng-if="rbac.cluster.admin.memcached.read" class="margin-top-1">
           <label>Data Settings</label>
           <p
@@ -395,6 +396,7 @@ Enabling this option reserves disk space for recovery operations like performing
                mn-model="settingsClusterCtl.indexSettings"
                mn-errors="settingsClusterCtl.indexSettingsErrors"
                mn-initial="settingsClusterCtl.initialIndexSettings"
+               is-columnar="settingsClusterCtl.isColumnar"
                mn-permissions="rbac"
                mn-compat="poolDefault.compat">
             </mn-storage-mode>
@@ -685,6 +687,7 @@ Enabling this option reserves disk space for recovery operations like performing
             {{settingsClusterCtl.settingsAnalyticsErrors.numReplicas}}
           </div>
         </div>
+        </div>  
 
       </div>
     </div>

@@ -13,7 +13,7 @@ licenses/APL2.txt.
    ng-show="errors._">
   {{errors._}}
 </div>
-<div ng-if="config.displayedServices.kv">
+<div ng-if="config.displayedServices.kv && !isColumnar">
   <div class="row formrow">
     <div class="width-6">
       <input
@@ -45,7 +45,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div ng-if="config.displayedServices.n1ql !== undefined">
+<div ng-if="config.displayedServices.n1ql !== undefined && !isColumnar">
   <div class="row formrow">
     <div class="width-6">
       <input
@@ -88,7 +88,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div ng-if="config.displayedServices.index">
+<div ng-if="config.displayedServices.index && !isColumnar">
   <div class="row formrow">
     <div class="width-6">
       <input
@@ -120,7 +120,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div ng-if="config.displayedServices.fts">
+<div ng-if="config.displayedServices.fts && !isColumnar">
   <div class="row formrow">
     <div class="width-6">
       <input
@@ -162,7 +162,7 @@ licenses/APL2.txt.
          id="cbas_ram_quota">
       <label
          for="cbas_ram_quota">
-        Analytics
+        Columnar
       </label>
     </div>
     <div class="row width-6 flex-right">
@@ -182,7 +182,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div ng-if="config.displayedServices.eventing && mnIsEnterprise">
+<div ng-if="config.displayedServices.eventing && mnIsEnterprise && !isColumnar">
   <div class="row formrow">
     <div class="width-6">
       <input
@@ -213,7 +213,7 @@ licenses/APL2.txt.
   </div>
 </div>
 
-<div ng-if="config.displayedServices.backup && mnIsEnterprise">
+<div ng-if="config.displayedServices.backup && mnIsEnterprise && !isColumnar">
   <div class="row formrow">
     <div class="width-5">
       <input

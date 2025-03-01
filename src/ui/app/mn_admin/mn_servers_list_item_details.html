@@ -66,14 +66,11 @@
         </span>
       </div>
       <div
-         ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isPathPresent | mnOrderServices)">
+         ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
         <strong>{{service | mnFormatServices}} Storage Path:</strong>
         {{serversListItemDetailsCtl.getServicePath(service)}}
       </div>
-      <div ng-if="node.services.includes('kv') || node.services.includes('index') || node.services.includes('fts')">
-         <strong>{{'index' | mnFormatServices}} Storage Path:</strong>
-         {{serversListItemDetailsCtl.getServicePath('index')}}
-      </div>
+     
       <div ng-show="serversCtl.nodeCertificates[node.configuredHostname].warnings">
         <div
            ng-repeat="warning in serversCtl.nodeCertificates[node.configuredHostname].warnings"
@@ -86,7 +83,7 @@
       <h5>Memory</h5>
       <hr>
       <div
-         ng-repeat="item in serversListItemDetailsCtl.memoryUsages track by $index"
+         ng-repeat="item in (serversListItemDetailsCtl.memoryUsages | mnColumnarService) track by $index"
          ng-if="item"
          class="column bar-usages"
          mn-bar-usage

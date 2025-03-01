@@ -21,7 +21,7 @@ licenses/APL2.txt.
   </div>
 
   <div *ngFor="let service of (mnServices | async)">
-    <div class="row formrow">
+    <div class="row formrow" *ngIf="service !== 'kv'">
       <div
          class="width-6"
          *ngIf="group.value.flag"

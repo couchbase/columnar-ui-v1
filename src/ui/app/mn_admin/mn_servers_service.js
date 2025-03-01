@@ -75,7 +75,7 @@ function mnServersFactory($http, $q, $uibModal, mnPoolDefault) {
         fts: getNodesByService("fts", nodes),
         all: nodes
       };
-      if (isEnterprise) {
+      if (true) {
         rv.cbas = getNodesByService("cbas", nodes);
         rv.eventing = getNodesByService("eventing", nodes);
         rv.backup = getNodesByService("backup", nodes);

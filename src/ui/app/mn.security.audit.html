@@ -105,7 +105,7 @@
 
           <section
              class="audit-module"
-             *ngFor="let moduleName of (descriptorsByModule | async | mnObjectKeys);">
+             *ngFor="let moduleName of (descriptorsByModule | async | mnObjectKeys | mnFilterColumnar);">
 
             <mn-security-audit-item
                [group]="form.group.get('auditEvents')"

@@ -10,7 +10,7 @@ licenses/APL2.txt.
 
 <div mn-spinner="viewLoading" min-height="410px">
   <div
-     ng-repeat="group in state.folders"
+     ng-repeat="group in state.folders | mnColumnarState"
      style="position: relative;"
      ng-style="{'z-index': 10 + group.folders.length - $index}">
     <label
@@ -20,7 +20,7 @@ licenses/APL2.txt.
               'disclosed': state.openedWrappers[group.name],
               'has-selection': !state.openedWrappers[group.name] && hasSelectedItems(group.name)
               }">
-      {{::group.name}}
+      {{::group.name | mnReplaceWord:'Analytics':'Columnar'}}
     </label>
     <div
        class="margin-left-half"
@@ -33,7 +33,7 @@ licenses/APL2.txt.
                     (state.selectedRoles[item.role] || state.selectedGroupsRoles[item.role].length)}">
         <input
            ng-disabled="isRoleDisabled(item)"
-           ng-if="!item.params.length"
+           ng-if="!item.params.length && item.name !== 'Eventing Full Admin' && item.name !== 'Backup Full Admin'"
            id="for-{{item.role}}"
            type="checkbox"
            ng-model="state.selectedRoles[item.role]">
@@ -43,8 +43,9 @@ licenses/APL2.txt.
                          'disclosed': item.params.length && state.openedWrappers[item.role],
                          'has-selection': item.params.length && (!state.openedWrappers[item.role] && hasSelectedConfigs(item.role))}"
            ng-click="toggleWrapper(item.role)"
+           ng-if="item.name !== 'Eventing Full Admin' && item.name !== 'Backup Full Admin'"
            for="for-{{item.role}}">
-          {{::item.name}}
+          {{::item.name | mnReplaceWord:'Analytics':'Columnar'}}
           <span
              ng-if="item.role == 'query_external_access'"
              tooltip-trigger="mouseenter"

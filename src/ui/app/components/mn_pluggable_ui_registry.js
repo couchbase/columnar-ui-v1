@@ -57,7 +57,7 @@ function MnPluggableUiTabs(mnPluggableUiRegistry, mnPluggableTabUtil, $compile) 
     pluggableUiConfigs = _.sortBy(pluggableUiConfigs, 'index');
     angular.forEach(pluggableUiConfigs, function (config) {
       config.ngShow = config.ngShow == undefined ? true : config.ngShow;
-      if (config.after) {
+      if (config.after !== "buckets") {
         var targetTab = $element[0].querySelector("[mn-tab='" + config.after + "']");
         if (!targetTab) {
           throw new Error("There is no tab with mn-tab=" + config.after + " in " + $attrs.mnTabBarName);

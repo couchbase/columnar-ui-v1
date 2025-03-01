@@ -10,7 +10,7 @@ licenses/APL2.txt.
 
 <div class="dialog-med">
   <div class="panel-header">
-    <h2>Add Server Node</h2>
+    <h2>Add Columnar Node</h2>
   </div>
   <form
      novalidate
@@ -20,7 +20,7 @@ licenses/APL2.txt.
      mn-spinner="serversAddDialogCtl.viewLoading">
     <div class="panel-content">
       <div class="error error-form">
-        Warning: Adding a server to this cluster means any previous Couchbase Server data on that server will be removed.
+        Warning: Adding a server to this cluster means any previous Couchbase Columnar data on that server will be removed.
       </div>
       <div class="error error-form"
          ng-show="serversAddDialogCtl.certificatesByNode[serversAddDialogCtl.selfConfig.selfConfig.configuredHostname].type === 'generated'">
@@ -112,7 +112,9 @@ licenses/APL2.txt.
          mn-is-disabled="!!serversAddDialogCtl.postDiskStorageErrors"
          class="formrow checkbox-list"
          mn-is-enterprise="poolDefault.isEnterprise"
+         mn-is-columnar="true"
          mn-services="serversAddDialogCtl.addNodeConfig">
+         
       </div>
 
       <div class="formrow">
@@ -128,6 +130,7 @@ licenses/APL2.txt.
          is-disabled="!serversAddDialogCtl.specifyDisk"
          ng-if="serversAddDialogCtl.selfConfig && serversAddDialogCtl.specifyDisk"
          config="serversAddDialogCtl.selfConfig"
+         mn-is-columnar="true"
          is-enterprise="poolDefault.isEnterprise"
          ></mn-services-disk-paths>
     </div>

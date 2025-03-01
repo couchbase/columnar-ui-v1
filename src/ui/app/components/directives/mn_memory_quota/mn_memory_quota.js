@@ -26,7 +26,8 @@ function mnMemoryQuotaDirective() {
       config: '=mnMemoryQuota',
       errors: "=",
       rbac: "=",
-      mnIsEnterprise: "="
+      mnIsEnterprise: "=",
+      isColumnar: "="
     },
     template,
     controller: ["$scope", controller]

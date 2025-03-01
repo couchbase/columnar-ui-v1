@@ -60,7 +60,7 @@ class MnPoolsService {
       this.stream.isEnterprise
       .pipe(map(function (isEnterprise) {
         return isEnterprise ?
-          ["kv", "index", "fts", "cbas", "eventing", "n1ql"] :
+          ["kv","cbas"] :
           ["kv", "index", "fts", "n1ql"];
       }), shareReplay({refCount: true, bufferSize: 1}));
   }
@@ -68,12 +68,8 @@ class MnPoolsService {
   getServiceVisibleName(service) {
     switch (service) {
     case "kv": return "Data";
-    case "index": return "Index";
-    case "fts": return "Search";
-    case "n1ql": return "Query";
-    case "eventing": return "Eventing";
-    case "cbas": return "Analytics";
-    case "backup": return "Backup";
+    case "cbas": return "Columnar";
+
     }
   }
 

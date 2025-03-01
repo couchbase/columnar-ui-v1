@@ -125,10 +125,11 @@ function mnOverviewController($scope, $rootScope, mnBucketsService, mnServersSer
 
   function activate() {
     new mnPoller($scope, function () {
-      return mnServersService.getServicesStatus(mnPoolDefault.export.isEnterprise);
+    return mnServersService.getServicesStatus(mnPoolDefault.export.isEnterprise);
     })
       .reloadOnScopeEvent("nodesChanged")
       .subscribe("nodes", vm)
       .cycle();
   }
 }
+ 

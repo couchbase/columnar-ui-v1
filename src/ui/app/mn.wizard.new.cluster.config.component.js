@@ -166,11 +166,17 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.indexPath = nodeStorage.get("storage.index_path").value;
     rv.eventingPath = nodeStorage.get("storage.eventing_path").value;
     rv.sendStats = this.wizardForm.termsAndConditions.get("enableStats").value;
+    rv.bucketHostName = this.newClusterConfigForm.get('bucketDetails.bucketHostName').value;
+    rv.bucketPort = this.newClusterConfigForm.get('bucketDetails.bucketPort').value;
+    rv.bucketName = this.newClusterConfigForm.get('bucketDetails.bucketName').value;
+    rv.bucketPathPrefix = this.newClusterConfigForm.get('bucketDetails.bucketPathPrefix').value;
+    rv.bucketStorageScheme = 's3';
     let services = this.wizardForm.newClusterConfig.get("services.flag");
+
     rv.services = this.getServicesValues(services).join(",");
     let userData = clone(this.wizardForm.newCluster.value.user);
     delete userData.passwordVerify;
-    userData.port = "SAME";
+    userData.port = nodeStorage.get("port").value || "SAME";
 
     let hostConfigRv = {};
 
@@ -182,6 +188,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
 
     let poolsDefaultRv = this.getPoolsDefaultValues.bind(this)(isEnterprise);
     let indexesRv = this.getIndexesConfig.bind(this)();
+    poolsDefaultRv.memoryQuota = 256;
 
     return Object.assign(rv, poolsDefaultRv, hostConfigRv, indexesRv, userData);
   }

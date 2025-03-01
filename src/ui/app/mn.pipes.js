@@ -35,7 +35,9 @@ export {
   MnTruncateTo3Digits,
   MnFormatServices,
   MnOrderServices,
-  MnStripPortHTML
+  MnStripPortHTML,
+  MnFilterColumnar,
+  MnReplaceWord
 }
 
 class MnTruncate {
@@ -410,10 +412,31 @@ class MnFormatServices {
       case 'index': return 'Index';
       case 'fts': return 'Search';
       case 'eventing': return 'Eventing';
-      case 'cbas': return 'Analytics';
+      case 'cbas': return 'Columnar';
       case 'backup': return 'Backup';
       default: return service;
     }
+  }
+}
+
+class MnFilterColumnar {
+  static get annotations() { return [
+    new Pipe({name: "mnFilterColumnar"})
+  ]}
+
+  transform(services) {    
+    return services.filter(service => (service === "eventing" || service === "ns_server" || service === "auditd"));
+  }
+}
+
+class MnReplaceWord {
+  static get annotations() { return [
+    new Pipe({name: "mnReplaceWord"})
+  ]}
+
+  transform(value, word, replace) {
+    if (!input) return input; // Handle empty or undefined input
+      return input.replace(new RegExp(`\\b${target}\\b`, 'g'), replacement);
   }
 }
 

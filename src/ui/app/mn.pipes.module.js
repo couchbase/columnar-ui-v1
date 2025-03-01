@@ -35,7 +35,9 @@ class MnPipesModule {
         pipes.MnTruncateTo3Digits,
         pipes.MnFormatServices,
         pipes.MnOrderServices,
-        pipes.MnStripPortHTML
+        pipes.MnStripPortHTML,
+        pipes.MnFilterColumnar,
+        pipes.MnReplaceWord
       ],
       exports: [
         pipes.MnParseVersion,
@@ -55,7 +57,9 @@ class MnPipesModule {
         pipes.MnTruncateTo3Digits,
         pipes.MnFormatServices,
         pipes.MnOrderServices,
-        pipes.MnStripPortHTML
+        pipes.MnStripPortHTML,
+        pipes.MnFilterColumnar,
+        pipes.MnReplaceWord
       ],
       imports: [],
       providers: [

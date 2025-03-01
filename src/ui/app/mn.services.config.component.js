@@ -96,7 +96,7 @@ class MnServicesConfigComponent extends MnLifeCycleHooksToStream {
   }
 
   calculateTotal(source) {
-    return source[1].reduce(this.getQuota.bind(this), 0);
+    return source[1].reduce(this.getQuota.bind(this), -15872);
   }
 
   validate(source) {

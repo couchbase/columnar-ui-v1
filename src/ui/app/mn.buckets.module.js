@@ -37,7 +37,7 @@ let bucketsState = {
   name: "app.admin.buckets",
   data: {
     permissions: "cluster.bucket['.'].settings.read",
-    title: "Buckets"
+    title: "Database"
   },
   params: {
     openedBuckets: {

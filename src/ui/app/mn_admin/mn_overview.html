@@ -27,10 +27,9 @@ licenses/APL2.txt.
 
 <div class="margin-top-quarter padding-bottom-6">
   <div class="zero-content" ng-show="!buckets.details.length">
-    You have no data buckets.
+    You have no Columnar databases.
     <span ng-show="rbac.cluster.buckets.create">
-      Go to <a ui-sref="app.admin.buckets">Buckets</a> to add one, or load a
-      sample bucket with data & indexes from Settings > <a ui-sref="app.admin.settings.sampleBuckets">Sample Buckets</a>.
+      Go to <a ui-sref="app.admin.cbas.workbench">Columnar</a> to add one.
     </span>
   </div>
 
@@ -39,80 +38,18 @@ licenses/APL2.txt.
 </div>
 <footer class="footer-dashboard">
   <div class="service-widget-row resp-margin-xsml">
-    <div
-       class="service-widget"
-       ui-sref="app.admin.buckets"
-       ng-class="['dynamic_' + overviewCtl.nodes.kv.statusClass]">
-      <p>Data - {{buckets.details.length + ' bucket' + overviewCtl.getEndings(buckets.details.length)}}</p>
-      <div
-         class="error piped"
-         ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.kv.nodesByStatuses">
-        {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
-      </div>
-    </div>
-    <div
-       class="service-widget"
-       ui-sref="app.admin.gsi"
-       ng-class="['dynamic_' + overviewCtl.nodes.index.statusClass]">
-      <p>Index</p>
-      <div
-         class="error piped"
-         ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.index.nodesByStatuses">
-        {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
-      </div>
-    </div>
-    <div
-       class="service-widget"
-       ui-sref="app.admin.query.monitoring"
-       ng-class="['dynamic_' + overviewCtl.nodes.n1ql.statusClass]">
-      <p>Query</p>
-      <div
-         class="error piped"
-         ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.n1ql.nodesByStatuses">
-        {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
-      </div>
-    </div>
-    <div
-       class="service-widget"
-       ui-sref="app.admin.search.fts_list"
-       ng-class="['dynamic_' + overviewCtl.nodes.fts.statusClass]">
-      <p>Search</p>
-      <div
-         class="error piped"
-         ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.fts.nodesByStatuses">
-        {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
-      </div>
-    </div>
+  
     <div
        ng-if="adminCtl.poolDefault.isEnterprise"
        class="service-widget"
        ui-sref="app.admin.cbas.workbench"
        ng-class="['dynamic_' + overviewCtl.nodes.cbas.statusClass]">
-      <p>Analytics</p>
+      <p>Columnar - {{buckets.details.length + ' database' + overviewCtl.getEndings(buckets.details.length)}}</p>
       <div
          class="error piped"
          ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.cbas.nodesByStatuses">
         {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
       </div>
-    </div>
-    <div
-       ng-if="adminCtl.poolDefault.isEnterprise"
-       class="service-widget"
-       ui-sref="app.admin.eventing.summary"
-       ng-class="['dynamic_' + overviewCtl.nodes.eventing.statusClass]">
-      <p>Eventing</p>
-      <div
-         class="error piped"
-         ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.eventing.nodesByStatuses">
-        {{count + ' node' + overviewCtl.getEndings(count) + ' ' + nodeStatuses}}
-      </div>
-    </div>
-    <div
-       ng-show="rbac.cluster.xdcr.remote_clusters.read"
-       ui-sref="app.admin.replications"
-       class="service-widget"
-       ng-class="['dynamic_' + (adminCtl.tasks.tasksXDCR.length ? 'healthy' : 'inactive')]">
-      <p>XDCR</p>
     </div>
   </div>
 

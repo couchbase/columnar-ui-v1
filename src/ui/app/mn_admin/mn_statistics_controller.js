@@ -249,8 +249,8 @@ function mnStatisticsNewController($scope, mnStatisticsNewService, $state, $http
   //selected scenario holder
   vm.openGroupDialog = openGroupDialog;
   //only new /range api can support "All Buckets" aggregation, hence we are checking atLeast70
-  vm.selectedBucket = $state.params.scenarioBucket || (mnPoolDefault.export.compat.atLeast70 ? "All Buckets": $state.params.scenarioBucket);
-  vm.bucketNames = mnPoolDefault.export.compat.atLeast70 ? [...$scope.rbac.bucketNames['.stats!read'] || [], "All Buckets"] : $scope.rbac.bucketNames['.stats!read'];
+  vm.selectedBucket = $state.params.scenarioBucket || (mnPoolDefault.export.compat.atLeast70 ? "All Databases": $state.params.scenarioBucket);
+  vm.bucketNames = mnPoolDefault.export.compat.atLeast70 ? [...$scope.rbac.bucketNames['.stats!read'] || [], "All Databases"] : $scope.rbac.bucketNames['.stats!read'];
   vm.onBucketChange = onBucketChange;
   vm.onSelectNode = onSelectNode;
   vm.getSelectedScenario = getSelectedScenario;

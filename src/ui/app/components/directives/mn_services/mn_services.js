@@ -24,7 +24,8 @@ function mnServicesDirective() {
     scope: {
       mnIsDisabled: "=?",
       config: '=mnServices',
-      mnIsEnterprise: "="
+      mnIsEnterprise: "=",
+      mnIsColumnar: "="
     },
     template,
     controller: ["mnMemoryQuotaService", controller],
