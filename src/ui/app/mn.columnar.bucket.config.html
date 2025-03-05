@@ -1,0 +1,97 @@
+
+<div [formGroup]="group">
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_hostName">Host Name / IP Address</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketHostName"
+       id="bucket_hostName"
+       [mnFocus]="focusFieldSubject"
+       mnName={{bucketHostName}}
+       formControlName="bucketHostName">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketHostName">
+      {{(postNodeInitHttp.error | async)?.errors?.bucketHostName}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketHostName">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketHostName}}
+    </div>
+  </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_port">Port</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketPort"
+       id="bucket_port"
+       formControlName="bucketPort">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPort">
+      {{(postNodeInitHttp.error | async)?.errors?.bucketPort}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPort">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketPort}}
+    </div>
+  </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_name">Bucket name</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketName"
+       id="bucket_name"
+       formControlName="bucketName">
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+    </div>
+  </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_path_prefix">Bucket path prefix</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketPathPrefix"
+       id="bucket_path_prefix"
+       formControlName="bucketPathPrefix">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix">
+      {{(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix}}
+    </div>
+  </div>
+</div>  
