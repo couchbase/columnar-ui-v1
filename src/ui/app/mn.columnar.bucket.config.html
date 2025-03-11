@@ -94,4 +94,64 @@
       {{(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix}}
     </div>
   </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_path_prefix">Bucket Region</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketRegion"
+       id="bucket_path_prefix"
+       formControlName="bucketRegion">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketRegion">
+      {{(postNodeInitHttp.error | async)?.errors?.bucketRegion}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketRegion">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketRegion}}
+    </div>
+  </div>
+  <div class="formrow">
+    <div class="row">
+      <label for="bucket_path_prefix">Bucket Storage Scheme</label>
+    </div>
+    <input
+       type="text"
+       autocorrect="off"
+       spellcheck="false"
+       autocapitalize="off"
+       name="bucketStorageScheme"
+       id="bucket_path_prefix"
+       formControlName="bucketStorageScheme">
+    <div
+       class="error error-form"
+       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme">
+      {{(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme}}
+    </div>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme">
+      {{(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme}}
+    </div>
+  </div>
+  <div class="formrow">
+    <input
+       type="checkbox"
+       id="for-anonymous-Auth"
+       formControlName="blobStorageAnonymousAuth">
+    <label for="for-anonymous-Auth" class="margin-right-quarter">
+      Enable Blob Storage Anonymous Auth
+    </label>
+    <div
+       class="error error-form"
+       [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
+      {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
+    </div>
+  </div>
 </div>  

@@ -94,6 +94,9 @@ var wizardForm = {
       bucketPort: new FormControl(null, [Validators.required]),
       bucketName: new FormControl(null, [Validators.required]),
       bucketPathPrefix: new FormControl(null, [Validators.required]),
+      bucketRegion: new FormControl(null, [Validators.required]),
+      bucketStorageScheme: new FormControl(null, [Validators.required]),
+      blobStorageAnonymousAuth: new FormControl(false)
     })
   }),
   termsAndConditions: new FormGroup({
@@ -422,23 +425,23 @@ class MnWizardService {
 
   postClusterInit(data) {
 const body = new URLSearchParams();
-body.set('blobStoragePrefix', data.bucketPathPrefix);
+body.set('blobStoragePrefix', data.bucketPathPrefix || '');
 body.set('blobStorageBucket', data.bucketName);
-body.set('blobStorageRegion', 'us-west-2');
+body.set('blobStorageRegion', data.bucketRegion);
 body.set('blobStorageScheme', data.bucketStorageScheme);
-body.set('blobStorageAnonymousAuth', 'true'); // 'true' as a string
+body.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth); // 'true' as a string
 body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
 
 const analyticsObservable = this.http.post('/settings/analytics', body.toString());
 
 analyticsObservable.subscribe();
-
-
             delete data.bucketStorageScheme;
             delete data.bucketHostName;
             delete data.bucketPort;
             delete data.bucketName;
             delete data.bucketPathPrefix;
+            delete data.blobStorageAnonymousAuth;
+            delete data.bucketRegion;
     return this.http.post('/clusterInit', data);
 
   }

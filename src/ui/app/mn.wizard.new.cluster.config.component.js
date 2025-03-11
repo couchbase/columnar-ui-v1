@@ -170,7 +170,9 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.bucketPort = this.newClusterConfigForm.get('bucketDetails.bucketPort').value;
     rv.bucketName = this.newClusterConfigForm.get('bucketDetails.bucketName').value;
     rv.bucketPathPrefix = this.newClusterConfigForm.get('bucketDetails.bucketPathPrefix').value;
-    rv.bucketStorageScheme = 's3';
+    rv.bucketRegion = this.newClusterConfigForm.get('bucketDetails.bucketRegion').value;
+    rv.bucketStorageScheme = this.newClusterConfigForm.get('bucketDetails.bucketStorageScheme').value;
+    rv.blobStorageAnonymousAuth = this.newClusterConfigForm.get('bucketDetails.blobStorageAnonymousAuth').value;
     let services = this.wizardForm.newClusterConfig.get("services.flag");
 
     rv.services = this.getServicesValues(services).join(",");
