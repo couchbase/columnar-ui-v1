@@ -705,7 +705,7 @@ function mnPrettyVersion(parseVersionFilter) {
     if (full && a[2]) {
       suffix = '-' + a[2];
     }
-    return [a[3], "Edition", a[0], "build",  a[1] + suffix].join(' ');
+    return [a[3], /*"Edition",*/ a[0], "build",  a[1] + suffix].join(' ');
   };
 }
 function encodeURIComponentFilter() {

@@ -56,7 +56,7 @@ licenses/APL2.txt.
 
         <div class="forms">
           <p class="text-medium">
-            You are running Couchbase Server {{prettyVersion | async}}
+            You are running Couchbase Columnar {{prettyVersion | async}}
           </p>
 
           <div [hidden]="!(getStats | async)?.sendStats">
@@ -107,7 +107,7 @@ licenses/APL2.txt.
             </label>
             <span
                class="fa-stack icon-info"
-               ngbTooltip="Enabling software update notifications allows notification in the Couchbase web console when a new version of Couchbase Server is available. Configuration information transferred in the update check is anonymous and does not include any stored key-value data."
+               ngbTooltip="Enabling software update notifications allows notification in the Couchbase web console when a new version of Couchbase Columnar is available. Configuration information transferred in the update check is anonymous and does not include any stored key-value data."
                tooltip-placement="right">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
               <span class="icon fa-info fa-stack-1x"></span>
