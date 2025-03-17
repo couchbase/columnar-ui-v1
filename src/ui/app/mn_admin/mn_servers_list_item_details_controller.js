@@ -17,6 +17,7 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
   var vm = this;
 
   vm.isEnterprise = $scope.poolDefault.isEnterprise;
+  vm.isColumnar = $scope.poolDefault.isColumnar;
   vm.getServiceQuota = getServiceQuota;
   vm.getServicePath = getServicePath;
   vm.isPathPresent = isPathPresent;

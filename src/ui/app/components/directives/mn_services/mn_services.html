@@ -64,19 +64,6 @@
 </div>
 <div
    class="checkbox-service"
-   ng-if="mnServicesCtl.mnIsEnterprise && mnServicesCtl.mnIsColumnar"
-   ng-click="mnServicesCtl.change('cbas', mnServicesCtl.config, $event)">
-  <input
-     type="checkbox"
-     id="for-cbas-service"
-     ng-model="mnServicesCtl.config.services.model.cbas"
-     ng-disabled="mnServicesCtl.config.services.disabled.cbas || mnServicesCtl.mnIsDisabled">
-  <label for="for-cbas-service">
-    Columnar
-  </label>
-</div>
-<div
-   class="checkbox-service"
    ng-if="mnServicesCtl.mnIsEnterprise && !mnServicesCtl.mnIsColumnar"
    ng-click="mnServicesCtl.change('eventing', mnServicesCtl.config, $event)">
   <input

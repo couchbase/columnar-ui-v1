@@ -40,6 +40,25 @@ licenses/APL2.txt.
   </p>
 </div>
 
+<div class="formrow" ng-if="mnIsColumnar">
+    <div class="row">
+        <label for="setup_db_path_input">Metadata Disk Path</label>
+        <small class="text-smaller">Path cannot be changed after setup</small>
+    </div>
+    <input
+            type="text"
+            autocorrect="off"
+            spellcheck="false"
+            autocapitalize="off"
+            ng-disabled="isDisabled"
+            id="setup_db_path_input"
+            ng-model="config.dbPath"
+            ng-change="mnCtl.onDbPathChange()">
+    <p>
+        Free: {{mnCtl.dbPathTotal}}
+    </p>
+</div>
+
 <div class="formrow" ng-if="!mnIsColumnar">
   <div class="row">
     <label for="setup_index_path_input">Indexes Disk Path</label>
@@ -82,8 +101,8 @@ licenses/APL2.txt.
    class="formrow"
    ng-if="isEnterprise && mnIsColumnar">
   <div class="row">
-    <label for="setup_cbas_dirs_input0">Columnar Disk Paths</label>
-    <small class="text-smaller">Paths cannot be changed after setup</small>
+    <label for="setup_cbas_dirs_input0">Cache Disk Path(s)</label>
+    <small class="text-smaller">Path(s) cannot be changed after setup</small>
   </div>
   <div
      class="formrow"

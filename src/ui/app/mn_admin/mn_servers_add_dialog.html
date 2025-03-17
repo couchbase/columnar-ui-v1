@@ -98,16 +98,17 @@ licenses/APL2.txt.
            autocorrect="off"
            spellcheck="false">
       </div>
-
-      <label class="inline">Services</label>
-      <span
-         class="fa-stack icon-info"
-         uib-tooltip="Services are enabled on a per-node basis. All services except Data may be changed later. To add or remove the Data service from a node, you must first remove the node from the cluster."
-         tooltip-placement="auto right">
-        <span class="icon fa-circle-thin fa-stack-2x"></span>
-        <span class="icon fa-info fa-stack-1x"></span>
+      <span ng-if="!serversAddDialogCtl.isColumnar">
+        <label class="inline">Services</label>
+        <span
+           class="fa-stack icon-info"
+           uib-tooltip="Services are enabled on a per-node basis. All services except Data may be changed later. To add or remove the Data service from a node, you must first remove the node from the cluster."
+           tooltip-placement="auto right">
+          <span class="icon fa-circle-thin fa-stack-2x"></span>
+          <span class="icon fa-info fa-stack-1x"></span>
+        </span>
+        <br>
       </span>
-      <br>
       <div
          mn-is-disabled="!!serversAddDialogCtl.postDiskStorageErrors"
          class="formrow checkbox-list"
@@ -123,7 +124,7 @@ licenses/APL2.txt.
            id="for-use-disk-paths"
            ng-model="serversAddDialogCtl.specifyDisk">
         <label for="for-use-disk-paths">
-          Customize disk storage paths (this node)
+          Customize Disk Storage Paths (this node)
         </label>
       </div>
       <mn-services-disk-paths

@@ -16,7 +16,18 @@
 
 <div [formGroup]="group">
   <div formGroupName="storage">
-   
+    <div class="formrow">
+      <div class="row">
+        <label for="setup_db_path_input">Metadata Disk Path</label>
+        <small class="text-smaller">Path cannot be changed after setup</small>
+      </div>
+      <mn-path-field
+          [control]="group.get('storage.path')"
+          controlName="setup_db_path_input">
+      </mn-path-field>
+    </div>
+    <div formGroupName="storage">
+
     <div
        class="error"
        [hidden]="!(postClusterInitHttp.error | async)?.errors?.eventing_path">
@@ -24,8 +35,8 @@
     </div>
     <div class="formrow" *ngIf="isEnterprise | async">
       <div class="row">
-        <label for="setup_cbas_path_input0">Columnar Disk Paths</label>
-        <small class="text-smaller">Paths cannot be changed after setup</small>
+        <label for="setup_cbas_dirs_input0">Cache Disk Path(s)</label>
+        <small class="text-smaller">Path(s) cannot be changed after setup</small>
       </div>
       <div formArrayName="cbas_path">
         <div

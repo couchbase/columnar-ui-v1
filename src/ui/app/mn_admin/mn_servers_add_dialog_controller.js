@@ -15,7 +15,7 @@ function mnServersAddDialogController($scope, $rootScope, $q, $uibModal, mnServe
   var vm = this;
 
   vm.specifyDisk = false;
-
+  vm.isColumnar = $scope.poolDefault.isColumnar;
   vm.addNodeConfig = {
     services: {
       model: {
@@ -35,6 +35,12 @@ function mnServersAddDialogController($scope, $rootScope, $q, $uibModal, mnServe
     vm.addNodeConfig.services.model.cbas = true;
     vm.addNodeConfig.services.model.eventing = true;
     vm.addNodeConfig.services.model.backup = true;
+  }
+  if ($scope.poolDefault.isColumnar) {
+    vm.addNodeConfig.services.model = {
+        kv: true,
+        cbas: true
+    }
   }
   vm.isGroupsAvailable = !!groups;
   vm.onSubmit = onSubmit;
