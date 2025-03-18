@@ -22,6 +22,7 @@ licenses/APL2.txt.
 
   <div *ngFor="let service of (mnServices | async)">
     <div class="row formrow" *ngIf="service !== 'kv'">
+      <!--
       <div
          class="width-6"
          *ngIf="group.value.flag"
@@ -30,9 +31,9 @@ licenses/APL2.txt.
            [formControlName]="service"
            type="checkbox"
            [attr.id]="service + '-ram-flag'">
-        <!-- *ngIf="config.services" -->
-        <!-- ng-model="config.services.model.kv" -->
-        <!-- ng-disabled="config.services.disabled.kv" -->
+           *ngIf="config.services"
+           ng-model="config.services.model.kv"
+           ng-disabled="config.services.disabled.kv"
         <label
            [attr.for]="service + '-ram-flag'"
            class="checkbox">
@@ -63,8 +64,9 @@ licenses/APL2.txt.
          *ngIf="group.value.field && service === 'backup'">
         - - - - - - -
       </small>
+      -->
       <div
-         class="row width-6 flex-right relative"
+         class="row flex-right relative"
          *ngIf="group.value.field && service !== 'backup'"
          formGroupName="field">
         <input

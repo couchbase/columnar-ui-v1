@@ -59,7 +59,7 @@ licenses/APL2.txt.
         <div class="formrow">
           <div class="row formrow">
             <span class="row flex-left">
-              <label class="margin-right-quarter">Service Memory Quotas</label>
+              <label class="margin-right-quarter">Columnar Memory Quota</label>
               <span
                  class="fa-stack icon-info"
                  [ngbTooltip]="tipContent_serviceMem"
@@ -70,7 +70,7 @@ licenses/APL2.txt.
                 <span class="icon fa-info fa-stack-1x"></span>
               </span>
             </span>
-            <small class="text-smaller">Per service / per node</small>
+            <small class="text-smaller">Per node</small>
           </div>
           <div>
             <div
@@ -92,11 +92,13 @@ licenses/APL2.txt.
             <mn-columnar-bucket-config
             [group]="newClusterConfigForm.get('bucketDetails')">
             </mn-columnar-bucket-config>
+            <!--
             <label>Index Storage Setting</label>
             <mn-storage-mode
                [indexFlag]="newClusterConfigForm.get('services.flag.index')"
                [control]="newClusterConfigForm.get('storageMode')">
             </mn-storage-mode>
+            -->
             <mn-node-storage-config
                [group]="newClusterConfigForm.get('clusterStorage')">
             </mn-node-storage-config>
