@@ -53,6 +53,9 @@
             <span class="nowrap" ng-if="adminCtl.tasks.tasksRebalance.stageInfo.startTime">
               <strong>start</strong> {{adminCtl.tasks.tasksRebalance.stageInfo.startTime | date:'d MMM HH:mm:ss':'UTC'}}
             </span>
+            <span ng-show="adminCtl.poolDefault.isColumnar && adminCtl.getRebalanceTotalTimeTaken() > 0 && !adminCtl.tasks.tasksRebalance.stageInfo.completedTime.status" class="nowrap margin-left-half">
+              <strong>elapsed</strong> {{adminCtl.getRebalanceTotalTimeTaken() | mnMsToTime}}
+            </span>
             <span ng-show="adminCtl.tasks.tasksRebalance.stageInfo.completedTime.status" class="nowrap margin-left-half">
               <strong>complete</strong> {{adminCtl.tasks.tasksRebalance.stageInfo.completedTime.time | date:'d MMM HH:mm:ss':'UTC'}}
             </span>
@@ -92,7 +95,7 @@
 
           <!-- rebalance per stage info ********************************************** -->
           <div
-             ng-if="adminCtl.poolDefault.isEnterprise"
+             ng-if="adminCtl.poolDefault.isEnterprise && !adminCtl.poolDefault.isColumnar"
              ng-repeat="service in adminCtl.tasks.tasksRebalance.stageInfo.services track by (service.name + $index)">
             <div class="row margin-top-half margin-bottom-half">
               <label class="initialcaps">

@@ -58,6 +58,7 @@ function mnAdminController($scope, $rootScope, $state, $window, $uibModal, mnAle
   vm.enableCustomAlert = enableCustomAlert;
 
   vm.getRebalanceReport = getRebalanceReport;
+  vm.getRebalanceTotalTimeTaken = getRebalanceTotalTimeTaken;
 
   $rootScope.implementationVersion = pools.implementationVersion;
   $rootScope.rbac = mnPermissions.export;
@@ -170,6 +171,15 @@ function mnAdminController($scope, $rootScope, $state, $window, $uibModal, mnAle
       var file = new Blob([JSON.stringify(report,null,2)],{type: "application/json", name: "rebalanceReport.json"});
       saveAs(file,"rebalanceReport.json");
     });
+  }
+
+  function getRebalanceTotalTimeTaken() {
+    if (!vm.tasks || !vm.tasks.tasksRebalance || !vm.tasks.tasksRebalance.stageInfo || !vm.tasks.tasksRebalance.stageInfo.services) {
+      return 0;
+    }
+    return vm.tasks.tasksRebalance.stageInfo.services.reduce((total, service) => {
+      return total + (service.timeTaken || 0);
+    }, 0);
   }
 
   function activate() {
