@@ -54,6 +54,7 @@ class MnWizardTermsAndConditionsComponent extends MnLifeCycleHooksToStream {
 
     this.uiRouter = uiRouter;
     this.isEnterprise = mnPoolsService.stream.isEnterprise;
+    this.isColumnar = mnPoolsService.stream.isColumnar;
     this.wizardForm = mnWizardService.wizardForm;
     this.initialValues = mnWizardService.initialValues;
     this.majorMinorVersion = mnAdminService.stream.majorMinorVersion;

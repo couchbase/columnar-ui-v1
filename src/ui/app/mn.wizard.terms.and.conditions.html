@@ -101,8 +101,7 @@ licenses/APL2.txt.
 
 <ng-template #tipContent>
   <ul>
-    <li>Enable all services on this node (safest if you're exploring)
-    <li>Allocate memory automatically for Couchbase services
+    <li>Allocate memory automatically for Columnar
     <li>Use default disk paths
   </ul>
 </ng-template>
@@ -117,6 +116,7 @@ licenses/APL2.txt.
           class="outline tight margin-right-quarter"
           (click)="defaultForm.submit.next(true)"
           [ngbTooltip]="tipContent"
+          *ngIf="isColumnar | async"
           placement="top">
           Finish With Defaults
         </button>
@@ -124,7 +124,7 @@ licenses/APL2.txt.
           [mnFocus]="focusFieldSubject"
           type="submit"
           class="tight margin-left-0">
-          Configure Disk, Memory, Services
+          Configure Disk, Memory, Blob Storage
         </button>
       </span>
     </div>

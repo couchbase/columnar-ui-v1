@@ -88,7 +88,11 @@ licenses/APL2.txt.
               <strong>RAM Available</strong> {{totalRAMMegs | async}}MiB &nbsp;
               <strong>Max Allowed Quota</strong> {{maxRAMMegs | async}}MiB
             </div>
-            <label>Storage bucket configuration</label>
+            <div class="row">
+              <h3>Blob Storage Configuration</h3>
+              <small class="text-smaller">Config cannot be changed after setup</small>
+            </div>
+            <br>
             <mn-columnar-bucket-config
             [group]="newClusterConfigForm.get('bucketDetails')">
             </mn-columnar-bucket-config>
@@ -99,6 +103,9 @@ licenses/APL2.txt.
                [control]="newClusterConfigForm.get('storageMode')">
             </mn-storage-mode>
             -->
+            <br>
+            <h3>Local Storage Configuration</h3>
+            <br>
             <mn-node-storage-config
                [group]="newClusterConfigForm.get('clusterStorage')">
             </mn-node-storage-config>

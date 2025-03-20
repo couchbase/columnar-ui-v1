@@ -41,4 +41,8 @@ class MnColumnarbucketConfig extends MnLifeCycleHooksToStream {
     this.postNodeInitHttp = mnWizardService.stream.postNodeInitHttp;
     this.postClusterInitHttp = mnWizardService.stream.postClusterInitHttp;
   }
+
+  ngOnInit() {
+    this.group.get("bucketStorageScheme").setValue('s3');
+  }
 }

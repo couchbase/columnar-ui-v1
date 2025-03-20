@@ -2,156 +2,190 @@
 <div [formGroup]="group">
   <div class="formrow">
     <div class="row">
-      <label for="bucket_hostName">Host Name / IP Address</label>
+      <label for="bucket_path_prefix">Blob Storage Scheme</label>
     </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketHostName"
-       id="bucket_hostName"
-       [mnFocus]="focusFieldSubject"
-       mnName={{bucketHostName}}
-       formControlName="bucketHostName">
-    <div
-       class="error error-form"
-       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketHostName">
-      {{(postNodeInitHttp.error | async)?.errors?.bucketHostName}}
-    </div>
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketHostName">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketHostName}}
-    </div>
-  </div>
-  <div class="formrow">
-    <div class="row">
-      <label for="bucket_port">Port</label>
-    </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketPort"
-       id="bucket_port"
-       formControlName="bucketPort">
-    <div
-       class="error error-form"
-       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPort">
-      {{(postNodeInitHttp.error | async)?.errors?.bucketPort}}
+    <div class="form-inline">
+      <input
+          type="radio"
+          formControlName="bucketStorageScheme"
+          value="s3"
+          id="s3">
+      <label for="s3">
+        S3
+      </label>
+      <!--
+      <input
+          type="radio"
+          formControlName="bucketStorageScheme"
+          value="gc"
+          id="gc">
+      <label for="gc">
+        Google Cloud Storage (GCS)
+      </label>
+      <input
+          type="radio"
+          formControlName="bucketStorageScheme"
+          value="azblob"
+          id="azblob">
+      <label for="azblob">
+        Azure Blob Storage
+      </label>
+      -->
+      <input
+          type="radio"
+          formControlName="bucketStorageScheme"
+          value="none"
+          id="none">
+      <label for="none">
+        None (Blob Storage Disabled)
+      </label>
     </div>
     <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPort">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketPort}}
-    </div>
-  </div>
-  <div class="formrow">
-    <div class="row">
-      <label for="bucket_name">Bucket name</label>
-    </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketName"
-       id="bucket_name"
-       formControlName="bucketName">
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
-    </div>
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
-    </div>
-  </div>
-  <div class="formrow">
-    <div class="row">
-      <label for="bucket_path_prefix">Bucket path prefix</label>
-    </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketPathPrefix"
-       id="bucket_path_prefix"
-       formControlName="bucketPathPrefix">
-    <div
-       class="error error-form"
-       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix">
-      {{(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix}}
-    </div>
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix}}
-    </div>
-  </div>
-  <div class="formrow">
-    <div class="row">
-      <label for="bucket_path_prefix">Bucket Region</label>
-    </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketRegion"
-       id="bucket_path_prefix"
-       formControlName="bucketRegion">
-    <div
-       class="error error-form"
-       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketRegion">
-      {{(postNodeInitHttp.error | async)?.errors?.bucketRegion}}
-    </div>
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketRegion">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketRegion}}
-    </div>
-  </div>
-  <div class="formrow">
-    <div class="row">
-      <label for="bucket_path_prefix">Bucket Storage Scheme</label>
-    </div>
-    <input
-       type="text"
-       autocorrect="off"
-       spellcheck="false"
-       autocapitalize="off"
-       name="bucketStorageScheme"
-       id="bucket_path_prefix"
-       formControlName="bucketStorageScheme">
-    <div
-       class="error error-form"
-       [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme">
+        class="error error-form"
+        [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme">
       {{(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme}}
     </div>
     <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme">
+        class="error error-form"
+        [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme">
       {{(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme}}
     </div>
   </div>
-  <div class="formrow">
-    <input
-       type="checkbox"
-       id="for-anonymous-Auth"
-       formControlName="blobStorageAnonymousAuth">
-    <label for="for-anonymous-Auth" class="margin-right-quarter">
-      Enable Blob Storage Anonymous Auth
-    </label>
-    <div
-       class="error error-form"
-       [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
-      {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
+  <div *ngIf="group.get('bucketStorageScheme').value === 'none'">
+    <p class="error">Warning: Disabling blob storage is for evaluation purposes only and can only be utilized on single-node clusters.</p>
+  </div>
+
+  <div *ngIf="group.get('bucketStorageScheme').value !== 'none'">
+    <div class="formrow">
+      <div class="row">
+        <label for="bucket_hostName">Host Name / IP Address</label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="bucketHostName"
+         id="bucket_hostName"
+         [mnFocus]="focusFieldSubject"
+         mnName={{bucketHostName}}
+         formControlName="bucketHostName">
+      <div
+         class="error error-form"
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketHostName">
+        {{(postNodeInitHttp.error | async)?.errors?.bucketHostName}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketHostName">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketHostName}}
+      </div>
+    </div>
+    <div class="formrow">
+      <div class="row">
+        <label for="bucket_port">Port</label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="bucketPort"
+         id="bucket_port"
+         formControlName="bucketPort">
+      <div
+         class="error error-form"
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPort">
+        {{(postNodeInitHttp.error | async)?.errors?.bucketPort}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPort">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketPort}}
+      </div>
+    </div>
+    <div class="formrow">
+      <div class="row">
+        <label for="bucket_name">Bucket name</label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="bucketName"
+         id="bucket_name"
+         formControlName="bucketName">
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+      </div>
+    </div>
+    <div class="formrow">
+      <div class="row">
+        <label for="bucket_path_prefix">Bucket path prefix</label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="bucketPathPrefix"
+         id="bucket_path_prefix"
+         formControlName="bucketPathPrefix">
+      <div
+         class="error error-form"
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix">
+        {{(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix}}
+      </div>
+    </div>
+    <div class="formrow">
+      <div class="row">
+        <label for="bucket_path_prefix">Bucket Region</label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="bucketRegion"
+         id="bucket_path_prefix"
+         formControlName="bucketRegion">
+      <div
+         class="error error-form"
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketRegion">
+        {{(postNodeInitHttp.error | async)?.errors?.bucketRegion}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketRegion">
+        {{(postClusterInitHttp.error | async)?.errors?.bucketRegion}}
+      </div>
+    </div>
+    <div class="formrow">
+      <input
+         type="checkbox"
+         id="for-anonymous-Auth"
+         formControlName="blobStorageAnonymousAuth">
+      <label for="for-anonymous-Auth" class="margin-right-quarter">
+        Enable Blob Storage Anonymous Auth
+      </label>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
+        {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
+      </div>
     </div>
   </div>
 </div>  

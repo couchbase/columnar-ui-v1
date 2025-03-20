@@ -432,7 +432,7 @@ body.set('blobStorageScheme', data.bucketStorageScheme);
 body.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth); // 'true' as a string
 body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
 
-const analyticsObservable = this.http.post('/settings/analytics', body.toString());
+const analyticsObservable = this.http.post('/settings/columnar', body.toString());
 
 analyticsObservable.subscribe();
             delete data.bucketStorageScheme;
