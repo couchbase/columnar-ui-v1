@@ -7,16 +7,23 @@
     <div class="form-inline">
       <input
           type="radio"
-          formControlName="bucketStorageScheme"
+          formControlName="blobStorageScheme"
           value="s3"
           id="s3">
       <label for="s3">
-        S3
-      </label>
+        AWS S3
+      </label><input
+                type="radio"
+                formControlName="blobStorageScheme"
+                value="s3-compat"
+                id="s3-compat">
+        <label for="s3-compat">
+            S3-Compatible Storage
+        </label>
       <!--
       <input
           type="radio"
-          formControlName="bucketStorageScheme"
+          formControlName="blobStorageScheme"
           value="gc"
           id="gc">
       <label for="gc">
@@ -24,7 +31,7 @@
       </label>
       <input
           type="radio"
-          formControlName="bucketStorageScheme"
+          formControlName="blobStorageScheme"
           value="azblob"
           id="azblob">
       <label for="azblob">
@@ -33,75 +40,53 @@
       -->
       <input
           type="radio"
-          formControlName="bucketStorageScheme"
+          formControlName="blobStorageScheme"
           value="none"
           id="none">
       <label for="none">
-        None (Blob Storage Disabled)
+        None
       </label>
     </div>
     <div
         class="error error-form"
-        [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme">
-      {{(postNodeInitHttp.error | async)?.errors?.bucketStorageScheme}}
+        [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageScheme">
+      {{(postNodeInitHttp.error | async)?.errors?.blobStorageScheme}}
     </div>
     <div
         class="error error-form"
-        [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme">
-      {{(postClusterInitHttp.error | async)?.errors?.bucketStorageScheme}}
+        [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageScheme">
+      {{(postClusterInitHttp.error | async)?.errors?.blobStorageScheme}}
     </div>
   </div>
-  <div *ngIf="group.get('bucketStorageScheme').value === 'none'">
+  <div *ngIf="group.get('blobStorageScheme').value === 'none'">
     <p class="error">Warning: Disabling blob storage is for evaluation purposes only and can only be utilized on single-node clusters.</p>
   </div>
 
-  <div *ngIf="group.get('bucketStorageScheme').value !== 'none'">
+  <div *ngIf="group.get('blobStorageScheme').value !== 'none'">
     <div class="formrow">
-      <div class="row">
-        <label for="bucket_hostName">Host Name / IP Address</label>
+      <div class="row" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+        <label for="bucket_endpoint">Endpoint</label>
       </div>
-      <input
+      <input *ngIf="group.get('blobStorageScheme').value == 's3-compat'"
          type="text"
          autocorrect="off"
          spellcheck="false"
          autocapitalize="off"
-         name="bucketHostName"
-         id="bucket_hostName"
+         name="blobStorageEndpoint"
+         id="bucket_endpoint"
          [mnFocus]="focusFieldSubject"
-         mnName={{bucketHostName}}
-         formControlName="bucketHostName">
+         mnName={{blobStorageEndpoint}}
+         formControlName="blobStorageEndpoint"
+         placeholder="e.g. https://my-object-storage:18082">
       <div
          class="error error-form"
-         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketHostName">
-        {{(postNodeInitHttp.error | async)?.errors?.bucketHostName}}
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageEndpoint">
+        {{(postNodeInitHttp.error | async)?.errors?.blobStorageEndpoint}}
       </div>
       <div
          class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketHostName">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketHostName}}
-      </div>
-    </div>
-    <div class="formrow">
-      <div class="row">
-        <label for="bucket_port">Port</label>
-      </div>
-      <input
-         type="text"
-         autocorrect="off"
-         spellcheck="false"
-         autocapitalize="off"
-         name="bucketPort"
-         id="bucket_port"
-         formControlName="bucketPort">
-      <div
-         class="error error-form"
-         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPort">
-        {{(postNodeInitHttp.error | async)?.errors?.bucketPort}}
-      </div>
-      <div
-         class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPort">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketPort}}
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageEndpoint">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageEndpoint}}
       </div>
     </div>
     <div class="formrow">
@@ -113,18 +98,19 @@
          autocorrect="off"
          spellcheck="false"
          autocapitalize="off"
+         [mnFocus]="focusFieldSubject"
          name="bucketName"
          id="bucket_name"
-         formControlName="bucketName">
+         formControlName="blobStorageBucket">
       <div
          class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageBucket">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageBucket}}
       </div>
       <div
          class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketName">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketName}}
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageBucket">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageBucket}}
       </div>
     </div>
     <div class="formrow">
@@ -136,41 +122,42 @@
          autocorrect="off"
          spellcheck="false"
          autocapitalize="off"
-         name="bucketPathPrefix"
+         name="blobStoragePrefix"
          id="bucket_path_prefix"
-         formControlName="bucketPathPrefix">
+         formControlName="blobStoragePrefix"
+         placeholder="e.g. columnar/">
       <div
          class="error error-form"
-         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix">
-        {{(postNodeInitHttp.error | async)?.errors?.bucketPathPrefix}}
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStoragePrefix">
+        {{(postNodeInitHttp.error | async)?.errors?.blobStoragePrefix}}
       </div>
       <div
          class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketPathPrefix}}
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStoragePrefix">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStoragePrefix}}
       </div>
     </div>
     <div class="formrow">
       <div class="row">
-        <label for="bucket_path_prefix">Bucket Region</label>
+        <label for="bucket_region">Bucket Region</label>
       </div>
       <input
          type="text"
          autocorrect="off"
          spellcheck="false"
          autocapitalize="off"
-         name="bucketRegion"
-         id="bucket_path_prefix"
-         formControlName="bucketRegion">
+         name="blobStorageRegion"
+         id="bucket_region"
+         formControlName="blobStorageRegion">
       <div
          class="error error-form"
-         [hidden]="!(postNodeInitHttp.error | async)?.errors?.bucketRegion">
-        {{(postNodeInitHttp.error | async)?.errors?.bucketRegion}}
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageRegion">
+        {{(postNodeInitHttp.error | async)?.errors?.blobStorageRegion}}
       </div>
       <div
          class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.bucketRegion">
-        {{(postClusterInitHttp.error | async)?.errors?.bucketRegion}}
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageRegion">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageRegion}}
       </div>
     </div>
     <div class="formrow">
@@ -187,5 +174,40 @@
         {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
       </div>
     </div>
+      <div class="formrow">
+          <input
+                  type="checkbox"
+                  id="for-force-path-style"
+                  formControlName="blobStorageForcePathStyle">
+          <label for="for-force-path-style" class="margin-right-quarter">
+              Force Path Style
+          </label>
+          <div
+                  class="error error-form"
+                  [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageForcePathStyle">
+              {{(postClusterInitHttp.error | async)?.errors.blobStorageForcePathStyle}}
+          </div>
+      </div>
+      <div class="formrow">
+          <input
+                  type="checkbox"
+                  id="for-disable-ssl-verify"
+                  formControlName="blobStorageDisableSslVerify">
+          <label for="for-disable-ssl-verify" class="margin-right-quarter">
+              Disable SSL Verify
+          </label>
+          <div id="ssl-warning"
+               *ngIf="group.get('blobStorageDisableSslVerify').value">
+              <p class="error">Warning: Disabling SSL verification in a
+                  production environment is highly insecure and exposes the
+                  system to serious risks, including Man-in-the-Middle (MITM)
+                  attacks.</p>
+          </div>
+          <div
+                  class="error error-form"
+                  [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageDisableSslVerify">
+              {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
+          </div>
+      </div>
   </div>
 </div>  

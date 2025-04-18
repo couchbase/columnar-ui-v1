@@ -90,13 +90,14 @@ var wizardForm = {
     javaPath: new FormControl(),
     storageMode: new FormControl(null),
     bucketDetails: new FormGroup({
-      bucketHostName: new FormControl(null, [Validators.required]),
-      bucketPort: new FormControl(null, [Validators.required]),
-      bucketName: new FormControl(null, [Validators.required]),
-      bucketPathPrefix: new FormControl(null, [Validators.required]),
-      bucketRegion: new FormControl(null, [Validators.required]),
-      bucketStorageScheme: new FormControl(null, [Validators.required]),
-      blobStorageAnonymousAuth: new FormControl(false)
+      blobStorageEndpoint: new FormControl('', [Validators.required]),
+      blobStorageBucket: new FormControl('', [Validators.required]),
+      blobStoragePrefix: new FormControl('', [Validators.required]),
+      blobStorageRegion: new FormControl('', [Validators.required]),
+      blobStorageScheme: new FormControl("s3", [Validators.required]),
+      blobStorageAnonymousAuth: new FormControl(false),
+      blobStorageForcePathStyle: new FormControl(false),
+      blobStorageDisableSslVerify: new FormControl(false),
     })
   }),
   termsAndConditions: new FormGroup({
@@ -384,66 +385,33 @@ class MnWizardService {
     return this.http.post('/nodeInit', data);
   }
 
-  // postClusterInit(data) {
-  //   const headers = new HttpHeaders().set(
-  //     'Content-Type',
-  //     'application/x-www-form-urlencoded'
-  //   );
-  //    delete data.bucketStorageScheme;
-  //           delete data.bucketHostName;
-  //           delete data.bucketPort;
-  //           delete data.bucketName;
-  //           delete data.bucketPathPrefix;
-  //           return this.http.post('/clusterInit', data);
-  //   const body = new URLSearchParams();
-  //   body.set('blobStoragePrefix', data.bucketPathPrefix);
-  //   body.set('blobStorageBucket', data.bucketName);
-  //   body.set('blobStorageRegion', 'us-east-2');
-  //   body.set('blobStorageScheme', data.bucketStorageScheme);
-  //   body.set('blobStorageAnonymousAuth', true);
-  //   body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
-
-  //  return this.http.post('/settings/analytics', body.toString(), { headers }).subscribe({
-  //     next: (response) => {
-  //       // const headUrl = `${data.bucketHostName}:${data.bucketPort}/${data.bucketPathPrefix}${data.bucketName}`;
-  //       // this.http.head(headUrl, {
-  //       //   headers: new HttpHeaders().set('Content-Type', 'text/plain')
-  //       // }).subscribe({
-  //       //   next: (headResponse) => {
-           
-  //       //   },
-  //       //   error: (headError) => {
-  //       //     console.error('HEAD Error:', headError);
-  //       //   }
-  //       // });
-  //     },
-  //     error: (error) => {
-  //       console.error('Error:', error);
-  //     }
-  //   });
-  // }
-
   postClusterInit(data) {
-const body = new URLSearchParams();
-body.set('blobStoragePrefix', data.bucketPathPrefix || '');
-body.set('blobStorageBucket', data.bucketName);
-body.set('blobStorageRegion', data.bucketRegion);
-body.set('blobStorageScheme', data.bucketStorageScheme);
-body.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth); // 'true' as a string
-body.set('blobStorageEndpoint', `${data.bucketHostName}:${data.bucketPort}`);
-
-const analyticsObservable = this.http.post('/settings/columnar', body.toString());
-
-analyticsObservable.subscribe();
-            delete data.bucketStorageScheme;
-            delete data.bucketHostName;
-            delete data.bucketPort;
-            delete data.bucketName;
-            delete data.bucketPathPrefix;
-            delete data.blobStorageAnonymousAuth;
-            delete data.bucketRegion;
-    return this.http.post('/clusterInit', data);
-
+    const columnarSettingsForm = new URLSearchParams();
+    if (data.blobStorageScheme === "s3-compat") {
+      columnarSettingsForm.set('blobStorageEndpoint', data.blobStorageEndpoint);
+      columnarSettingsForm.set('blobStorageScheme', "s3");
+    } else {
+      columnarSettingsForm.set('blobStorageScheme', data.blobStorageScheme);
+    }
+    columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
+    columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
+    columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
+    columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
+    columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
+    columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
+    return this.http.post('/settings/columnar', columnarSettingsForm.toString()).pipe(
+        switchMap(() => {
+          delete data.blobStorageScheme;
+          delete data.blobStorageEndpoint;
+          delete data.blobStorageBucket;
+          delete data.blobStoragePrefix;
+          delete data.blobStorageAnonymousAuth;
+          delete data.blobStorageRegion;
+          delete data.blobStorageForcePathStyle;
+          delete data.blobStorageDisableSslVerify;
+          return this.http.post('/clusterInit', data);
+        })
+    );
   }
 
 

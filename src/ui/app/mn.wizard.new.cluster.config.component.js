@@ -166,13 +166,14 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.indexPath = nodeStorage.get("storage.index_path").value;
     rv.eventingPath = nodeStorage.get("storage.eventing_path").value;
     rv.sendStats = this.wizardForm.termsAndConditions.get("enableStats").value;
-    rv.bucketHostName = this.newClusterConfigForm.get('bucketDetails.bucketHostName').value;
-    rv.bucketPort = this.newClusterConfigForm.get('bucketDetails.bucketPort').value;
-    rv.bucketName = this.newClusterConfigForm.get('bucketDetails.bucketName').value;
-    rv.bucketPathPrefix = this.newClusterConfigForm.get('bucketDetails.bucketPathPrefix').value;
-    rv.bucketRegion = this.newClusterConfigForm.get('bucketDetails.bucketRegion').value;
-    rv.bucketStorageScheme = this.newClusterConfigForm.get('bucketDetails.bucketStorageScheme').value;
+    rv.blobStorageEndpoint = this.newClusterConfigForm.get('bucketDetails.blobStorageEndpoint').value;
+    rv.blobStorageBucket = this.newClusterConfigForm.get('bucketDetails.blobStorageBucket').value;
+    rv.blobStoragePrefix = this.newClusterConfigForm.get('bucketDetails.blobStoragePrefix').value;
+    rv.blobStorageRegion = this.newClusterConfigForm.get('bucketDetails.blobStorageRegion').value;
+    rv.blobStorageScheme = this.newClusterConfigForm.get('bucketDetails.blobStorageScheme').value;
     rv.blobStorageAnonymousAuth = this.newClusterConfigForm.get('bucketDetails.blobStorageAnonymousAuth').value;
+    rv.blobStorageForcePathStyle = this.newClusterConfigForm.get('bucketDetails.blobStorageForcePathStyle').value;
+    rv.blobStorageDisableSslVerify = this.newClusterConfigForm.get('bucketDetails.blobStorageDisableSslVerify').value;
     let services = this.wizardForm.newClusterConfig.get("services.flag");
 
     rv.services = this.getServicesValues(services).join(",");
