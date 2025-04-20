@@ -139,7 +139,7 @@ class MnSecurityAuditItemComponent extends MnLifeCycleHooksToStream {
     case "n1ql":
       return "Query and Index Service";
     case "eventing":
-      return "Columnar Service";
+      return "Eventing Service";
     case "memcached":
       return "Data Service";
     case "xdcr":
@@ -148,6 +148,8 @@ class MnSecurityAuditItemComponent extends MnLifeCycleHooksToStream {
       return "Search Service";
     case "view_engine":
       return "Views";
+    case "analytics":
+        return "Columnar";
     default:
       return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
     }

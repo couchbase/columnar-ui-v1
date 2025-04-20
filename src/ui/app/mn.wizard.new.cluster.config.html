@@ -30,6 +30,11 @@ licenses/APL2.txt.
     </a>
   </ng-template>
 
+    <ng-template #tipContent_columnarMem>
+        <p> The memory quota to be allocated for Couchbase Columnar
+        </p>
+    </ng-template>
+
   <div class="panel-header flex-left margin-bottom-quarter">
     <img
       src="../cb_logo_bug_white_2.svg"
@@ -62,7 +67,7 @@ licenses/APL2.txt.
               <label class="margin-right-quarter">Columnar Memory Quota</label>
               <span
                  class="fa-stack icon-info"
-                 [ngbTooltip]="tipContent_serviceMem"
+                 [ngbTooltip]="tipContent_columnarMem"
                  placement="right"
                  [closeDelay]="2000"
                  container="body">

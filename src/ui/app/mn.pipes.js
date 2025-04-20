@@ -425,7 +425,7 @@ class MnFilterColumnar {
   ]}
 
   transform(services) {    
-    return services.filter(service => (service === "eventing" || service === "ns_server" || service === "auditd"));
+    return services.filter(service => (service === "analytics" || service === "ns_server" || service === "auditd"));
   }
 }
 

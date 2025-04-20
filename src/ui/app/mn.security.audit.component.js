@@ -47,7 +47,7 @@ class MnSecurityAuditComponent extends MnLifeCycleHooksToStream {
     super();
 
     this.IEC = mnHelperService.IEC;
-
+    this.isColumnar = true;
     this.compatVersion55 = mnAdminService.stream.compatVersion55;
     this.compatVersion80 = mnAdminService.stream.compatVersion80;
     this.isEnterprise = mnPoolsService.stream.isEnterprise;
