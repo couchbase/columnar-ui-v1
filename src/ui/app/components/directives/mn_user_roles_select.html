@@ -26,7 +26,7 @@ licenses/APL2.txt.
        class="margin-left-half"
        ng-show="state.openedWrappers[group.name]">
       <div
-         ng-repeat="item in group.roles"
+         ng-repeat="item in group.roles | mnColumnarRoles"
          class="user-role-row"
          ng-style="{'z-index': 10 + group.roles.length - $index}"
          ng-class="{'has-selection': !item.params.length &&

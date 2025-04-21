@@ -33,20 +33,20 @@
         </span>
         <span ng-if="!node.nodeEncryption">off</span>
       </div>
-      <div ng-if="serversListItemDetailsCtl.isEnterprise && node.hasOwnProperty('encryptionAtRestInfo')">
-        <div>
-          <strong>Encryption at Rest Configuration:</strong>
-          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.configuration"></mn-encryption-status>
-        </div>
-        <div>
-          <strong>Encryption at Rest Audit:</strong>
-          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.audits"></mn-encryption-status>
-        </div>
-        <div>
-          <strong>Encryption at Rest Logs:</strong>
-          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.logs"></mn-encryption-status>
-        </div>
-      </div>
+<!--      <div ng-if="serversListItemDetailsCtl.isEnterprise && node.hasOwnProperty('encryptionAtRestInfo')">-->
+<!--        <div>-->
+<!--          <strong>Encryption at Rest Configuration:</strong>-->
+<!--          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.configuration"></mn-encryption-status>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--          <strong>Encryption at Rest Audit:</strong>-->
+<!--          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.audits"></mn-encryption-status>-->
+<!--        </div>-->
+<!--        <div>-->
+<!--          <strong>Encryption at Rest Logs:</strong>-->
+<!--          <mn-encryption-status class="inline" encryption-info="node.encryptionAtRestInfo.logs"></mn-encryption-status>-->
+<!--        </div>-->
+<!--      </div>-->
       <div>
         <strong>OS:</strong> {{serversListItemDetailsCtl.server.details.os}}
       </div>

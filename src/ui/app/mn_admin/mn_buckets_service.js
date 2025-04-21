@@ -49,6 +49,11 @@ function mnBucketsServiceFactory($q, mnBucketsStats) {
     }
     return mnBucketsStats.get(mnHttpParams).then(function (resp) {
       var bucketsDetails = resp.data;
+      // fake bucket to enable UI features that require at least one bucket
+      bucketsDetails.push({
+        "name": "All Buckets",
+        "bucketType": "membase"
+      })
       // TODO: remove memcached type once backend no longer supports them
       bucketsDetails.byType = {membase: [], memcached: [], ephemeral: []};
       bucketsDetails.byName = {};

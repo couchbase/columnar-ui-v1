@@ -58,7 +58,8 @@ angular
   .filter("formatFailoverWarnings", formatFailoverWarnings)
   .filter('mnColumnarService', mnColumnarService)
   .filter('mnColumnarState', mnColumnarState)
-  .filter('mnReplaceWord', mnReplaceWord);
+  .filter('mnColumnarRoles', mnColumnarRoles)
+  .filter('mnReplaceWord', mnReplaceWord)
 
 
 
@@ -663,9 +664,27 @@ function mnFormatServices() {
 function mnColumnarState() {
   return function (service) {
     return service.filter(function (s) {
-      return (s.name === "Administrative" || s.name === "Analytics");
+      return (s.name === "Administrative");
     })
-    
+  }
+}
+
+function mnColumnarRoles() {
+  return function (service) {
+    return service.filter(function (s) {
+      switch (s.role) {
+        case "admin":
+        case "ro_admin":
+        case "security_admin":
+        case "user_admin_local":
+        case "user_admin_external":
+        case "cluster_admin":
+        case "external_stats_reader":
+          return true;
+        default:
+          return false;
+      }
+    })
   }
 }
 

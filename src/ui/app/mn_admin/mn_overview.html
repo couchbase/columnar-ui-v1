@@ -44,7 +44,6 @@ licenses/APL2.txt.
        class="service-widget"
        ui-sref="app.admin.cbas.workbench"
        ng-class="['dynamic_' + overviewCtl.nodes.cbas.statusClass]">
-      <p>Columnar - {{buckets.details.length + ' database' + overviewCtl.getEndings(buckets.details.length)}}</p>
       <div
          class="error piped"
          ng-repeat="(nodeStatuses, count) in overviewCtl.nodes.cbas.nodesByStatuses">

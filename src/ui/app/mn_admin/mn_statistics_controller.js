@@ -249,8 +249,8 @@ function mnStatisticsNewController($scope, mnStatisticsNewService, $state, $http
   //selected scenario holder
   vm.openGroupDialog = openGroupDialog;
   //only new /range api can support "All Buckets" aggregation, hence we are checking atLeast70
-  vm.selectedBucket = $state.params.scenarioBucket || (mnPoolDefault.export.compat.atLeast70 ? "All Databases": $state.params.scenarioBucket);
-  vm.bucketNames = mnPoolDefault.export.compat.atLeast70 ? [...$scope.rbac.bucketNames['.stats!read'] || [], "All Databases"] : $scope.rbac.bucketNames['.stats!read'];
+  vm.selectedBucket = $state.params.scenarioBucket || (mnPoolDefault.export.compat.atLeast70 ? "All Buckets": $state.params.scenarioBucket);
+  vm.bucketNames = mnPoolDefault.export.compat.atLeast70 ? [...$scope.rbac.bucketNames['.stats!read'] || [], "All Buckets"] : $scope.rbac.bucketNames['.stats!read'];
   vm.onBucketChange = onBucketChange;
   vm.onSelectNode = onSelectNode;
   vm.getSelectedScenario = getSelectedScenario;
@@ -360,102 +360,102 @@ function mnStatisticsNewController($scope, mnStatisticsNewService, $state, $http
         .cycle();
     }
 
-    if ($scope.rbac.cluster.settings.fts && $scope.rbac.cluster.settings.fts.read) {
-      new mnPoller($scope, function () {
-        return $http.get('/_p/fts/api/index').then(function(rv) {
-          return Object.keys(rv.data.indexDefs.indexDefs).reduce(function (acc, key) {
-            var index = rv.data.indexDefs.indexDefs[key];
-            if (index.sourceName == $state.params.scenarioBucket) {
-              acc.push(index);
-            }
-            return acc;
-          }, []);
-        });
-      })
-        .setInterval(10000)
-        .subscribe(ftsItems => {
-          vm.ftsItems = (ftsItems || []).reduce((acc, ftsItem) => {
-            acc.values.push('fts/' + ftsItem.name + '/');
-            acc.labels.push(ftsItem.name);
-            return acc;
-          }, {values: [], labels: []});
-        })
-        .reloadOnScopeEvent("reloadXdcrPoller")
-        .cycle();
-    }
+    // if ($scope.rbac.cluster.settings.fts && $scope.rbac.cluster.settings.fts.read) {
+    //   new mnPoller($scope, function () {
+    //     return $http.get('/_p/fts/api/index').then(function(rv) {
+    //       return Object.keys(rv.data.indexDefs.indexDefs).reduce(function (acc, key) {
+    //         var index = rv.data.indexDefs.indexDefs[key];
+    //         if (index.sourceName == $state.params.scenarioBucket) {
+    //           acc.push(index);
+    //         }
+    //         return acc;
+    //       }, []);
+    //     });
+    //   })
+    //     .setInterval(10000)
+    //     .subscribe(ftsItems => {
+    //       vm.ftsItems = (ftsItems || []).reduce((acc, ftsItem) => {
+    //         acc.values.push('fts/' + ftsItem.name + '/');
+    //         acc.labels.push(ftsItem.name);
+    //         return acc;
+    //       }, {values: [], labels: []});
+    //     })
+    //     .reloadOnScopeEvent("reloadXdcrPoller")
+    //     .cycle();
+    // }
 
-    if ($scope.rbac.cluster.collection['.:.:.'].n1ql.index.read) {
-      new mnPoller($scope, function () {
-        return mnGsiService.getIndexStatus().then(function (rv) {
-          if (!$state.params.scenarioBucket) {
-            return;
-          }
-          return rv.indexes.filter(index => index.bucket === $state.params.scenarioBucket);
-        });
-      })
-        .setInterval(10000)
-        .subscribe(indexes => {
-          vm.indexItems = (indexes || []).reduce((acc, indexItem) => {
-            acc.values.push('index/' + indexItem.index + '/');
-            acc.labels.push(indexItem.index);
-            return acc;
-          }, {values: [], labels: []});
-        })
-        .reloadOnScopeEvent("indexStatusURIChanged")
-        .cycle();
-    }
+    // if ($scope.rbac.cluster.collection['.:.:.'].n1ql.index.read) {
+    //   new mnPoller($scope, function () {
+    //     return mnGsiService.getIndexStatus().then(function (rv) {
+    //       if (!$state.params.scenarioBucket) {
+    //         return;
+    //       }
+    //       return rv.indexes.filter(index => index.bucket === $state.params.scenarioBucket);
+    //     });
+    //   })
+    //     .setInterval(10000)
+    //     .subscribe(indexes => {
+    //       vm.indexItems = (indexes || []).reduce((acc, indexItem) => {
+    //         acc.values.push('index/' + indexItem.index + '/');
+    //         acc.labels.push(indexItem.index);
+    //         return acc;
+    //       }, {values: [], labels: []});
+    //     })
+    //     .reloadOnScopeEvent("indexStatusURIChanged")
+    //     .cycle();
+    // }
 
-    if ($scope.rbac.cluster.eventing.functions.manage) {
-      new mnPoller($scope, function () {
-        return $http.get('/_p/event/api/v1/status');
-      })
-        .setInterval(10000)
-        .subscribe(resp => {
-          vm.eventingItems = ((resp.data && resp.data.apps) || []).reduce((acc, func) => {
-            if (func.composite_status == "deployed") {
-              let funcName = '';
-              if (func.function_scope && func.function_scope.bucket !== '*') {
-                funcName = `${func.function_scope.bucket}/${func.function_scope.scope}/`;
-              }
-              funcName += func.name;
-              acc.values.push(funcName);
-            }
-            return acc;
-          }, {values: []});
-        })
-        .cycle();
-    }
+    // if ($scope.rbac.cluster.eventing.functions.manage) {
+    //   new mnPoller($scope, function () {
+    //     return $http.get('/_p/event/api/v1/status');
+    //   })
+    //     .setInterval(10000)
+    //     .subscribe(resp => {
+    //       vm.eventingItems = ((resp.data && resp.data.apps) || []).reduce((acc, func) => {
+    //         if (func.composite_status == "deployed") {
+    //           let funcName = '';
+    //           if (func.function_scope && func.function_scope.bucket !== '*') {
+    //             funcName = `${func.function_scope.bucket}/${func.function_scope.scope}/`;
+    //           }
+    //           funcName += func.name;
+    //           acc.values.push(funcName);
+    //         }
+    //         return acc;
+    //       }, {values: []});
+    //     })
+    //     .cycle();
+    // }
 
-    if ($scope.rbac.cluster.bucket['.'].views.read && $state.params.scenarioBucket) {
-      new mnPoller($scope, function () {
-        return mnStatisticsNewService.getStatsDirectory($state.params.scenarioBucket, {})
-          .then(function (rv) {
-            if (!$state.params.scenarioBucket) {
-              return;
-            }
-            return rv.data.blocks.filter(function (block) {
-              if (block.blockName.includes("View Stats")) {
-                block.statId = block.blockName.split(": ")[1];
-                var name = block.stats[0].name.split("/");
-                name.pop()
-                block.statKeyPrefix = name.join("/") + "/";
-                return true;
-              }
-              return false;
-            });
-          });
-      })
-        .setInterval(10000)
-        .subscribe(views => {
-          vm.viewItems = (views || []).reduce((acc, viewItem) => {
-            acc.values.push(viewItem.statKeyPrefix);
-            acc.labels.push(viewItem.statId);
-            return acc;
-          }, {values: [], labels: []});
-        })
-        .reloadOnScopeEvent("reloadViewsPoller")
-        .cycle();
-    }
+    // if ($scope.rbac.cluster.bucket['.'].views.read && $state.params.scenarioBucket) {
+    //   new mnPoller($scope, function () {
+    //     return mnStatisticsNewService.getStatsDirectory($state.params.scenarioBucket, {})
+    //       .then(function (rv) {
+    //         if (!$state.params.scenarioBucket) {
+    //           return;
+    //         }
+    //         return rv.data.blocks.filter(function (block) {
+    //           if (block.blockName.includes("View Stats")) {
+    //             block.statId = block.blockName.split(": ")[1];
+    //             var name = block.stats[0].name.split("/");
+    //             name.pop()
+    //             block.statKeyPrefix = name.join("/") + "/";
+    //             return true;
+    //           }
+    //           return false;
+    //         });
+    //       });
+    //   })
+    //     .setInterval(10000)
+    //     .subscribe(views => {
+    //       vm.viewItems = (views || []).reduce((acc, viewItem) => {
+    //         acc.values.push(viewItem.statKeyPrefix);
+    //         acc.labels.push(viewItem.statId);
+    //         return acc;
+    //       }, {values: [], labels: []});
+    //     })
+    //     .reloadOnScopeEvent("reloadViewsPoller")
+    //     .cycle();
+    // }
   }
 
   function getSelectedScenario() {

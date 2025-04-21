@@ -62,7 +62,12 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
     }
     var promise = mnSettingsClusterService.postPoolsDefault(vm.memoryQuotaConfig, true);
     mnPromiseHelper(vm, promise)
-      .catchErrors("memoryQuotaErrors");
+      .catchErrors(function (error) {
+        if (error && error.cbasMemoryQuota) {
+          error.cbasMemoryQuota = error.cbasMemoryQuota.replace(/analytics/gi, "columnar");
+        }
+        vm.memoryQuotaErrors = error;
+      })
   }, 500), true);
 
   $scope.$watch('settingsClusterCtl.indexSettings', _.debounce(function (indexSettings, prevIndexSettings) {
@@ -99,24 +104,24 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
 
     queries.push(promise1);
 
-    if (vm.replicationSettings.genericServicesLogLevel) {
-      vm.replicationSettings.genericServicesLogLevel = JSON.stringify(vm.replicationSettings.genericServicesLogLevel);
-    }
-    promise6 = mnPromiseHelper(vm,
-                               mnXDCRService.postSettingsReplications(vm.replicationSettings))
-      .catchErrors("replicationSettingsErrors")
-      .getPromise();
+    // if (vm.replicationSettings.genericServicesLogLevel) {
+    //   vm.replicationSettings.genericServicesLogLevel = JSON.stringify(vm.replicationSettings.genericServicesLogLevel);
+    // }
+    // promise6 = mnPromiseHelper(vm,
+    //                            mnXDCRService.postSettingsReplications(vm.replicationSettings))
+    //   .catchErrors("replicationSettingsErrors")
+    //   .getPromise();
+    //
+    // queries.push(promise6);
 
-    queries.push(promise6);
-
-    if (!_.isEqual(vm.indexSettings, vm.initialIndexSettings) && $scope.rbac.cluster.settings.indexes.write) {
-      promise2 = mnPromiseHelper(vm, mnSettingsClusterService.postIndexSettings(vm.indexSettings))
-        .catchErrors("indexSettingsErrors")
-        .applyToScope("initialIndexSettings")
-        .getPromise();
-
-      queries.push(promise2);
-    }
+    // if (!_.isEqual(vm.indexSettings, vm.initialIndexSettings) && $scope.rbac.cluster.settings.indexes.write) {
+    //   promise2 = mnPromiseHelper(vm, mnSettingsClusterService.postIndexSettings(vm.indexSettings))
+    //     .catchErrors("indexSettingsErrors")
+    //     .applyToScope("initialIndexSettings")
+    //     .getPromise();
+    //
+    //   queries.push(promise2);
+    // }
 
     if (mnPoolDefault.export.isEnterprise &&
         mnPoolDefault.export.compat.atLeast65 &&
@@ -137,35 +142,35 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
       queries.push(promise9);
     }
 
-    if (mnPoolDefault.export.compat.atLeast80 &&
-        $scope.rbac.cluster.settings.write) {
-      promise9 = mnPromiseHelper(vm, mnSettingsClusterService
-          .postSettingsResource(vm.settingsResource))
-          .catchErrors("settingsResourceErrors")
-          .getPromise();
-      queries.push(promise9);
-    }
+    // if (mnPoolDefault.export.compat.atLeast80 &&
+    //     $scope.rbac.cluster.settings.write) {
+    //   promise9 = mnPromiseHelper(vm, mnSettingsClusterService
+    //       .postSettingsResource(vm.settingsResource))
+    //       .catchErrors("settingsResourceErrors")
+    //       .getPromise();
+    //   queries.push(promise9);
+    // }
 
-    if (mnPoolDefault.export.compat.atLeast71 &&
-        mnPoolDefault.export.isEnterprise &&
-        $scope.rbac.cluster.settings.write) {
-      promise10 = mnPromiseHelper(vm, mnSettingsClusterService
-                                 .postSettingsAnalytics(vm.settingsAnalytics))
-        .catchErrors("settingsAnalyticsErrors")
-        .getPromise();
-      queries.push(promise10);
-    }
+    // if (mnPoolDefault.export.compat.atLeast71 &&
+    //     mnPoolDefault.export.isEnterprise &&
+    //     $scope.rbac.cluster.settings.write) {
+    //   promise10 = mnPromiseHelper(vm, mnSettingsClusterService
+    //                              .postSettingsAnalytics(vm.settingsAnalytics))
+    //     .catchErrors("settingsAnalyticsErrors")
+    //     .getPromise();
+    //   queries.push(promise10);
+    // }
 
-    if ($scope.rbac.cluster.admin.memcached.write) {
-      promise8 = mnPromiseHelper(vm, mnSettingsClusterService.postMemcachedSettings({
-        num_reader_threads: packThreadValue('reader'),
-        num_writer_threads: packThreadValue('writer'),
-        num_storage_threads: packThreadValue('storage')
-      }))
-        .catchErrors("dataServiceSettingsErrors")
-        .getPromise();
-      queries.push(promise8);
-    }
+    // if ($scope.rbac.cluster.admin.memcached.write) {
+    //   promise8 = mnPromiseHelper(vm, mnSettingsClusterService.postMemcachedSettings({
+    //     num_reader_threads: packThreadValue('reader'),
+    //     num_writer_threads: packThreadValue('writer'),
+    //     num_storage_threads: packThreadValue('storage')
+    //   }))
+    //     .catchErrors("dataServiceSettingsErrors")
+    //     .getPromise();
+    //   queries.push(promise8);
+    // }
 
     queries = queries.concat(mnSettingsClusterService.getSubmitCallbacks().map(function (cb) {
       return cb();
@@ -201,26 +206,27 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
     if (vm.clusterSettingsLoading) {
       return;
     }
-    if ((!vm.indexSettings || vm.indexSettings.storageMode === "forestdb") && vm.initialMemoryQuota != vm.memoryQuotaConfig.indexMemoryQuota) {
-      $uibModal.open({
-        template,
-      }).result.then(saveSettings);
-    } else {
-      saveSettings();
-    }
+    saveSettings();
+    // if ((!vm.indexSettings || vm.indexSettings.storageMode === "forestdb") && vm.initialMemoryQuota != vm.memoryQuotaConfig.indexMemoryQuota) {
+    //   $uibModal.open({
+    //     template,
+    //   }).result.then(saveSettings);
+    // } else {
+    //   saveSettings();
+    // }
   }
   function isFormInitialized() {
     let compat = mnPoolDefault.export.compat;
     let cluster = $scope.rbac.cluster;
     return (vm.clusterName != void 0) && (vm.initialMemoryQuota != void 0) &&
-      (cluster.xdcr.settings.read ? (vm.replicationSettings != void 0) : true) &&
-      (cluster.admin.memcached.read ? (vm.readerThreads != void 0) : true) &&
+      // (cluster.xdcr.settings.read ? (vm.replicationSettings != void 0) : true) &&
+      // (cluster.admin.memcached.read ? (vm.readerThreads != void 0) : true) &&
       ((compat.atLeast66 && cluster.settings.read) ? (vm.settingsRebalance != void 0) : true) &&
       ((compat.atLeast65 && mnPoolDefault.export.isEnterprise && cluster.settings.read) ?
        (vm.retryRebalanceCfg != void 0) : true) &&
-      (cluster.settings.indexes.read ? (vm.indexSettings != void 0) : true) &&
-      ((compat.atLeast71 && mnPoolDefault.export.isEnterprise && cluster.settings.read) ?
-        (vm.settingsAnalytics != void 0) : true) &&
+      // (cluster.settings.indexes.read ? (vm.indexSettings != void 0) : true) &&
+      // ((compat.atLeast71 && mnPoolDefault.export.isEnterprise && cluster.settings.read) ?
+      //   (vm.settingsAnalytics != void 0) : true) &&
 
       mnSettingsClusterService.getInitChecker().every(v => v());
   }
@@ -284,18 +290,18 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
     }
     services.n1ql = mnPoolDefault.export.compat.atLeast76;
 
-    if ($scope.rbac.cluster.xdcr.settings.read) {
-      mnXDCRService.getSettingsReplications().then(function (rv) {
-        vm.replicationSettings = rv.data;
-        vm.initialServicesLogLevels = _.clone(vm.replicationSettings.genericServicesLogLevel);
-        vm.XDCRServices = Object.keys(vm.replicationSettings.genericServicesLogLevel);
-        vm.replicationSettings.xdcrAllLogLevels =
-          Object.values(vm.replicationSettings.genericServicesLogLevel).every(logLevel => logLevel === vm.replicationSettings.genericServicesLogLevel[vm.XDCRServices[0]]) ?
-            vm.replicationSettings.genericServicesLogLevel[vm.XDCRServices[0]] :
-            null;
-        vm.logValues = ["Info", "Trace", "Debug", "Error"];
-      });
-    }
+    // if ($scope.rbac.cluster.xdcr.settings.read) {
+    //   mnXDCRService.getSettingsReplications().then(function (rv) {
+    //     vm.replicationSettings = rv.data;
+    //     vm.initialServicesLogLevels = _.clone(vm.replicationSettings.genericServicesLogLevel);
+    //     vm.XDCRServices = Object.keys(vm.replicationSettings.genericServicesLogLevel);
+    //     vm.replicationSettings.xdcrAllLogLevels =
+    //       Object.values(vm.replicationSettings.genericServicesLogLevel).every(logLevel => logLevel === vm.replicationSettings.genericServicesLogLevel[vm.XDCRServices[0]]) ?
+    //         vm.replicationSettings.genericServicesLogLevel[vm.XDCRServices[0]] :
+    //         null;
+    //     vm.logValues = ["Info", "Trace", "Debug", "Error"];
+    //   });
+    // }
 
     if (mnPoolDefault.export.compat.atLeast71  &&
         mnPoolDefault.export.isEnterprise &&

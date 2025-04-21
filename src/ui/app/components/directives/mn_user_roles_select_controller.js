@@ -86,14 +86,6 @@ function mnUserRolesSelectFormDirective(mnKeyspaceSelectorServiceDowngrade) {
     let mnOnDestroy = new Subject();
     let params = $scope.item.params.map(v => v.split("_")[0]);
 
-    params = params.map((param, i) => {
-      if (param === "bucket") {
-       return "database"
-      }
-      return param;
-    });
-    
-
     $scope.mnCollectionSelectorService =
       mnKeyspaceSelectorServiceDowngrade.createCollectionSelector({
         isRolesMode: true,

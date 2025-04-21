@@ -614,67 +614,8 @@ function mnStatisticsNewServiceFactory($http, mnServersService, mnPoller, $rootS
       uiid: "mn-cluster-overview",
       desc: "Stats showing the general health of your cluster. Customize and/or make your own dashboard with \"new dashboard... \" below.",
       groups: [{
-        name: "Cluster Overview",
-        uiid: "mn-cluster-overview-group",
-        charts: [{
-          stats: {"@kv-.ops": true,
-                  "@query.query_requests": true,
-                  "@fts-.@items.total_queries": true,
-                  "@kv-.ep_tmp_oom_errors": true,
-                  "@kv-.ep_cache_miss_rate": true,
-                  "@kv-.cmd_get": true,
-                  "@kv-.cmd_set": true,
-                  "@kv-.delete_hits": true
-                 },
-          size: "medium",
-          specificStat: false // false for multi-stat chart
-        }, {
-          stats: {"@kv-.mem_used": true,
-                  "@kv-.ep_mem_low_wat": true,
-                  "@kv-.ep_mem_high_wat": true},
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@kv-.curr_items": true,
-                  "@kv-.vb_replica_curr_items": true,
-                  "@kv-.vb_active_resident_items_ratio": true,
-                  "@kv-.vb_replica_resident_items_ratio": true,
-                "@kv-.couch_docs_fragmentation": true},
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@kv-.disk_write_queue": true,
-                  "@kv-.couch_docs_actual_disk_size": true},
-          size: "small",
-          specificStat: false
-        }, {
-          stats: {"@kv-.ep_dcp_replica_items_remaining": true},
-          size: "small",
-          specificStat: false
-        }, {
-          stats: {"@kv-.ep_data_read_failed": true,
-                  "@kv-.ep_data_write_failed": true,
-                  "@query.query_errors": true,
-                  "@fts-.@items.total_queries_error": true,
-                  "@eventing.eventing/failed_count": true},
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@query.query_requests_250ms": true,
-                  "@query.query_requests_500ms": true,
-                  "@query.query_requests_1000ms": true,
-                  "@query.query_requests_5000ms": true},
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@xdcr-.replication_changes_left": true,
-                  "@index-.@items.num_docs_pending+queued": true,
-                  "@fts-.@items.num_mutations_to_index": true},
-          size: "medium",
-          specificStat: false
-        }]
-      }, {
         name: "Node Resources",
+        uiid: "mn-cluster-overview-group",
         charts: [{
           stats: {"@system.cpu_utilization_rate": true},
           size: "medium",
@@ -692,162 +633,110 @@ function mnStatisticsNewServiceFactory($http, mnServersService, mnPoller, $rootS
           size: "medium",
           specificStat: true
         }]
-      }]
-    },{  // 2nd scenario starts here with the comma ///////////////////////
-
-      name: "Columnar",
-      uiid: "mn-all-services",
-      desc: "Most common stats for Columnar. Customize and/or make your own dashboard with \"new dashboard... \" below.",
-      groups: [{
-        name: "Data (Docs/Views/XDCR)",
-        uiid: "mn-all-services-data-group",
-        charts: [{
-          stats: {"@kv-.mem_used": true,
-                  "@kv-.ep_mem_low_wat": true,
-                  "@kv-.ep_mem_high_wat": true,
-                  "@kv-.ep_kv_size": true,
-                  "@kv-.ep_meta_data_memory": true,
-                  "@kv-.vb_active_resident_items_ratio": true},
-          size: "medium",
-          specificStat: false // false for multi-stat chart
-        }, {
-          stats: {"@kv-.ops": true,
-                  "@kv-.ep_cache_miss_rate": true,
-                  "@kv-.cmd_get": true,
-                  "@kv-.cmd_set": true,
-                  "@kv-.delete_hits": true,
-                  "@kv-.ep_num_ops_set_meta": true
-                 },
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@kv-.ep_dcp_views+indexes_items_remaining": true,
-                  "@kv-.ep_dcp_cbas_items_remaining": true,
-                  "@kv-.ep_dcp_replica_items_remaining": true,
-                  "@kv-.ep_dcp_xdcr_items_remaining": true,
-                  "@kv-.ep_dcp_eventing_items_remaining": true,
-                  "@kv-.ep_dcp_other_items_remaining": true,
-                  "@xdcr-.replication_changes_left": true
-                 },
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@kv-.ep_bg_fetched": true,
-                  "@kv-.ep_data_read_failed": true,
-                  "@kv-.ep_data_write_failed": true,
-                  "@kv-.ep_ops_create": true,
-                  "@kv-.ep_ops_update": true
-                 },
-          size: "medium",
-          specificStat: false
-        }, {
-          stats: {"@kv-.ep_diskqueue_items": true},
-          size: "small",
-          specificStat: true
+      },
+        {
+          name: "Columnar",
+          enterprise: true,
+          charts: [{
+            stats: (mnPoolDefault.export.compat.atLeast76 ?
+                {"@cbas-.cbas_incoming_records_total": true} :
+                {"@cbas-.cbas/incoming_records_count": true}),
+            size: "small",
+            specificStat: true
+          }, {
+            stats: (mnPoolDefault.export.compat.atLeast76 ?
+                {"@cbas-.cbas_failed_to_parse_records_total": true} :
+                {"@cbas-.cbas_failed_to_parse_records_count": true}),
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas-.cbas/failed_at_parser_records_count_total": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_heap_used": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_heap_memory_committed_bytes": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_thread_count": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: (mnPoolDefault.export.compat.atLeast76 ?
+                {"@cbas.cbas_disk_used_bytes": true} :
+                {"@cbas.cbas_disk_used": true}),
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_io_reads": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_io_writes": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_system_load_average": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_pending_merge_ops": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_pending_flush_ops": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@system.sysproc_mem_resident_java_cbas": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_pending_requests": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_queued_jobs": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_running_jobs": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_active_links": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_requests_total": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_http_requests_total": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_queued_http_requests_size": true},
+            size: "small",
+            specificStat: true
+          }, {
+            stats: {"@cbas.cbas_http_requests_failed_400_total": true,
+              "@cbas.cbas_http_requests_failed_401_total": true,
+              "@cbas.cbas_http_requests_failed_403_total": true,
+              "@cbas.cbas_http_requests_failed_404_total": true,
+              "@cbas.cbas_http_requests_failed_405_total": true,
+              "@cbas.cbas_http_requests_failed_409_total": true,
+              "@cbas.cbas_http_requests_failed_413_total": true,
+              "@cbas.cbas_http_requests_failed_500_total": true,
+              "@cbas.cbas_http_requests_failed_503_total": true},
+            size: "small",
+            specificStat: false
+          }]
         }]
-      }, {
-        name: "Columnar",
-        enterprise: true,
-        charts: [{
-          stats: (mnPoolDefault.export.compat.atLeast76 ?
-              {"@cbas-.cbas_incoming_records_total": true} :
-              {"@cbas-.cbas/incoming_records_count": true}),
-          size: "small",
-          specificStat: true
-        }, {
-          stats: (mnPoolDefault.export.compat.atLeast76 ?
-              {"@cbas-.cbas_failed_to_parse_records_total": true} :
-              {"@cbas-.cbas_failed_to_parse_records_count": true}),
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas-.cbas/failed_at_parser_records_count_total": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_heap_used": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_heap_memory_committed_bytes": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_thread_count": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: (mnPoolDefault.export.compat.atLeast76 ?
-              {"@cbas.cbas_disk_used_bytes": true} :
-              {"@cbas.cbas_disk_used": true}),
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_io_reads": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_io_writes": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_system_load_average": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_pending_merge_ops": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_pending_flush_ops": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@system.sysproc_mem_resident_java_cbas": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_pending_requests": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_queued_jobs": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_running_jobs": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_active_links": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_requests_total": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_http_requests_total": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_queued_http_requests_size": true},
-          size: "small",
-          specificStat: true
-        }, {
-          stats: {"@cbas.cbas_http_requests_failed_400_total": true,
-                  "@cbas.cbas_http_requests_failed_401_total": true,
-                  "@cbas.cbas_http_requests_failed_403_total": true,
-                  "@cbas.cbas_http_requests_failed_404_total": true,
-                  "@cbas.cbas_http_requests_failed_405_total": true,
-                  "@cbas.cbas_http_requests_failed_409_total": true,
-                  "@cbas.cbas_http_requests_failed_413_total": true,
-                  "@cbas.cbas_http_requests_failed_500_total": true,
-                  "@cbas.cbas_http_requests_failed_503_total": true},
-          size: "small",
-          specificStat: false
-        }]
-      }]
     }]
   }
 }

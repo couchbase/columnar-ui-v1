@@ -155,16 +155,16 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     }
 
     if (memoryQuotaConfig) {
-      maybeSetQuota(data, memoryQuotaConfig, "kv", "memoryQuota");
-      maybeSetQuota(data, memoryQuotaConfig, "index", "indexMemoryQuota");
-      maybeSetQuota(data, memoryQuotaConfig, "fts", "ftsMemoryQuota");
+      // maybeSetQuota(data, memoryQuotaConfig, "kv", "memoryQuota");
+      // maybeSetQuota(data, memoryQuotaConfig, "index", "indexMemoryQuota");
+      // maybeSetQuota(data, memoryQuotaConfig, "fts", "ftsMemoryQuota");
       if (mnPools.export.isEnterprise) {
         maybeSetQuota(data, memoryQuotaConfig, "cbas", "cbasMemoryQuota");
-        maybeSetQuota(data, memoryQuotaConfig, "eventing", "eventingMemoryQuota");
+        // maybeSetQuota(data, memoryQuotaConfig, "eventing", "eventingMemoryQuota");
       }
-      if (mnPoolDefault.export.compat.atLeast76) {
-        maybeSetQuota(data, memoryQuotaConfig, "n1ql", "queryMemoryQuota");
-      }
+      // if (mnPoolDefault.export.compat.atLeast76) {
+      //   maybeSetQuota(data, memoryQuotaConfig, "n1ql", "queryMemoryQuota");
+      // }
     }
 
     var config = {
