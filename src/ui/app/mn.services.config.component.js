@@ -96,7 +96,7 @@ class MnServicesConfigComponent extends MnLifeCycleHooksToStream {
   }
 
   calculateTotal(source) {
-    return source[1].reduce(this.getQuota.bind(this), -15872); //TODO(columnar-ui)
+    return source[1].filter(name => name === 'cbas').reduce(this.getQuota.bind(this), 0);
   }
 
   validate(source) {
