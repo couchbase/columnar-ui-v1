@@ -16,7 +16,7 @@ licenses/APL2.txt.
       width="32"
       height="32"
       class="margin-right-half">
-    <h2>Couchbase &gt; New Cluster</h2>
+    <h2>Enterprise Analytics &gt; New Cluster</h2>
   </div>
   <form
      [formGroup]="form.group"
@@ -31,7 +31,7 @@ licenses/APL2.txt.
       <div
         class="formrow text-small"
         [hidden]="!(isEnterprise | async)">
-        <i>Couchbase Columnar must be licensed for use in production environments.</i>
+        <i>Enterprise Analytics must be licensed for use in production environments.</i>
       </div>
       <small [hidden]="(isEnterprise | async)">Community Edition</small>
 
@@ -101,7 +101,7 @@ licenses/APL2.txt.
 
 <ng-template #tipContent>
   <ul>
-    <li>Allocate memory automatically for Columnar
+    <li>Allocate memory automatically for Enterprise Analytics
     <li>Use default disk paths
   </ul>
 </ng-template>

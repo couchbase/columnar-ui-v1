@@ -149,7 +149,7 @@ class MnSecurityAuditItemComponent extends MnLifeCycleHooksToStream {
     case "view_engine":
       return "Views";
     case "analytics":
-        return "Columnar";
+        return "Enterprise Analytics";
     default:
       return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
     }

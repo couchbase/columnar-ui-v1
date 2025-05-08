@@ -196,11 +196,11 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
       case "cbas":
         memoryUsages.push(
           mnServersListItemDetailsService.getBaseConfig(
-            'Columnar service used',
+            'Enterprise Analytics service used',
             vm.getLatestStat(statsNames[2], stats),
             getServiceQuota(serviceName), true));
         diskUsages.push(mnServersListItemDetailsService.getBaseConfig(
-          "Columnar service",
+          "Enterprise Analytics service",
           vm.getLatestStat(statsNames[3], stats),
           hdd ? hdd.free : 0))
         break;

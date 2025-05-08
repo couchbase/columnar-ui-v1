@@ -349,7 +349,7 @@
 
 <header>
   <a ui-sref="app.admin.overview.statistics" class="logobug-wrapper">
-    <img src="../cb_logo_bug_white_2.svg" width="48" height="48" alt="Couchbase Columnar" class="logobug" title="Couchbase Columnar {{::adminCtl.implementationVersion | mnPrettyVersion}}">
+    <img src="../cb_logo_bug_white_2.svg" width="48" height="48" alt="Enterprise Analytics" class="logobug" title="Enterprise Analytics {{::adminCtl.implementationVersion | mnPrettyVersion}}">
   </a>
   <h1>
     <a ui-sref="app.admin.overview.statistics" class="resp-txt-xsml ellipsis">
@@ -546,7 +546,7 @@
       <span
          ng-show="adminCtl.updates.sendStats && !!adminCtl.updates.newVersion"
          class="label neutral badge notify"
-         uib-tooltip="A newer version of Couchbase Columnar is available on the General Settings page..."
+         uib-tooltip="A newer version of Enterprise Analytics is available on the General Settings page..."
          tooltip-placement="auto right"
          tooltip-append-to-body="true">i</span>
       Settings
@@ -567,7 +567,7 @@
        ng-class="{currentnav: ('app.admin.cbas' | includedByState)}"
        ng-show="rbac.cluster.collection['.:.:.'].analytics.select || rbac.cluster.analytics.manage"
        ui-sref="app.admin.cbas.workbench">
-      Columnar
+      Workbench
     </a>
     <!-- <a
        ng-show="rbac.cluster.bucket['.'].settings.read && rbac.cluster.bucket['.'].views.read"

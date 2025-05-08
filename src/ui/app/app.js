@@ -81,7 +81,7 @@ function appRun($state, $urlRouter, $exceptionHandler, mnPools, $window, $rootSc
   }
 
 
-  $rootScope.mnTitle = "Couchbase Columnar";
+  $rootScope.mnTitle = "Enterprise Analytics";
 
   $state.defaultErrorHandler(function (error) {
     error && $exceptionHandler(error);

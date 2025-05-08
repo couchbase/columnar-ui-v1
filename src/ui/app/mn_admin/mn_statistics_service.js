@@ -635,7 +635,7 @@ function mnStatisticsNewServiceFactory($http, mnServersService, mnPoller, $rootS
         }]
       },
         {
-          name: "Columnar",
+          name: "Enterprise Analytics",
           enterprise: true,
           charts: [{
             stats: (mnPoolDefault.export.compat.atLeast76 ?

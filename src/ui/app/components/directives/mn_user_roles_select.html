@@ -20,7 +20,7 @@ licenses/APL2.txt.
               'disclosed': state.openedWrappers[group.name],
               'has-selection': !state.openedWrappers[group.name] && hasSelectedItems(group.name)
               }">
-      {{::group.name | mnReplaceWord:'Analytics':'Columnar'}}
+      {{::group.name | mnReplaceWord:'Analytics':'Enterprise Analytics'}}
     </label>
     <div
        class="margin-left-half"
@@ -45,7 +45,7 @@ licenses/APL2.txt.
            ng-click="toggleWrapper(item.role)"
            ng-if="item.name !== 'Eventing Full Admin' && item.name !== 'Backup Full Admin'"
            for="for-{{item.role}}">
-          {{::item.name | mnReplaceWord:'Analytics':'Columnar'}}
+          {{::item.name | mnReplaceWord:'Analytics':'Enterprise Analytics'}}
           <span
              ng-if="item.role == 'query_external_access'"
              tooltip-trigger="mouseenter"

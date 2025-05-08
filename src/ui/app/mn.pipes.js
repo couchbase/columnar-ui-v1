@@ -412,7 +412,7 @@ class MnFormatServices {
       case 'index': return 'Index';
       case 'fts': return 'Search';
       case 'eventing': return 'Eventing';
-      case 'cbas': return 'Columnar';
+      case 'cbas': return 'Enterprise Analytics';
       case 'backup': return 'Backup';
       default: return service;
     }

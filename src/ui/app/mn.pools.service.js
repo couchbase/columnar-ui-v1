@@ -68,7 +68,7 @@ class MnPoolsService {
   getServiceVisibleName(service) {
     switch (service) {
     case "kv": return "Data";
-    case "cbas": return "Columnar";
+    case "cbas": return "Enterprise Analytics";
 
     }
   }
