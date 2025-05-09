@@ -75,7 +75,7 @@ licenses/APL2.txt.
         <span class="cbui-tablerow-title ellipsis flex-grow-1-5 row flex-left">
           {{server.hostname | mnStripPortHTML}}
           <span
-             ng-repeat="service in server.services | mnOrderServices"
+             ng-repeat="service in ['cbas'] | mnOrderServices"
              class="label neutral nocaps">
             {{service | mnFormatServices}}
           </span>
