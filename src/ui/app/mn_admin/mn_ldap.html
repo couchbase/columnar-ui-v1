@@ -113,7 +113,7 @@ licenses/APL2.txt.
                   <label
                      for="ldap-cert-server"
                      ng-disabled="mnLDAPCtl.config.connect.encryption == 'None'"
-                     uib-tooltip="Use the certificate already loaded in your Couchbase cluster"
+                     uib-tooltip="Use the certificate already loaded in your Enterprise Analytics cluster"
                      tooltip-trigger="mouseenter"
                      tooltip-placement="top">
                     Couchbase
@@ -798,7 +798,7 @@ licenses/APL2.txt.
           <p>
             Your certificate choices for connecting to your LDAP host are either
             none (and no hostname verification will occur), use the certificate
-            already loaded in your Couchbase cluster,
+            already loaded in your Enterprise Analytics cluster,
             or choose <b>Paste Cert</b> and paste in your own certificate text.
           </p>
           <p>
@@ -830,8 +830,8 @@ licenses/APL2.txt.
           </h5>
           <div ng-show="sectFocus == 'group auth'">
             <p>
-              This section lets you build a query so that Couchbase
-              Server can discover the LDAP groups a particular user belongs to
+              This section lets you build a query so that Enterprise
+              Analytics can discover the LDAP groups a particular user belongs to
               (which you can then map to Enterprise Analytics groups in Security >
               Users > Groups). You can discover a user's groups with a user attribute
               or by constructing a query.
