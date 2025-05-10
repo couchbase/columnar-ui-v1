@@ -399,7 +399,7 @@ class MnWizardService {
     columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
     columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
     columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
-    return this.http.post('/settings/columnar', columnarSettingsForm.toString()).pipe(
+    return this.http.post('/settings/analytics', columnarSettingsForm.toString()).pipe(
         switchMap(() => {
           delete data.blobStorageScheme;
           delete data.blobStorageEndpoint;
