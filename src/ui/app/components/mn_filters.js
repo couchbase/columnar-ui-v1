@@ -664,7 +664,7 @@ function mnFormatServices() {
 function mnColumnarState() {
   return function (service) {
     return service.filter(function (s) {
-      return (s.name === "Administrative");
+      return (s.name === "Administrative" || s.name === "Analytics");
     })
   }
 }
@@ -680,6 +680,8 @@ function mnColumnarRoles() {
         case "user_admin_external":
         case "cluster_admin":
         case "external_stats_reader":
+        case "analytics_access":
+        case "analytics_admin":
           return true;
         default:
           return false;

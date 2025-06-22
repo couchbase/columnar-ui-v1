@@ -565,7 +565,7 @@
     </div> -->
     <a
        ng-class="{currentnav: ('app.admin.cbas' | includedByState)}"
-       ng-show="rbac.cluster.collection['.:.:.'].analytics.select || rbac.cluster.analytics.manage"
+       ng-show="rbac.cluster.analytics.access"
        ui-sref="app.admin.cbas.workbench">
       Workbench
     </a>
