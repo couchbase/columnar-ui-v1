@@ -76,8 +76,8 @@ var wizardForm = {
   newCluster: new FormGroup({
     clusterName: new FormControl(null, [Validators.required]),
     user: new FormGroup({
-      username: new FormControl("Administrator", [Validators.required]),
-      password: new FormControl(null, [Validators.required, Validators.minLength(6)]),
+      username: new FormControl("Administrator"),
+      password: new FormControl(null, [Validators.minLength(6)]),
       passwordVerify: new FormControl()
     })
   }),
@@ -107,7 +107,8 @@ var wizardForm = {
   joinCluster: new FormGroup({
     clusterAdmin: new FormGroup({
       hostname: new FormControl(null, [Validators.required]),
-      user: new FormControl("Administrator", [Validators.required]),
+      clientCertAuth: new FormControl("true"),
+      user: new FormControl("Administrator"),
       password: new FormControl('', [Validators.required])
     }),
     services: new FormGroup({
