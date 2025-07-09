@@ -971,25 +971,25 @@ function get76CompatDesc() {
       "@cbas-": {
         "cbas/failed_at_parse_records_count": {
           unit: "number/sec",
-          title: "Enterprise Analytics Parse Fail Rate (Deprecated)",
+          title: "Parse Fail Rate (Deprecated)",
           desc: "Number of records Enterprise Analytics failed to parse per second. (Deprecated)",
           metric: {name: "cbas_failed_to_parse_records_count"},
         },
         "cbas_failed_to_parse_records_total": {
           unit: "number/sec",
-          title: "Enterprise Analytics Parse Fail Rate",
+          title: "Parse Fail Rate",
           desc: "Number of records Enterprise Analytics failed to parse per second.",
           metric: {name: "cbas_failed_to_parse_records_total"},
         },
         "cbas/incoming_records_count": {
           unit: "number/sec",
-          title: "Enterprise Analytics Ops Rate (Deprecated)",
+          title: "Ops Rate (Deprecated)",
           desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket. (Deprecated)",
           metric: {name: "cbas_incoming_records_count"},
         },
         "cbas_incoming_records_total": {
           unit: "number/sec",
-          title: "Enterprise Analytics Ops Rate",
+          title: "Ops Rate",
           desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket.",
           metric: {name: "cbas_incoming_records_total"},
         },
@@ -1025,55 +1025,55 @@ function get76CompatDesc() {
       "@cbas": {
         "cbas_disk_used": {
           unit: "bytes",
-          title: "Enterprise Analytics Total Disk Size (Deprecated)",
+          title: "Total Disk Size (Deprecated)",
           desc: "The total disk size used by Enterprise Analytics. (Deprecated)",
           metric: {name: "cbas_disk_used_bytes_total"},
         },
         "cbas_disk_used_bytes": {
           unit: "bytes",
-          title: "Enterprise Analytics Total Disk Size",
+          title: "Total Disk Size",
           desc: "The total disk size used by Enterprise Analytics.",
           metric: {name: "cbas_disk_used_bytes"},
         },
         "cbas_gc_time": {
           unit: "millisecond/sec",
-          title: "Enterprise Analytics Garbage Collection Time (Deprecated)",
+          title: "Garbage Collection Time (Deprecated)",
           desc: "The amount of time in milliseconds spent performing JVM garbage collections for Enterprise Analytics node. (Deprecated)",
           metric: {name: "cbas_gc_time_milliseconds_total"},
         },
         "cbas_gc_time_seconds_total": {
           unit: "millisecond/sec",
-          title: "Enterprise Analytics Garbage Collection Time",
+          title: "Garbage Collection Time",
           desc: "The amount of time in seconds spent performing JVM garbage collections for Enterprise Analytics node.",
           metric: {name: "cbas_gc_time_seconds_total"},
         },
         "cbas_rebalance_successful_total": {
           unit: "number",
-          title: "Enterprise Analytics Total Successful Rebalances",
+          title: "Total Successful Rebalances",
           desc: "Total number of successful rebalances for Enterprise Analytics on this server.",
           metric: {name: "cbas_rebalance_successful_total"},
         },
         "cbas_rebalance_cancelled_total": {
           unit: "number",
-          title: "Enterprise Analytics Total Cancelled Rebalances",
+          title: "Total Cancelled Rebalances",
           desc: "Total number of cancelled rebalances for Enterprise Analytics on this server.",
           metric: {name: "cbas_rebalance_cancelled_total"},
         },
         "cbas_rebalance_failed_total": {
           unit: "number",
-          title: "Enterprise Analytics Total Failed Rebalances",
+          title: "Total Failed Rebalances",
           desc: "Total number of failed rebalances for Enterprise Analytics on this server.",
           metric: {name: "cbas_rebalance_failed_total"},
         },
         "cbas_http_requests_total": {
           unit: "number",
-          title: "Enterprise Analytics Total HTTP Requests",
+          title: "Total HTTP Requests",
           desc: "Total number of received HTTP requests for Enterprise Analytics on this server.",
           metric: {name: "cbas_http_requests_total"},
         },
         "cbas_queued_http_requests_size": {
           unit: "number",
-          title: "Enterprise Analytics Queued HTTP Requests",
+          title: "Queued HTTP Requests",
           desc: "Number of queued http requests for Enterprise Analytics on this server.",
           metric: {name: "cbas_queued_http_requests_size"},
         },
@@ -1162,7 +1162,7 @@ function get70CompatDesc() {
       "@system": {
         "sysproc_mem_resident_java_cbas": {
           unit: "bytes",
-          title: "Enterprise Analytics Service Memory Resident",
+          title: "Service Memory Resident",
           desc: "The memory used for Enterprise Analytics service (cbas process + java process resident memory)."
         },
         "sysproc_mem_resident_java": {
@@ -1172,7 +1172,7 @@ function get70CompatDesc() {
         },
         "sysproc_mem_resident_cbas": {
           unit: "bytes",
-          title: "Enterprise Analytics Sysproc Memory Resident",
+          title: "Sysproc Memory Resident",
           desc: "The memory used for the Enterprise Analytics system process."
         }
       },
@@ -1243,49 +1243,49 @@ function get70CompatDesc() {
       "@cbas-": {
         "cbas_failed_to_parse_records_count": {
           unit: "number/sec",
-          title: "Enterprise Analytics Parse Fail Rate",
+          title: "Parse Fail Rate",
           desc: "Number of records Enterprise Analytics failed to parse per second."
         },
       },
       "@cbas": {
         "cbas_pending_merge_ops": {
           unit: "number",
-          title: "Enterprise Analytics Pending Merge Operations",
+          title: "Pending Merge Operations",
           desc: "Number of pending merge operations per node."
         },
         "cbas_pending_flush_ops": {
           unit: "number",
-          title: "Enterprise Analytics Pending Flush Operations",
+          title: "Pending Flush Operations",
           desc: "Number of pending flush operations per node."
         },
         "cbas_heap_memory_committed_bytes": {
           unit: "bytes",
-          title: "Enterprise Analytics Heap Committed",
+          title: "Heap Committed",
           desc: "Bytes of JVM heap committed for Enterprise Analytics on this server."
         },
         "cbas_pending_requests": {
           unit: "number",
-          title: "Enterprise Analytics Pending Requests",
+          title: "Pending Requests",
           desc: "Number of pending requests for Enterprise Analytics on this server."
         },
         "cbas_queued_jobs": {
           unit: "number",
-          title: "Enterprise Analytics Queued Jobs",
+          title: "Queued Jobs",
           desc: "Number of queued jobs for Enterprise Analytics on this server."
         },
         "cbas_running_jobs": {
           unit: "number",
-          title: "Enterprise Analytics Running Jobs",
+          title: "Running Jobs",
           desc: "Number of running jobs for Enterprise Analytics on this server."
         },
         "cbas_active_links": {
           unit: "number",
-          title: "Enterprise Analytics Active Links",
+          title: "Active Links",
           desc: "Number of active links for Enterprise Analytics on this server."
         },
         "cbas_requests_total": {
           unit: "number",
-          title: "Enterprise Analytics Total Requests",
+          title: "Total Requests",
           desc: "Total number of received requests for Enterprise Analytics on this server."
         }
       }
@@ -2367,17 +2367,17 @@ function get65CompatDesc() {
       "@cbas-":{
         "cbas/failed_at_parser_records_count_total": {
           unit: "number",
-          title: "Enterprise Analytics Parse Fail Since Connect",
+          title: "Parse Fail Since Connect",
           desc: "Number of records Enterprise Analytics failed to parse during bucket synchronization - since last bucket connect."
         },
         "cbas/incoming_records_count": {
           unit: "number/sec",
-          title: "Enterprise Analytics Ops Rate",
+          title: "Ops Rate",
           desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket."
         },
         "cbas/incoming_records_count_total": {
           unit: "number",
-          title: "Enterprise Analytics Ops Since Connect",
+          title: "Ops Since Connect",
           desc: "Number of operations (gets + sets + deletes) processed by Enterprise Analytics for this bucket since last bucket connect."
         }
       },
@@ -2385,42 +2385,42 @@ function get65CompatDesc() {
       "@cbas":{
         "cbas_disk_used": {
           unit: "bytes",
-          title: "Enterprise Analytics Total Disk Size",
+          title: "Total Disk Size",
           desc: "The total disk size used by Enterprise Analytics."
         },
         "cbas_gc_count": {
           unit: "number/sec",
-          title: "Enterprise Analytics Garbage Collection Rate",
+          title: "Garbage Collection Rate",
           desc: "Number of JVM garbage collections per second for this Enterprise Analytics node."
         },
         "cbas_gc_time": {
           unit: "millisecond/sec",
-          title: "Enterprise Analytics Garbage Collection Time",
+          title: "Garbage Collection Time",
           desc: "The amount of time in milliseconds spent performing JVM garbage collections for Enterprise Analytics node."
         },
         "cbas_heap_used": {
           unit: "bytes",
-          title: "Enterprise Analytics Heap Used",
+          title: "Heap Used",
           desc: "Bytes of JVM heap used by Enterprise Analytics on this server."
         },
         "cbas_system_load_average": {
           unit: "number",
-          title: "Enterprise Analytics System Load",
+          title: "System Load",
           desc: "System load average for the last minute."
         },
         "cbas_thread_count": {
           unit: "number",
-          title: "Enterprise Analytics Thread Count",
+          title: "Thread Count",
           desc: "Number of threads for Enterprise Analytics node."
         },
         "cbas_io_reads": {
           unit: "bytes/sec",
-          title: "Enterprise Analytics Read Rate",
+          title: "Read Rate",
           desc: "Number of disk bytes read on Enterprise Analytics node per second."
         },
         "cbas_io_writes": {
           unit: "bytes/sec",
-          title: "Enterprise Analytics Write Rate",
+          title: "Write Rate",
           desc: "Number of disk bytes written on Enterprise Analytics node per second."
         }
       },
