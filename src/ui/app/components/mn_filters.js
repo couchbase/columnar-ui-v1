@@ -692,8 +692,11 @@ function mnColumnarRoles() {
 
 function mnColumnarService() {
   return function (service) {
+    if (!Array.isArray(service)) {
+      return [];
+    }
     return service.filter(function (s) {
-      return s.items[0].name.toLowerCase().includes('columnar')
+      return s.items[0].name.toLowerCase().includes('analytics')
     })
   }
 }

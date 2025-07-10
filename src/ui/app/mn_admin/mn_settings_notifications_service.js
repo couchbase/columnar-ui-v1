@@ -472,7 +472,7 @@ angular.module('mnSettingsNotificationsService', [
   };
 
   mnSettingsNotificationsService.getCbasData = function() {
-    return $http.post('/_p/cbas/query/service',
+    return $http.post('/_p/cbas/api/v1/request',
                       {statement:
                        'with user_datasets as (select value d from Metadata.`Dataset` d ' +
                        'where d.DataverseName <> "Metadata") select ' +

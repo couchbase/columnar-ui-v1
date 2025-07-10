@@ -61,7 +61,7 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
     '@index.index_memory_used',
     '@fts.fts_num_bytes_used_ram',
     '@system.sysproc_mem_resident_java_cbas',
-    '@cbas.cbas_disk_used'
+    '@cbas.cbas_disk_used_bytes'
   ];
 
   statsNames =
@@ -174,10 +174,10 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
             'data service used',
             ram ? ram.usedByData : 0,
             ram ? ram.quotaTotalPerNode : 0, true));
-        diskUsages.push(mnServersListItemDetailsService.getBaseConfig(
-          'data service',
-          hdd ? hdd.usedByData : 0,
-          hdd ? hdd.free : 0));
+        // diskUsages.push(mnServersListItemDetailsService.getBaseConfig(
+        //     'data service',
+        //   hdd ? hdd.usedByData : 0,
+        //   hdd ? hdd.free : 0));
         break;
       case "index":
         memoryUsages.push(
