@@ -22,9 +22,9 @@ function mnServersFailOverDialogController(mnServersService, mnPromiseHelper, no
   activate();
 
   function isFailOverBtnDisabled() {
-    return !vm.status || !vm.status.confirmation &&
+    return !vm.status || !vm.status.confirmation /*&&
       (vm.status.failOver === 'startFailover') &&
-      !(vm.status.down && !vm.status.backfill) && !vm.status.dataless;
+      !(vm.status.down && !vm.status.backfill) && !vm.status.dataless*/;
   }
 
   function doPostFailover(allowUnsafe) {

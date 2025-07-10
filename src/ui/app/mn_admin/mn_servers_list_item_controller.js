@@ -48,7 +48,7 @@ function mnServersListItemController($scope, $rootScope, $uibModal, mnServersSer
     vm.isNodeInactiveAdded = isNodeInactiveAdded(node);
     vm.couchDiskUsage = couchDiskUsage(node);
 
-    vm.isKVNode = isKVNode(node);
+    vm.isKVNode = false; //isKVNode(node);
 
     vm.getStatisticsStateParams = getStatisticsStateParams(node);
     vm.getRamUsageConf = getRamUsageConf(node);

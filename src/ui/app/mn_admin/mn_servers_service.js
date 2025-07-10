@@ -245,7 +245,7 @@ function mnServersFactory($http, $q, $uibModal, mnPoolDefault) {
       rv.down = node.status != 'healthy';
       rv.backfill = node.replication < 1;
       rv.failOver = rv.down ? "startFailover" : node.gracefulFailoverPossible ? "startGracefulFailover" : "startFailover";
-      rv.gracefulFailoverPossible = node.gracefulFailoverPossible;
+      rv.gracefulFailoverPossible = false; //node.gracefulFailoverPossible;
       !rv.backfill && (rv.confirmation = true);
       return rv;
     })
