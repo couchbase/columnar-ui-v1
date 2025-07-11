@@ -36,12 +36,30 @@ function mnSettingsNotificationsController(mnPromiseHelper, mnSettingsNotificati
 
   function activate() {
     mnPromiseHelper(vm, mnSettingsNotificationsService.maybeCheckUpdates())
-      .applyToScope("updates");
+      .applyToScope("updates")
+      .onSuccess(function() {
+        if (vm.updates && vm.updates.links && !vm.updates.links.upgrade) {
+          // Prefer newVersion, fallback to implementationVersion
+          const versionSource = vm.updates.newVersion || vm.implementationVersion;
+          let majorMinor = "latest";
+          if (versionSource) {
+            const match = versionSource.match(/(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
+            if (match) {
+              const versionParts = match[1].split(".");
+              majorMinor = versionParts[0] + "." + versionParts[1];
+            }
+          }
+          vm.updates.links.upgrade =
+              "https://docs.couchbase.com/enterprise-analytics/" +
+              majorMinor +
+              "/install/upgrade.html";
+        }
+      });
   }
 
   function submit() {
     return mnPromiseHelper(vm, mnSettingsNotificationsService.saveSendStatsFlag(vm.updates.enabled))
-      .catchGlobalErrors('An error occured, update notifications settings were not saved.')
+      .catchGlobalErrors('An error occurred, update notifications settings were not saved.')
       .getPromise();
   }
 }
