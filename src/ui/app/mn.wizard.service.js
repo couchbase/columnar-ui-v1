@@ -58,7 +58,6 @@ function getIpvOnlyError(isKindV6, isValueV6) {
 
 var clusterStorage = new FormGroup({
   hostname: new FormControl(null, [Validators.required]),
-  port : new FormControl(null, [Validators.required]),
   hostConfig: new FormGroup({
     addressFamilyUI: new FormControl(null, [ipvOnlyValidator()]),
     nodeEncryption: new FormControl()
