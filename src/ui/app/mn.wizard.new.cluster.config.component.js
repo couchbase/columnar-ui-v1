@@ -179,7 +179,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.services = this.getServicesValues(services).join(",");
     let userData = clone(this.wizardForm.newCluster.value.user);
     delete userData.passwordVerify;
-    userData.port = nodeStorage.get("port").value || "SAME";
+    userData.port = "SAME";
 
     let hostConfigRv = {};
 
