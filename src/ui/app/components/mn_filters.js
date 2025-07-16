@@ -709,10 +709,8 @@ function mnReplaceWord() {
     };
 }
 function mnOrderServices() {
-  let order = ["kv", "n1ql", "index", "fts", "cbas", "eventing", "backup"];
   return function (services) {
-    return services.slice().sort((a, b) =>
-                                 order.indexOf(a) - order.indexOf(b));
+    return services.includes('cbas') ? ['cbas'] : [];
   }
 }
 

@@ -67,7 +67,7 @@
       </div>
       <div
          ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
-        <strong><!--{{service | mnFormatServices}} -->Storage Path:</strong>
+        <strong><!--{{service | mnFormatServices}} -->Storage Path(s):</strong>
         {{serversListItemDetailsCtl.getServicePath(service)}}
       </div>
      
