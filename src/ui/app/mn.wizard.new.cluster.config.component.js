@@ -73,11 +73,35 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     let hostConfigField =
         this.wizardForm.newClusterConfig.get("clusterStorage.hostConfig");
 
-    this.isButtonDisabled =
-      combineLatest(
-        postPoolsDefaultErrors,
-        hostConfigField.statusChanges.pipe(map(v => v == "INVALID"))
-      ).pipe(map(([err, invalid]) => err || invalid));
+    const newCluster = this.wizardForm.newCluster;
+    const newClusterConfig = this.wizardForm.newClusterConfig;
+    const termsAndConditions = this.wizardForm.termsAndConditions;
+    this.isButtonDisabled = combineLatest([
+      postPoolsDefaultErrors,
+      newCluster.statusChanges.pipe(
+          map(status => status === 'INVALID'),
+          startWith(newCluster.status === 'INVALID')
+      ),
+      newClusterConfig.statusChanges.pipe(
+          map(status => status === 'INVALID'),
+          startWith(newClusterConfig.status === 'INVALID')
+      ),
+      termsAndConditions.statusChanges.pipe(
+          map(status => status === 'INVALID'),
+          startWith(termsAndConditions.status === 'INVALID')
+      )
+    ]).pipe(
+        map(([hasPostError, clusterInvalid, configInvalid, termsInvalid]) =>
+            hasPostError || clusterInvalid || configInvalid || termsInvalid
+        )
+    );
+
+    newCluster.valueChanges.subscribe(() => {
+      newCluster.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
+    newClusterConfig.valueChanges.subscribe(() => {
+      newClusterConfig.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+    });
 
 
     mnWizardService.stream.getSelfConfig

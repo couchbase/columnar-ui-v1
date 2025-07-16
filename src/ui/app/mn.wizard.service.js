@@ -25,6 +25,16 @@ import {singletonGuard} from './mn.core.js';
 
 export {MnWizardService};
 
+function blobStorageEndpointRequiredIfS3Compatible(group) {
+  const scheme = group.get('blobStorageScheme')?.value;
+  const endpoint = group.get('blobStorageEndpoint')?.value;
+  if (scheme === 's3-compat' && !endpoint) {
+    return { blobStorageEndpointRequired: true };
+  }
+
+  return null;
+}
+
 function ipvOnlyValidator() {
   return (control) => {
     let value = control.value;
@@ -97,7 +107,7 @@ var wizardForm = {
       blobStorageAnonymousAuth: new FormControl(false),
       blobStorageForcePathStyle: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
-    })
+    }, { validators: blobStorageEndpointRequiredIfS3Compatible })
   }),
   termsAndConditions: new FormGroup({
     agree: new FormControl(false, [Validators.required]),
@@ -116,6 +126,16 @@ var wizardForm = {
     clusterStorage: clusterStorage
   })
 };
+
+const bucketDetails = wizardForm.newClusterConfig.get('bucketDetails');
+const schemeControl = bucketDetails.get('blobStorageScheme');
+schemeControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
+const endpointControl = bucketDetails.get('blobStorageEndpoint');
+endpointControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
 
 class MnWizardService {
   static get annotations() { return [
