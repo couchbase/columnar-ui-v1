@@ -166,8 +166,16 @@
          id="for-anonymous-Auth"
          formControlName="blobStorageAnonymousAuth">
       <label for="for-anonymous-Auth" class="margin-right-quarter">
-        Enable Blob Storage Anonymous Auth
+        Use Anonymous Authentication
       </label>
+      <span
+          class="fa-stack icon-info"
+          ngbTooltip="Access the service without providing authentication credentials. Use only
+                      if the target bucket or endpoint explicitly allows public or anonymous access.."
+          placement="right">
+          <span class="icon fa-circle-thin fa-stack-2x"></span>
+          <span class="icon fa-info fa-stack-1x"></span>
+      </span>
       <div
          class="error error-form"
          [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
@@ -180,12 +188,21 @@
                   id="for-force-path-style"
                   formControlName="blobStorageForcePathStyle">
           <label for="for-force-path-style" class="margin-right-quarter">
-              Force Path Style
+              Use Path Style Addressing
           </label>
+          <span
+              class="fa-stack icon-info"
+              ngbTooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while
+                          virtual-hosted–style URLs look like https://bucket-name.s3.example.com/key.
+                          Some S3-compatible storage services or DNS configurations may require path-style addressing."
+              placement="right">
+              <span class="icon fa-circle-thin fa-stack-2x"></span>
+              <span class="icon fa-info fa-stack-1x"></span>
+          </span>
           <div
-                  class="error error-form"
-                  [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageForcePathStyle">
-              {{(postClusterInitHttp.error | async)?.errors.blobStorageForcePathStyle}}
+              class="error error-form"
+              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageForcePathStyle">
+          {{(postClusterInitHttp.error | async)?.errors.blobStorageForcePathStyle}}
           </div>
       </div>
       <div class="formrow">
@@ -194,8 +211,17 @@
                   id="for-disable-ssl-verify"
                   formControlName="blobStorageDisableSslVerify">
           <label for="for-disable-ssl-verify" class="margin-right-quarter">
-              Disable SSL Verify
+              Disable SSL Verification
           </label>
+        <span
+            class="fa-stack icon-info"
+            ngbTooltip="Disables certificate verification for SSL/TLS connections.
+            Useful for testing or self-signed certificates, but not recommended
+            for production."
+            placement="right">
+              <span class="icon fa-circle-thin fa-stack-2x"></span>
+              <span class="icon fa-info fa-stack-1x"></span>
+          </span>
           <div id="ssl-warning"
                *ngIf="group.get('blobStorageDisableSslVerify').value">
               <p class="error">Warning: Disabling SSL verification in a
