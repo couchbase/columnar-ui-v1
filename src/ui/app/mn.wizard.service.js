@@ -89,9 +89,9 @@ var wizardForm = {
     javaPath: new FormControl(),
     storageMode: new FormControl(null),
     bucketDetails: new FormGroup({
-      blobStorageEndpoint: new FormControl('', [Validators.required]),
+      blobStorageEndpoint: new FormControl(''),
       blobStorageBucket: new FormControl('', [Validators.required]),
-      blobStoragePrefix: new FormControl('', [Validators.required]),
+      blobStoragePrefix: new FormControl(''),
       blobStorageRegion: new FormControl('', [Validators.required]),
       blobStorageScheme: new FormControl("s3", [Validators.required]),
       blobStorageAnonymousAuth: new FormControl(false),

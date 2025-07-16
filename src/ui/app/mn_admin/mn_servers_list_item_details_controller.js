@@ -36,7 +36,7 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
   //should be replaced with MnPoolsService.stream.quotaServices in future
   vm.quotaServices =
     (vm.isEnterprise ?
-     ["kv", "index", "fts", "cbas", "eventing"] :
+     ["cbas"] :
      ["kv", "index", "fts"]).reduce((acc, name) => {
        acc[name] = true;
        return acc;
@@ -196,11 +196,11 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
       case "cbas":
         memoryUsages.push(
           mnServersListItemDetailsService.getBaseConfig(
-            'Enterprise Analytics service used',
+            'used',
             vm.getLatestStat(statsNames[2], stats),
             getServiceQuota(serviceName), true));
         diskUsages.push(mnServersListItemDetailsService.getBaseConfig(
-          "Enterprise Analytics service",
+          "used",
           vm.getLatestStat(statsNames[3], stats),
           hdd ? hdd.free : 0))
         break;

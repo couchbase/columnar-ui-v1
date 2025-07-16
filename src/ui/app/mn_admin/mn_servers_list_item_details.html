@@ -57,17 +57,17 @@
         <strong>Version:</strong> {{serversListItemDetailsCtl.server.details.version | mnPrettyVersion:true}}
       </div>
       <div>
-        <strong>RAM Quotas:</strong>
+        <strong>RAM Quota:</strong>
         <span
-           ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.filterQuotaServices | mnOrderServices)">
-          {{service | mnFormatServices}}
+           ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
+          <!--{{service | mnFormatServices}}-->
           {{(serversListItemDetailsCtl.getServiceQuota(service)|mnFormatQuantity) || 'unknown'}}
           {{$last ? '' : '| '}}
         </span>
       </div>
       <div
          ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
-        <strong>{{service | mnFormatServices}} Storage Path:</strong>
+        <strong><!--{{service | mnFormatServices}} -->Storage Path:</strong>
         {{serversListItemDetailsCtl.getServicePath(service)}}
       </div>
      
@@ -83,7 +83,7 @@
       <h5>Memory</h5>
       <hr>
       <div
-         ng-repeat="item in (serversListItemDetailsCtl.memoryUsages | mnColumnarService) track by $index"
+         ng-repeat="item in serversListItemDetailsCtl.memoryUsages track by $index"
          ng-if="item"
          class="column bar-usages"
          mn-bar-usage

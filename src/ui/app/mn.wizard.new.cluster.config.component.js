@@ -191,22 +191,15 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
 
     let poolsDefaultRv = this.getPoolsDefaultValues.bind(this)(isEnterprise);
     let indexesRv = this.getIndexesConfig.bind(this)();
-    poolsDefaultRv.memoryQuota = 256;
 
     return Object.assign(rv, poolsDefaultRv, hostConfigRv, indexesRv, userData);
   }
 
   getPoolsDefaultValues(isEnterprise) {
     var services = [
-      ["memoryQuota", "kv"],
-      ["indexMemoryQuota", "index"],
-      ["ftsMemoryQuota", "fts"],
-      ["queryMemoryQuota", "n1ql"]
+      ["cbasMemoryQuota", "cbas"]
     ];
-    if (isEnterprise) {
-      services.push(["eventingMemoryQuota", "eventing"]);
-      services.push(["cbasMemoryQuota", "cbas"]);
-    }
+
     return services.reduce(this.getPoolsDefaultValue.bind(this), {
       clusterName: this.wizardForm.newCluster.get("clusterName").value
     });
