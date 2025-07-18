@@ -10,7 +10,7 @@ licenses/APL2.txt.
 
 <div class="dialog-med">
   <div class="panel-header">
-    <h2>Add Enterprise Analytics Node</h2>
+    <h2>Add Node</h2>
   </div>
   <form
      novalidate
@@ -20,7 +20,7 @@ licenses/APL2.txt.
      mn-spinner="serversAddDialogCtl.viewLoading">
     <div class="panel-content">
       <div class="error error-form">
-        Warning: Adding a server to this cluster means any previous Enterprise Analytics data on that server will be removed.
+        Warning: Adding a server to this cluster means any previous data on that server will be removed.
       </div>
       <div class="error error-form"
          ng-show="serversAddDialogCtl.certificatesByNode[serversAddDialogCtl.selfConfig.selfConfig.configuredHostname].type === 'generated'">

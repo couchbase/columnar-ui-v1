@@ -133,7 +133,8 @@ function mnServersListItemController($scope, $rootScope, $uibModal, mnServersSer
         isLastBackup: mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'backup', true),
         isLastFts: mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'fts', true),
         isLastEventing: mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'eventing', true),
-        isKv: _.indexOf(node.services, 'kv') > -1
+        isColumnar: true,
+        isKv: false/*_.indexOf(node.services, 'kv') > -1*/
       };
       if (mnPoolDefault.export.isEnterprise) {
         warnings.isLastCBAS = mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'cbas', true);

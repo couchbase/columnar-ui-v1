@@ -15,8 +15,7 @@ licenses/APL2.txt.
       <span
          class="fa-stack icon-info"
          uib-tooltip="After the timeout period set here — and up to the limit of actionable events — an unresponsive
-                      or malfunctioning node will be failed over. Any replica copies of data, indexes, or query engines will
-                      be promoted to active elsewhere in the cluster. Please note that this feature is only available when 3
+                      or malfunctioning node will be failed over. Please note that this feature is only available when 3
                       or more nodes are present in the cluster and that many other factors determine whether or not an auto-failover
                       will take place. After it has recovered, a failed-over node can be brought back into the cluster with a
                       rebalance or replaced with a new node."
@@ -76,7 +75,7 @@ licenses/APL2.txt.
       </div>
 
       <div
-         ng-if="adminCtl.poolDefault.compat.atLeast55 && adminCtl.poolDefault.isEnterprise"
+         ng-if="false && adminCtl.poolDefault.compat.atLeast55 && adminCtl.poolDefault.isEnterprise"
          class="row flex-left text-medium flex-wrap">
         <input
            type="checkbox"
@@ -107,7 +106,7 @@ licenses/APL2.txt.
       </div>
 
        <div
-           ng-if="adminCtl.poolDefault.compat.atLeast79 && adminCtl.poolDefault.isEnterprise"
+           ng-if="false && adminCtl.poolDefault.compat.atLeast79 && adminCtl.poolDefault.isEnterprise"
            class="row flex-left text-medium flex-wrap">
           <input
               type="checkbox"
