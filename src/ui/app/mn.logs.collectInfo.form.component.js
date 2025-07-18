@@ -110,7 +110,7 @@ class MnLogsCollectInfoFormComponent extends MnLifeCycleHooksToStream {
       .subscribe(this.addNodes.bind(this));
 
     this.isLogEncryptionAtRestEnabled = mnSecuritySecretsService.stream.getEncryptionAtRest
-      .pipe(first(), map(encryption => encryption.log.encryptionMethod !== 'disabled' || encryption.config.encryptionMethod !== 'disabled'));
+      .pipe(first(), map(encryption => encryption.audit.encryptionMethod !== 'disabled' || encryption.config.encryptionMethod !== 'disabled'));
 
     this.isLogEncryptionAtRestEnabled
       .pipe(takeUntil(this.mnOnDestroy))

@@ -72,7 +72,7 @@ licenses/APL2.txt.
         class="nowrap"
         *ngIf="(compatVersion79 | async) && (isEnterprise | async)"
       >
-        <strong>Encryption At Rest:</strong>
+        <strong>Encryption at Rest:</strong>
         <mn-encryption-status
            [isEncryptionEnabled]="bucket.encryptionAtRestKeyId !== -1"
            [encryptionInfo]="bucket.encryptionAtRestInfo">

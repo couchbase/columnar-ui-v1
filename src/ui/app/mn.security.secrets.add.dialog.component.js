@@ -74,7 +74,7 @@ class MnSecuritySecretsAddDialogComponent extends MnLifeCycleHooksToStream {
 
   doInit(buckets) {
     this.bucketNames = buckets || [];
-    this.options = ['KEK', 'bucket', ...this.mnSecuritySecretsService.types];
+    this.options = ['KEK', /*'bucket',*/ ...this.mnSecuritySecretsService.types];
     this.mapTypeToNames = this.mnSecuritySecretsService.mapTypeToNames;
     this.preventMinus = this.mnSecuritySecretsService.preventMinus;
 
@@ -160,13 +160,13 @@ class MnSecuritySecretsAddDialogComponent extends MnLifeCycleHooksToStream {
       this.form.group.get('generated-secret.autoRotation').valueChanges
         .pipe(startWith(this.form.group.get('generated-secret.autoRotation').value));
 
-    const isDataEnabled =
+    const isDataEnabled = false;/*
       this.form.group.get('usage.bucket-encryption').valueChanges
         .pipe(startWith(this.form.group.get('usage.bucket-encryption').value));
 
     isDataEnabled
       .pipe(takeUntil(this.mnOnDestroy))
-      .subscribe(this.maybeToggleAllBuckets.bind(this));
+      .subscribe(this.maybeToggleAllBuckets.bind(this));*/
 
     isAutoRotationEnabled
       .pipe(takeUntil(this.mnOnDestroy))
@@ -196,7 +196,7 @@ class MnSecuritySecretsAddDialogComponent extends MnLifeCycleHooksToStream {
   }
 
   getSelected() {
-    const isAnyBucketSelected = Object.values(this.form.group.get('usageBuckets').value).some(v => v);
+    const isAnyBucketSelected = false; //Object.values(this.form.group.get('usageBuckets').value).some(v => v);
     const selected = this.options.filter(v => this.form.group.get('usage').value[v + '-encryption']).map(this.mapTypeToNames).join(', ');
     if (isAnyBucketSelected && !selected.includes('Data')) {
         return selected.length ? selected + ', Data (Custom)' : 'Data (Custom)';

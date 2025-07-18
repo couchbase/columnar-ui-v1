@@ -51,7 +51,10 @@ class MnSecuritySecretsComponent extends MnLifeCycleHooksToStream {
     this.mnTimezoneDetailsService = mnTimezoneDetailsService;
 
     this.getEncryptionAtRest = mnSecuritySecretsService.stream.getEncryptionAtRest;
-    this.getEncryptionAtRestKeys = mnSecuritySecretsService.stream.getEncryptionAtRestKeys.pipe(map(this.displayOrder));
+    this.getEncryptionAtRestKeys = mnSecuritySecretsService.stream.getEncryptionAtRestKeys.pipe(
+        map(keys => keys.filter(k => k !== 'log')),
+        map(this.displayOrder)
+    );
     this.mapTypeToNames = mnSecuritySecretsService.mapTypeToNames;
     this.mapTypeToReEncryptNames = mnSecuritySecretsService.mapTypeToReEncryptNames;
     this.mapMethodToNames = mnSecuritySecretsService.mapMethodToNames;

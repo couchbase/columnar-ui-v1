@@ -34,7 +34,7 @@ class MnSecuritySecretsService {
     this.http = http;
     this.stream = {};
 
-    this.types = ['config', 'log', 'audit'];
+    this.types = ['config', /*'log',*/ 'audit'];
 
     this.stream.updateSecretsList =
       new BehaviorSubject();
