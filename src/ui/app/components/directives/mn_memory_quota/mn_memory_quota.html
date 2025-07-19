@@ -162,7 +162,7 @@ licenses/APL2.txt.
          id="cbas_ram_quota">
       <label
          for="cbas_ram_quota">
-        Enterprise Analytics
+        Memory Quota &nbsp;<small>per server node</small>
       </label>
     </div>
     <div class="row width-6 flex-right">
@@ -175,6 +175,7 @@ licenses/APL2.txt.
          class="input-inside-label">
     </div>
   </div>
+  <p class="desc">Note: Total Couchbase RAM allocation should be no more than 90% of available memory.</p>
   <div
      class="error"
      ng-show="errors.cbasMemoryQuota">
