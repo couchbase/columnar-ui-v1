@@ -22,7 +22,6 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
   vm.getServicePath = getServicePath;
   vm.isPathPresent = isPathPresent;
   vm.filterQuotaServices = filterQuotaServices;
-  vm.isOnlyColumnar = isOnlyColumnar;
 
   $scope.$watchCollection(() => ({
     stats: $scope.mnUIStats,
@@ -96,14 +95,6 @@ function mnServersListItemDetailsController($scope, mnServersListItemDetailsServ
       return vm.server.details[service + "MemoryQuota"] * 1024 * 1024;
     }
   }
-
-    function isOnlyColumnar(service) {
-    if (!vm.server || !vm.server.details.storage.hdd[0]) {
-      return;
-    }
-    return service === "cbas" && vm.server.details.storage.hdd[0].cbas_dirs.length ;
-  }
-
 
   function isPathPresent(service) {
     if (!vm.server || !vm.server.details.storage.hdd[0]) {

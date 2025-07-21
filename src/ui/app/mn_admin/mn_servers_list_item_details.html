@@ -59,9 +59,9 @@
       <div>
         <strong>RAM Quota:</strong>
         <span
-           ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
+           ng-repeat="service in (node.services | mnOrderServices)">
           <!--{{service | mnFormatServices}}-->
-          {{(serversListItemDetailsCtl.getServiceQuota(service)|mnFormatQuantity) || 'unknown'}}
+          {{(serversListItemDetailsCtl.getServiceQuota(cbas)|mnFormatQuantity) || 'unknown'}}
           {{$last ? '' : '| '}}
         </span>
       </div>
