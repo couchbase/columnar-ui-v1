@@ -65,10 +65,13 @@
           {{$last ? '' : '| '}}
         </span>
       </div>
-      <div
-         ng-repeat="service in (node.services | filter:serversListItemDetailsCtl.isOnlyColumnar | mnOrderServices)">
-        <strong><!--{{service | mnFormatServices}} -->Storage Path(s):</strong>
-        {{serversListItemDetailsCtl.getServicePath(service)}}
+      <div>
+        <strong><!--{{service | mnFormatServices}} -->Metadata Disk Path:</strong>
+        {{serversListItemDetailsCtl.getServicePath("kv")}}
+      </div>
+      <div>
+        <strong><!--{{service | mnFormatServices}} -->Cache Disk Path(s):</strong>
+        {{serversListItemDetailsCtl.getServicePath("cbas")}}
       </div>
      
       <div ng-show="serversCtl.nodeCertificates[node.configuredHostname].warnings">
