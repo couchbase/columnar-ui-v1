@@ -663,7 +663,7 @@ function mnFormatServices() {
 
 function mnColumnarState() {
   return function (service) {
-    return service.filter(function (s) {
+    return service && service.filter(function (s) {
       return (s.name === "Administrative" || s.name === "Analytics");
     })
   }
