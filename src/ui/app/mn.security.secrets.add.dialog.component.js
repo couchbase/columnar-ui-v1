@@ -115,11 +115,11 @@ class MnSecuritySecretsAddDialogComponent extends MnLifeCycleHooksToStream {
           host: "",
           port: null
         }),
-        usageBuckets: this.formBuilder.group(this.bucketNames.reduce((acc, bucket) => {
+        usageBuckets: this.formBuilder.group(/*this.bucketNames.reduce((acc, bucket) => {
           //set false by default for editing mode and true for adding mode
           acc['bucket-encryption-' + bucket] = !this.item;
           return acc;
-        }, {})),
+        }, {})*/{}),
         usage: this.formBuilder.group(this.options.reduce((acc, v) => {
           //set false by default for editing mode and true for adding mode
           acc[v + '-encryption'] = !this.item;

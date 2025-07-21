@@ -75,9 +75,9 @@ licenses/APL2.txt.
         {{serversItemCtl.couchDiskUsage | mnFormatQuantity}}
       </span>
     </span>
-    <span class="cbui-table-cell resp-hide-med" title="all active items / all replica items">
+    <!--span class="cbui-table-cell resp-hide-med" title="all active items / all replica items">
       {{node.interestingStats.curr_items || 0 | mnFormatQuantity:1000 }}/{{node.interestingStats.vb_replica_curr_items || 0 | mnFormatQuantity:1000 }}
-    </span>
+    </span-->
     <span class="cbui-table-cell text-right resp-hide-sml">
       <a
          ng-if="!serversItemCtl.isNodeInactiveFailed && !serversItemCtl.isNodeUnhealthy && rbac.cluster.collection['.:.:.'].stats.read"
