@@ -43,6 +43,20 @@ angular
   .controller('mnOverviewController', ["$scope", "$rootScope", "mnBucketsService", "mnServersService", "mnPoller", "mnPromiseHelper", "mnHelper", "permissions", "pools", "mnPoolDefault", mnOverviewController]);
 
 function mnOverviewConfig($stateProvider, $transitionsProvider) {
+  // This checks permissions and redirects to the appropriate state based on whether
+  // the user has access to statistics or not.
+  $transitionsProvider.onStart({ to: "app.admin.overview.statistics" }, function (trans) {
+    const mnPermissionsService = trans.injector().get("mnPermissions");
+    const $state = trans.router.stateService;
+
+    return mnPermissionsService.check().then((permissions) => {
+      const statsAllowed = permissions.cluster.collection?.['.:.:.']?.stats?.read;
+      if (!statsAllowed) {
+        return $state.target("app.admin.servers.list");
+      }
+      return true;
+    });
+  });
   $transitionsProvider.onBefore({
     from: state => (state.name !== "app.admin.overview.statistics"),
     to: "app.admin.overview.statistics"

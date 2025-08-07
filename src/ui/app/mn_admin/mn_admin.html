@@ -501,6 +501,7 @@
      mn-tab-bar-name="adminTab">
 
     <a
+       ng-show="rbac.cluster.collection['.:.:.'].stats.read"
        mn-tab="overview"
        ui-sref="app.admin.overview.statistics"
        ui-sref-active="currentnav">
