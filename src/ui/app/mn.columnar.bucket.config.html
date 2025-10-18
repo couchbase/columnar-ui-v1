@@ -20,15 +20,6 @@
         <label for="s3-compat">
             S3-Compatible Storage
         </label>
-      <!--
-      <input
-          type="radio"
-          formControlName="blobStorageScheme"
-          value="gc"
-          id="gc">
-      <label for="gc">
-        Google Cloud Storage (GCS)
-      </label>
       <input
           type="radio"
           formControlName="blobStorageScheme"
@@ -37,15 +28,16 @@
       <label for="azblob">
         Azure Blob Storage
       </label>
-      <input
-          type="radio"
-          formControlName="blobStorageScheme"
-          value="none"
-          id="none">
-      <label for="none">
-        None
-      </label>
-      -->
+        <!--
+ <input
+   type="radio"
+   formControlName="blobStorageScheme"
+   value="gc"
+   id="gc">
+ <label for="gc">
+   Google Cloud Storage (GCS)
+ </label>
+-->
     </div>
     <div
         class="error error-form"
@@ -64,10 +56,12 @@
 
   <div *ngIf="group.get('blobStorageScheme').value !== 'none'">
     <div class="formrow">
-      <div class="row" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
-        <label for="bucket_endpoint">Endpoint</label>
+      <div class="row" *ngIf="group.get('blobStorageScheme').value == 's3-compat' || group.get('blobStorageScheme').value == 'azblob'">
+        <label for="bucket_endpoint">
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Blob service endpoint' : 'Endpoint' }}
+        </label>
       </div>
-      <input *ngIf="group.get('blobStorageScheme').value == 's3-compat'"
+      <input *ngIf="group.get('blobStorageScheme').value == 's3-compat' || group.get('blobStorageScheme').value == 'azblob'"
          type="text"
          autocorrect="off"
          spellcheck="false"
@@ -77,7 +71,7 @@
          [mnFocus]="focusFieldSubject"
          mnName={{blobStorageEndpoint}}
          formControlName="blobStorageEndpoint"
-         placeholder="e.g. https://my-object-storage:18082">
+         [placeholder]="group.get('blobStorageScheme').value === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082'">
       <div
          class="error error-form"
          [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageEndpoint">
@@ -91,7 +85,9 @@
     </div>
     <div class="formrow">
       <div class="row">
-        <label for="bucket_name">Bucket name</label>
+        <label for="bucket_name">
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container name' : 'Bucket name' }}
+        </label>
       </div>
       <input
          type="text"
@@ -115,7 +111,18 @@
     </div>
     <div class="formrow">
       <div class="row">
-        <label for="bucket_path_prefix">Bucket path prefix</label>
+          <label for="bucket_path_prefix">
+              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container path prefix' : 'Bucket path prefix' }}
+              <span
+                      class="fa-stack icon-info"
+                      [ngbTooltip]="group.get('blobStorageScheme').value === 'azblob'
+    ? 'An optional prefix in the container where Enterprise Analytics will store its data. Leave blank to use the root of the container.'
+    : 'An optional prefix in the bucket where Enterprise Analytics will store its data. Leave blank to use the root of the bucket.'"
+                      placement="right">
+              <span class="icon fa-circle-thin fa-stack-2x"></span>
+              <span class="icon fa-info fa-stack-1x"></span>
+          </span>
+          </label>
       </div>
       <input
          type="text"
@@ -137,7 +144,7 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStoragePrefix}}
       </div>
     </div>
-    <div class="formrow">
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
         <label for="bucket_region">Bucket Region</label>
       </div>
@@ -160,7 +167,7 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStorageRegion}}
       </div>
     </div>
-    <div class="formrow">
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <input
          type="checkbox"
          id="for-anonymous-Auth"
@@ -182,7 +189,7 @@
         {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
       </div>
     </div>
-      <div class="formrow">
+      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
           <input
                   type="checkbox"
                   id="for-force-path-style"

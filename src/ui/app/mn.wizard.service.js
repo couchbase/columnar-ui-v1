@@ -25,11 +25,16 @@ import {singletonGuard} from './mn.core.js';
 
 export {MnWizardService};
 
-function blobStorageEndpointRequiredIfS3Compatible(group) {
+function blobStorageValidator(group) {
   const scheme = group.get('blobStorageScheme')?.value;
   const endpoint = group.get('blobStorageEndpoint')?.value;
-  if (scheme === 's3-compat' && !endpoint) {
+  const region = group.get('blobStorageRegion')?.value;
+  if ((scheme === 's3-compat' || scheme === 'azblob') && !endpoint) {
     return { blobStorageEndpointRequired: true };
+  }
+
+  if (scheme !== 'azblob' && !region) {
+    return { blobStorageBucketRequired: true };
   }
 
   return null;
@@ -102,12 +107,12 @@ var wizardForm = {
       blobStorageEndpoint: new FormControl(''),
       blobStorageBucket: new FormControl('', [Validators.required]),
       blobStoragePrefix: new FormControl(''),
-      blobStorageRegion: new FormControl('', [Validators.required]),
+      blobStorageRegion: new FormControl(''),
       blobStorageScheme: new FormControl("s3", [Validators.required]),
       blobStorageAnonymousAuth: new FormControl(false),
       blobStorageForcePathStyle: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
-    }, { validators: blobStorageEndpointRequiredIfS3Compatible })
+    }, { validators: [blobStorageValidator] })
   }),
   termsAndConditions: new FormGroup({
     agree: new FormControl(false, [Validators.required]),
@@ -407,17 +412,21 @@ class MnWizardService {
 
   postClusterInit(data) {
     const columnarSettingsForm = new URLSearchParams();
-    if (data.blobStorageScheme === "s3-compat") {
+    if (data.blobStorageScheme === "s3-compat" || data.blobStorageScheme === "azblob") {
       columnarSettingsForm.set('blobStorageEndpoint', data.blobStorageEndpoint);
+    }
+    if (data.blobStorageScheme === "s3-compat") {
       columnarSettingsForm.set('blobStorageScheme', "s3");
     } else {
       columnarSettingsForm.set('blobStorageScheme', data.blobStorageScheme);
     }
-    columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
+    if (data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat") {
+      columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
+      columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
+      columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
+    }
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
-    columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
-    columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
-    columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
+    columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
     columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
     return this.http.post('/settings/analytics', columnarSettingsForm.toString()).pipe(
         switchMap(() => {
