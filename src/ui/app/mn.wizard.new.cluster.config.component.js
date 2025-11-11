@@ -22,6 +22,7 @@ import {MnAuthService} from './mn.auth.service.js';
 import {MnAdminService} from './mn.admin.service.js';
 import {MnPools, $rootScope} from './ajs.upgraded.providers.js';
 import template from "./mn.wizard.new.cluster.config.html";
+import {kvMemoryQuota} from "./constants/constants.js";
 
 export {MnWizardNewClusterConfigComponent};
 
@@ -235,6 +236,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
       result[names[0]] =
         this.wizardForm.newClusterConfig.get("services.field." + names[1]).value;
     }
+    result["memoryQuota"] = kvMemoryQuota
     return result;
   }
 }

@@ -12,6 +12,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import mnPendingQueryKeeper from './mn_pending_query_keeper.js';
+import {kvMemoryQuota} from "../constants/constants.js";
 
 export default 'mnHelper';
 
@@ -55,7 +56,7 @@ function mnHelperFactory($window, $state, $location, $timeout, $q, $http, mnPend
     };
   }
   function calculateMaxMemorySize(totalRAMMegs) {
-    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024));
+    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024)) - kvMemoryQuota;
   }
   function initializeDetailsHashObserver($scope, hashKey, stateName) {
     function getHashValue() {

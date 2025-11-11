@@ -20,6 +20,7 @@ import ipaddr from 'ipaddr';
 import CodeMirror from 'codemirror';
 
 import {singletonGuard} from './mn.core.js';
+import {kvMemoryQuota} from "./constants/constants.js";
 
 export {MnHelperService};
 
@@ -110,7 +111,7 @@ class MnHelperService {
   }
 
   calculateMaxMemorySize(totalRAMMegs) {
-    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024));
+    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024)) - kvMemoryQuota;
   }
 
   validateEqual(key1, key2, erroName) {

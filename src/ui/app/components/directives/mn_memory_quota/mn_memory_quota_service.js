@@ -13,6 +13,7 @@ import _ from 'lodash';
 
 import mnHelper from "../../mn_helper.js";
 import mnPoolDefault from "../../mn_pool_default.js";
+import {kvMemoryQuota} from '../../../constants/constants.js';
 
 export default "mnMemoryQuotaService";
 
@@ -51,6 +52,7 @@ function mnMemoryQuotaServiceFactory($http, $window, mnPoolDefault, mnHelper, IE
       rv.queryMemoryQuota = currentPool.queryMemoryQuota || 0;
     }
     if (currentPool.compat.atLeast55 && mnPoolDefault.export.isEnterprise) {
+      rv.memoryQuota = kvMemoryQuota;
       rv.cbasMemoryQuota = currentPool.cbasMemoryQuota || 256;
       rv.eventingMemoryQuota = currentPool.eventingMemoryQuota || 256;
     }

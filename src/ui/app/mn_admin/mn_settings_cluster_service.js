@@ -159,6 +159,7 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       // maybeSetQuota(data, memoryQuotaConfig, "index", "indexMemoryQuota");
       // maybeSetQuota(data, memoryQuotaConfig, "fts", "ftsMemoryQuota");
       if (mnPools.export.isEnterprise) {
+        // maybeSetQuota(data, memoryQuotaConfig, "kv", "memoryQuota");
         maybeSetQuota(data, memoryQuotaConfig, "cbas", "cbasMemoryQuota");
         // maybeSetQuota(data, memoryQuotaConfig, "eventing", "eventingMemoryQuota");
       }

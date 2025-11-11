@@ -69,6 +69,7 @@ let IEC = {
 
 let servicesEnterprise = ["kv","cbas"];
 let servicesCE = ["kv", "index", "fts", "n1ql"];
+let kvMemoryQuota = 100;
 
 export {
   daysOfWeek,
@@ -79,5 +80,6 @@ export {
   viewsPerPageLimit,
   IEC,
   servicesEnterprise,
-  servicesCE
+  servicesCE,
+  kvMemoryQuota
 };
