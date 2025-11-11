@@ -88,6 +88,18 @@ class MnPoolsService {
     }, {});
   }
 
+    pluckMemoryQuotasFirst(source) {
+        const [selfConfig, quotaServices, maxRAMMegs] = source;
+        return quotaServices.reduce((acc, service) => {
+            if (service === "cbas") {
+                acc[service] = maxRAMMegs;
+            } else {
+                acc[service] = selfConfig[this.getServiceQuotaName(service)];
+            }
+            return acc;
+        }, {});
+    }
+
   get() {
     return this.http.get('/pools').pipe(
       map(function (pools) {

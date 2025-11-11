@@ -240,14 +240,6 @@ class MnWizardService {
       (new BehaviorSubject()).pipe(switchMap(this.getSelfConfig.bind(this)),
                                    shareReplay({refCount: true, bufferSize: 1}));
 
-
-    this.stream.memoryQuotasFirst =
-      combineLatest(
-        this.stream.getSelfConfig,
-        mnPoolsService.stream.quotaServices
-      )
-      .pipe(map(mnPoolsService.pluckMemoryQuotas.bind(mnPoolsService)));
-
     this.stream.getIndexes =
       (new BehaviorSubject()).pipe(switchMap(this.getIndexes.bind(this)),
                                    shareReplay({refCount: true, bufferSize: 1}));
@@ -276,6 +268,13 @@ class MnWizardService {
 
     this.stream.maxRAMMegs =
       this.stream.totalRAMMegs.pipe(map(mnHelperService.calculateMaxMemorySize));
+
+    this.stream.memoryQuotasFirst =
+        combineLatest(
+            this.stream.getSelfConfig,
+            mnPoolsService.stream.quotaServices,
+            this.stream.maxRAMMegs
+        ).pipe(map(mnPoolsService.pluckMemoryQuotasFirst.bind(mnPoolsService)));
   }
 
   getServicesValues(servicesGroup) {
