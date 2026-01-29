@@ -33,7 +33,7 @@ function blobStorageValidator(group) {
     return { blobStorageEndpointRequired: true };
   }
 
-  if (scheme !== 'azblob' && !region) {
+  if ((scheme === 's3' || scheme === 's3-compat') && !region) {
     return { blobStorageBucketRequired: true };
   }
 
