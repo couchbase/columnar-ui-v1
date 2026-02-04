@@ -112,6 +112,7 @@ var wizardForm = {
       blobStorageAnonymousAuth: new FormControl(false),
       blobStorageForcePathStyle: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
+      numStoragePartitions: new FormControl(128),
     }, { validators: [blobStorageValidator] })
   }),
   termsAndConditions: new FormGroup({
@@ -427,6 +428,7 @@ class MnWizardService {
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
     columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
     columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
+    columnarSettingsForm.set('numStoragePartitions', data.numStoragePartitions);
     return this.http.post('/settings/analytics', columnarSettingsForm.toString()).pipe(
         switchMap(() => {
           delete data.blobStorageScheme;
@@ -437,6 +439,7 @@ class MnWizardService {
           delete data.blobStorageRegion;
           delete data.blobStorageForcePathStyle;
           delete data.blobStorageDisableSslVerify;
+          delete data.numStoragePartitions;
           return this.http.post('/clusterInit', data);
         })
     );

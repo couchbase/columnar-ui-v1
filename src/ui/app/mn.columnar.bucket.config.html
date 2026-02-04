@@ -1,4 +1,12 @@
 
+<ng-template #storageTooltip>
+    The number of storage partitions used to distribute data in the blob storage.<br>
+    Range: 1–1024. The default value (128) provides a balance between scalability and object storage API calls.<br>
+    For deployments targeting total number of cores much greater than 128 across all nodes in the cluster,
+    this value may be increased to allow for higher degree of scalability.
+    For development environments, this value may be reduced.<br><br>
+    <em>Caution:</em> this setting cannot be changed after cluster initialization.
+</ng-template>
 <div [formGroup]="group">
   <div class="formrow">
     <div class="row">
@@ -241,5 +249,43 @@
               {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
           </div>
       </div>
+
+      <div class="formrow">
+        <span
+          class="disclosure inline"
+          [ngClass]="{'disclosed': (showAdvanced.state | async)}"
+          (click)="showAdvanced.click.next()">
+          Advanced
+        </span>
+      </div>
+      <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
+        <div class="formrow">
+          <div class="row">
+            <label for="num_storage_partitions">Storage Partitions
+                <span class="fa-stack icon-info"
+                      [ngbTooltip]="storageTooltip"
+                      placement="right">
+                 <span class="icon fa-circle-thin fa-stack-2x"></span>
+                 <span class="icon fa-info fa-stack-1x"></span>
+               </span>
+            </label>
+          </div>
+          <input
+            type="number"
+            name="numStoragePartitions"
+            id="num_storage_partitions"
+            formControlName="numStoragePartitions">
+          <div
+            class="error error-form"
+            [hidden]="!(postNodeInitHttp.error | async)?.errors?.numStoragePartitions">
+            {{(postNodeInitHttp.error | async)?.errors?.numStoragePartitions}}
+          </div>
+          <div
+            class="error error-form"
+            [hidden]="!(postClusterInitHttp.error | async)?.errors?.numStoragePartitions">
+            {{(postClusterInitHttp.error | async)?.errors?.numStoragePartitions}}
+          </div>
+        </div>
+      </div>
   </div>
-</div>  
+</div>

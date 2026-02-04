@@ -14,6 +14,7 @@ import {BehaviorSubject} from 'rxjs';
 
 import {MnPoolsService} from './mn.pools.service.js';
 import {MnWizardService} from './mn.wizard.service.js';
+import {MnHelperService} from './mn.helper.service.js';
 import {MnLifeCycleHooksToStream} from './mn.core.js';
 import template from "./mn.columnar.bucket.config.html"
 
@@ -33,13 +34,15 @@ class MnColumnarbucketConfig extends MnLifeCycleHooksToStream {
 
   static get parameters() { return [
     MnWizardService,
+    MnHelperService,
   ]}
 
-  constructor(mnWizardService) {
+  constructor(mnWizardService, mnHelperService) {
     super();
     this.focusFieldSubject = new BehaviorSubject(true);
     this.postNodeInitHttp = mnWizardService.stream.postNodeInitHttp;
     this.postClusterInitHttp = mnWizardService.stream.postClusterInitHttp;
+    this.showAdvanced = mnHelperService.createToggle();
   }
 
 }

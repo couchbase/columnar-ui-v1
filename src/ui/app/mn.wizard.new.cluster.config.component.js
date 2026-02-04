@@ -199,6 +199,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.blobStorageAnonymousAuth = this.newClusterConfigForm.get('bucketDetails.blobStorageAnonymousAuth').value;
     rv.blobStorageForcePathStyle = this.newClusterConfigForm.get('bucketDetails.blobStorageForcePathStyle').value;
     rv.blobStorageDisableSslVerify = this.newClusterConfigForm.get('bucketDetails.blobStorageDisableSslVerify').value;
+    rv.numStoragePartitions = this.newClusterConfigForm.get('bucketDetails.numStoragePartitions').value;
     let services = this.wizardForm.newClusterConfig.get("services.flag");
 
     rv.services = this.getServicesValues(services).join(",");
