@@ -110,8 +110,9 @@ var wizardForm = {
       blobStorageRegion: new FormControl(''),
       blobStorageScheme: new FormControl("s3", [Validators.required]),
       blobStorageAnonymousAuth: new FormControl(false),
-      blobStorageForcePathStyle: new FormControl(false),
+      blobStoragePathStyleAddressing: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
+      blobStorageCertificates: new FormControl(''),
     }, { validators: [blobStorageValidator] })
   }),
   termsAndConditions: new FormGroup({
@@ -422,11 +423,18 @@ class MnWizardService {
     if (data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat") {
       columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
       columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
-      columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
+      columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
     }
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
     columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
     columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
+    if (data.blobStorageCertificates) {
+      // Split PEM text into individual certificates and send each as a separate form value
+      const certs = data.blobStorageCertificates.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
+      if (certs) {
+        certs.forEach(cert => columnarSettingsForm.append('blobStorageCertificate', cert.trim()));
+      }
+    }
     return this.http.post('/settings/analytics', columnarSettingsForm.toString()).pipe(
         switchMap(() => {
           delete data.blobStorageScheme;
@@ -435,8 +443,9 @@ class MnWizardService {
           delete data.blobStoragePrefix;
           delete data.blobStorageAnonymousAuth;
           delete data.blobStorageRegion;
-          delete data.blobStorageForcePathStyle;
+          delete data.blobStoragePathStyleAddressing;
           delete data.blobStorageDisableSslVerify;
+          delete data.blobStorageCertificates;
           return this.http.post('/clusterInit', data);
         })
     );
