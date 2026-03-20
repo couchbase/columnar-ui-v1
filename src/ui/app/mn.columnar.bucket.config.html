@@ -199,26 +199,70 @@
         </div>
     </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
-      <input
-         type="checkbox"
-         id="for-anonymous-Auth"
-         formControlName="blobStorageAnonymousAuth">
-      <label for="for-anonymous-Auth" class="margin-right-quarter">
-        Use Anonymous Authentication
-      </label>
-      <span
-          class="fa-stack icon-info"
-          ngbTooltip="Access the service without providing authentication credentials. Use only
-                      if the target bucket or endpoint explicitly allows public or anonymous access.."
-          placement="right"
-          container="body">
-          <span class="icon fa-circle-thin fa-stack-2x"></span>
-          <span class="icon fa-info fa-stack-1x"></span>
-      </span>
+      <div class="row">
+        <label>Authentication
+          <span
+              class="fa-stack icon-info"
+              ngbTooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.) to obtain credentials automatically. Static Credentials allows you to supply an access key ID and secret access key directly. Anonymous accesses the storage without any credentials."
+              placement="right"
+              container="body">
+            <span class="icon fa-circle-thin fa-stack-2x"></span>
+            <span class="icon fa-info fa-stack-1x"></span>
+          </span>
+        </label>
+      </div>
+      <div class="form-inline">
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="chain"
+           id="cred-mode-chain">
+        <label for="cred-mode-chain">Standard Credential Chain</label>
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="static"
+           id="cred-mode-static">
+        <label for="cred-mode-static">Static Credentials</label>
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="anonymous"
+           id="cred-mode-anonymous">
+        <label for="cred-mode-anonymous">Anonymous</label>
+      </div>
       <div
-         class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
-        {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
+         *ngIf="group.get('blobStorageCredentialMode').value === 'static'"
+         class="indent-1-5 margin-top-half">
+        <div class="formrow">
+          <label for="blob-access-key-id">Access Key ID</label>
+          <input
+             type="text"
+             id="blob-access-key-id"
+             autocorrect="off"
+             spellcheck="false"
+             autocapitalize="off"
+             autocomplete="off"
+             formControlName="blobStorageAccessKeyId">
+          <div
+             class="error error-form"
+             [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId">
+            {{(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId}}
+          </div>
+        </div>
+        <div class="formrow">
+          <label for="blob-secret-access-key">Secret Access Key</label>
+          <input
+             type="password"
+             id="blob-secret-access-key"
+             autocomplete="new-password"
+             formControlName="blobStorageSecretAccessKey">
+          <div
+             class="error error-form"
+             [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageSecretAccessKey">
+            {{(postClusterInitHttp.error | async)?.errors?.blobStorageSecretAccessKey}}
+          </div>
+        </div>
       </div>
     </div>
       <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
