@@ -27,6 +27,7 @@ import mnMemoryQuotaService from "../components/directives/mn_memory_quota/mn_me
 import mnClusterConfigurationService from "../mn_wizard/mn_cluster_configuration/mn_cluster_configuration_service.js";
 import template from "./mn_settings_cluster_confirmation_dialog.html";
 import allXDCRLogLevelsTemplate from "./mn_settings_cluster_all_xdcr_log_levels_dialog.html";
+import blobStorageErrorTemplate from "./mn_settings_cluster_blob_storage_error_dialog.html";
 
 export default 'mnSettingsCluster';
 
@@ -53,6 +54,7 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
   vm.reloadState = mnHelper.reloadState;
   vm.itemsSelect = [...Array(65).keys()].slice(1);
   vm.isColumnar = true
+  vm.credentialsChanged = false;
 
   activate();
 
@@ -142,6 +144,40 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
       queries.push(promise9);
     }
 
+    if (vm.isColumnar &&
+        $scope.rbac.cluster.settings.write &&
+        vm.blobStorageSettings &&
+        vm.initialBlobStorageSettings) {
+      var rawBlobStoragePromise = mnSettingsClusterService.postBlobStorageSettings(
+        vm.blobStorageSettings,
+        vm.credentialsChanged
+      ).then(function () {
+        vm.initialBlobStorageSettings = _.cloneDeep(vm.blobStorageSettings);
+        vm.credentialsChanged = false;
+      }, function (resp) {
+        if (resp.status === -1) {
+          return;
+        }
+        var errors = resp.data && resp.data.errors;
+        var messages = errors
+          ? Object.entries(errors).map(function(e) {
+              return e[0] === '_' ? e[1] : e[0] + ': ' + e[1];
+            })
+          : (resp.data ? [JSON.stringify(resp.data)] : ['An unknown error occurred.']);
+        $uibModal.open({
+          template: blobStorageErrorTemplate,
+          controller: ['messages', function(messages) { this.messages = messages; }],
+          controllerAs: 'blobStorageErrorCtl',
+          resolve: {
+            messages: function() { return messages; }
+          }
+        });
+        return $q.reject(resp);
+      });
+      var blobStoragePromise = mnPromiseHelper(vm, rawBlobStoragePromise).getPromise();
+      queries.push(blobStoragePromise);
+    }
+
     // if (mnPoolDefault.export.compat.atLeast79 &&
     //     $scope.rbac.cluster.settings.write) {
     //   promise9 = mnPromiseHelper(vm, mnSettingsClusterService
@@ -227,27 +263,9 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
       // (cluster.settings.indexes.read ? (vm.indexSettings != void 0) : true) &&
       // ((compat.atLeast71 && mnPoolDefault.export.isEnterprise && cluster.settings.read) ?
       //   (vm.settingsAnalytics != void 0) : true) &&
+      ((vm.isColumnar && cluster.settings.read) ? (vm.blobStorageSettings != void 0) : true) &&
 
       mnSettingsClusterService.getInitChecker().every(v => v());
-  }
-  function onSelectAllXDCRLogLevels(selectedOption) {
-    vm.XDCRServices.map(XDCRService => vm.replicationSettings.genericServicesLogLevel[XDCRService] = selectedOption);
-  }
-  async function showAllXDCRLogLevels() {
-    await import("./mn_settings_cluster_all_xdcr_log_levels_dialog_controller.js");
-    await $ocLazyLoad.load({name: 'mnSettingsClusterAllXDCRLogLevelsDialogController'});
-    $uibModal.open({
-      template: allXDCRLogLevelsTemplate,
-      controller: 'mnSettingsClusterAllXDCRLogLevelsDialogController as allXDCRLogLevelsDialogCtl',
-      resolve: {
-        logLevels: function() {
-          return vm.replicationSettings.genericServicesLogLevel;
-        },
-        initialLogLevels: function() {
-          return vm.initialServicesLogLevels;
-        }
-      }
-    });
   }
   function onSelectAllXDCRLogLevels(selectedOption) {
     vm.XDCRServices.map(XDCRService => vm.replicationSettings.genericServicesLogLevel[XDCRService] = selectedOption);
@@ -310,6 +328,68 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
         .then(settings => vm.settingsAnalytics = settings);
     }
 
+    if (vm.isColumnar && $scope.rbac.cluster.settings.read) {
+      mnSettingsClusterService.getSettingsAnalytics()
+        .then(function(settings) {
+          // Join certificates array to a single string for the textarea
+          if (Array.isArray(settings.blobStorageCertificates)) {
+            settings.blobStorageCertificates = settings.blobStorageCertificates.join('\n');
+          }
+          vm.blobStorageSettings = settings;
+          vm.initialBlobStorageSettings = _.cloneDeep(settings);
+          vm.blobStorageSchemeName = getBlobStorageSchemeName(settings.blobStorageScheme, settings.blobStorageEndpoint);
+          vm.blobStorageIsS3 = settings.blobStorageScheme === 's3';
+          // Track whether this is an s3-compat config (s3 scheme with an endpoint at load time).
+          // Once true, the endpoint field stays visible even if the user clears it.
+          vm.blobStorageIsS3Compat = settings.blobStorageScheme === 's3' && !!settings.blobStorageEndpoint;
+          vm.blobStorageEndpointIsHttp = isEndpointHttp(settings.blobStorageEndpoint);
+          vm.blobStorageCredentialMode = getCredentialMode(settings);
+
+          $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageEndpoint', function(val) {
+            vm.blobStorageEndpointIsHttp = isEndpointHttp(val);
+          });
+
+          // Mask the secret access key for display
+          if (settings.blobStorageSecretAccessKey) {
+            vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
+          }
+
+          // Register init checker for blob storage settings
+          mnSettingsClusterService.registerInitChecker(function() {
+            return vm.blobStorageSettings !== undefined;
+          });
+
+          // Watch for credential changes
+          $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageAccessKeyId', function(newVal, oldVal) {
+            if (newVal !== oldVal && newVal !== undefined && newVal !== vm.initialBlobStorageSettings.blobStorageAccessKeyId) {
+              vm.credentialsChanged = true;
+            }
+          });
+          $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageSecretAccessKey', function(newVal, oldVal) {
+            if (newVal !== oldVal && newVal !== undefined && newVal !== '***') {
+              vm.credentialsChanged = true;
+            }
+          });
+
+          // Watch for credential mode changes
+          $scope.$watch('settingsClusterCtl.blobStorageCredentialMode', function(newVal, oldVal) {
+            if (newVal !== oldVal) {
+              if (newVal === 'anonymous') {
+                vm.blobStorageSettings.blobStorageAnonymousAuth = true;
+                vm.blobStorageSettings.blobStorageAccessKeyId = '';
+                vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
+              } else if (newVal === 'chain') {
+                vm.blobStorageSettings.blobStorageAnonymousAuth = false;
+                vm.blobStorageSettings.blobStorageAccessKeyId = '';
+                vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
+              } else if (newVal === 'static') {
+                vm.blobStorageSettings.blobStorageAnonymousAuth = false;
+              }
+            }
+          });
+        });
+    }
+
     if ($scope.rbac.cluster.admin.memcached.read) {
       mnSettingsClusterService.getMemcachedSettings().then(function (rv) {
         vm.readerThreads = unpackThreadValue(rv.data.num_reader_threads);
@@ -366,5 +446,35 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           vm.initialIndexSettings = _.clone(indexSettings);
         });
     }
+  }
+
+  function getBlobStorageSchemeName(scheme, endpoint) {
+    if (!scheme || scheme === 'none' || scheme === '') {
+      return 'None';
+    }
+    if (scheme === 's3') {
+      return endpoint ? 'S3-Compatible Storage' : 'AWS S3';
+    }
+    if (scheme === 'azblob') {
+      return 'Azure Blob Storage';
+    }
+    if (scheme === 'gs') {
+      return 'Google Cloud Storage';
+    }
+    return scheme;
+  }
+
+  function isEndpointHttp(endpoint) {
+    return !!(endpoint && !endpoint.toLowerCase().startsWith('https://'));
+  }
+
+  function getCredentialMode(settings) {
+    if (settings.blobStorageAnonymousAuth) {
+      return 'anonymous';
+    }
+    if (settings.blobStorageAccessKeyId && settings.blobStorageAccessKeyId !== '') {
+      return 'static';
+    }
+    return 'chain';
   }
 }

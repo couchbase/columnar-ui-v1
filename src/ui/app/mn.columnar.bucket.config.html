@@ -2,7 +2,7 @@
 <div [formGroup]="group">
   <div class="formrow">
     <div class="row">
-      <label for="bucket_path_prefix">Storage Scheme</label>
+      <label for="bucket_path_prefix">Storage Scheme<sup>*</sup></label>
     </div>
     <div class="form-inline">
       <input
@@ -86,7 +86,7 @@
     <div class="formrow">
       <div class="row">
         <label for="bucket_name">
-            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Name' : 'Bucket Name' }}
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Name' : 'Bucket Name' }}<sup>*</sup>
         </label>
       </div>
       <input
@@ -111,7 +111,7 @@
     </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
-        <label for="bucket_region">Bucket Region</label>
+        <label for="bucket_region">Bucket Region<sup>*</sup></label>
       </div>
       <input
          type="text"
@@ -135,7 +135,7 @@
     <div class="formrow">
       <div class="row">
           <label for="bucket_path_prefix">
-              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix' }}
+              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix' }}<sup>*</sup>
               <span
                       class="fa-stack icon-info"
                       [ngbTooltip]="group.get('blobStorageScheme').value === 'azblob'
@@ -198,6 +198,7 @@
             {{(postClusterInitHttp.error | async)?.errors.blobStorageCertificates}}
         </div>
     </div>
+    <sup>*</sup><small class="text-smaller">- config cannot be changed after setup</small>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
         <label>Authentication
@@ -321,5 +322,5 @@
               {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
           </div>
       </div>
-  </div>
+    </div>
 </div>  
