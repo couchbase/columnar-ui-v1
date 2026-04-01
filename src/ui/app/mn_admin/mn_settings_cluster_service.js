@@ -43,7 +43,8 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     getMemcachedSettings: getMemcachedSettings,
     postMemcachedSettings: postMemcachedSettings,
     getSettingsAnalytics: getSettingsAnalytics,
-    postSettingsAnalytics: postSettingsAnalytics
+    postSettingsAnalytics: postSettingsAnalytics,
+    postBlobStorageSettings: postBlobStorageSettings
   };
 
   var childSubmitCallbacks = [];
@@ -220,5 +221,55 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       };
     }
     return $http(config);
+  }
+
+  function postBlobStorageSettings(currentSettings, credentialsChanged) {
+    var formParams = new URLSearchParams();
+
+    // Always send all non-credential mutable fields with their current values
+    var nonCredentialFields = [
+      'blobStorageEndpoint',
+      'blobStorageDisableSslVerify',
+      'blobStorageCertificates',
+      'blobStoragePathStyleAddressing',
+      'blobStorageAnonymousAuth'
+    ];
+
+    nonCredentialFields.forEach(function(field) {
+      if (currentSettings[field] === undefined || currentSettings[field] === null) {
+        return;
+      }
+      if (field === 'blobStorageCertificates') {
+        // Split PEM text into individual certs; backend expects blobStorageCertificate repeated
+        var certsText = currentSettings[field];
+        if (certsText && typeof certsText === 'string' && certsText.trim()) {
+          var certs = certsText.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
+          if (certs) {
+            certs.forEach(function(cert) {
+              formParams.append('blobStorageCertificate', cert.trim());
+            });
+          }
+        }
+      } else {
+        formParams.append(field, currentSettings[field]);
+      }
+    });
+
+    // Only send credentials if the user explicitly changed them
+    if (credentialsChanged) {
+      if (currentSettings.blobStorageAccessKeyId !== undefined) {
+        formParams.append('blobStorageAccessKeyId', currentSettings.blobStorageAccessKeyId);
+      }
+      // Don't send the masked placeholder back
+      if (currentSettings.blobStorageSecretAccessKey && currentSettings.blobStorageSecretAccessKey !== '***') {
+        formParams.append('blobStorageSecretAccessKey', currentSettings.blobStorageSecretAccessKey);
+      }
+    }
+
+    return $http.post('/settings/analytics', formParams.toString(), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
   }
 }

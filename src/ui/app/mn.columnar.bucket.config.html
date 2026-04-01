@@ -10,7 +10,7 @@
 <div [formGroup]="group">
   <div class="formrow">
     <div class="row">
-      <label for="bucket_path_prefix">Blob Storage Scheme</label>
+      <label for="bucket_path_prefix">Storage Scheme<sup>*</sup></label>
     </div>
     <div class="form-inline">
       <input
@@ -65,7 +65,7 @@
     <div class="formrow">
       <div class="row" *ngIf="group.get('blobStorageScheme').value == 's3-compat' || group.get('blobStorageScheme').value == 'azblob'">
         <label for="bucket_endpoint">
-            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Blob service endpoint' : 'Endpoint' }}
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint' }}
         </label>
       </div>
       <input *ngIf="group.get('blobStorageScheme').value == 's3-compat' || group.get('blobStorageScheme').value == 'azblob'"
@@ -93,7 +93,7 @@
     <div class="formrow">
       <div class="row">
         <label for="bucket_name">
-            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container name' : 'Bucket name' }}
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Name' : 'Bucket Name' }}<sup>*</sup>
         </label>
       </div>
       <input
@@ -116,16 +116,40 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStorageBucket}}
       </div>
     </div>
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
+      <div class="row">
+        <label for="bucket_region">Bucket Region<sup>*</sup></label>
+      </div>
+      <input
+         type="text"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         name="blobStorageRegion"
+         id="bucket_region"
+         formControlName="blobStorageRegion">
+      <div
+         class="error error-form"
+         [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageRegion">
+        {{(postNodeInitHttp.error | async)?.errors?.blobStorageRegion}}
+      </div>
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageRegion">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageRegion}}
+      </div>
+    </div>
     <div class="formrow">
       <div class="row">
           <label for="bucket_path_prefix">
-              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container path prefix' : 'Bucket path prefix' }}
+              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix' }}<sup>*</sup>
               <span
                       class="fa-stack icon-info"
                       [ngbTooltip]="group.get('blobStorageScheme').value === 'azblob'
     ? 'An optional prefix in the container where Enterprise Analytics will store its data. Leave blank to use the root of the container.'
     : 'An optional prefix in the bucket where Enterprise Analytics will store its data. Leave blank to use the root of the bucket.'"
-                      placement="right">
+                      placement="right"
+                      container="body">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
               <span class="icon fa-info fa-stack-1x"></span>
           </span>
@@ -151,56 +175,108 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStoragePrefix}}
       </div>
     </div>
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+        <div class="row">
+            <label for="blob-storage-certificate">
+                Storage Endpoint Certificate(s)
+                <span
+                        class="fa-stack icon-info"
+                        ngbTooltip="One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
+                        placement="right"
+                        container="body">
+                    <span class="icon fa-circle-thin fa-stack-2x"></span>
+                    <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+            </label>
+        </div>
+        <textarea
+                id="blob-storage-certificate"
+                rows="6"
+                style="font-family: monospace; font-size: 11px;"
+                autocorrect="off"
+                spellcheck="false"
+                autocapitalize="off"
+                formControlName="blobStorageCertificates"
+                [attr.disabled]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://') ? true : null"
+                placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----&#10;-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"></textarea>
+        <div
+                class="error error-form"
+                [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageCertificates">
+            {{(postClusterInitHttp.error | async)?.errors.blobStorageCertificates}}
+        </div>
+    </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
-        <label for="bucket_region">Bucket Region</label>
+        <label>Authentication
+          <span
+              class="fa-stack icon-info"
+              ngbTooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.) to obtain credentials automatically. Static Credentials allows you to supply an access key ID and secret access key directly. Anonymous accesses the storage without any credentials."
+              placement="right"
+              container="body">
+            <span class="icon fa-circle-thin fa-stack-2x"></span>
+            <span class="icon fa-info fa-stack-1x"></span>
+          </span>
+        </label>
       </div>
-      <input
-         type="text"
-         autocorrect="off"
-         spellcheck="false"
-         autocapitalize="off"
-         name="blobStorageRegion"
-         id="bucket_region"
-         formControlName="blobStorageRegion">
-      <div
-         class="error error-form"
-         [hidden]="!(postNodeInitHttp.error | async)?.errors?.blobStorageRegion">
-        {{(postNodeInitHttp.error | async)?.errors?.blobStorageRegion}}
+      <div class="form-inline">
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="chain"
+           id="cred-mode-chain">
+        <label for="cred-mode-chain">Standard Credential Chain</label>
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="static"
+           id="cred-mode-static">
+        <label for="cred-mode-static">Static Credentials</label>
+        <input
+           type="radio"
+           formControlName="blobStorageCredentialMode"
+           value="anonymous"
+           id="cred-mode-anonymous">
+        <label for="cred-mode-anonymous">Anonymous</label>
       </div>
       <div
-         class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageRegion">
-        {{(postClusterInitHttp.error | async)?.errors?.blobStorageRegion}}
+         *ngIf="group.get('blobStorageCredentialMode').value === 'static'"
+         class="indent-1-5 margin-top-half">
+        <div class="formrow">
+          <label for="blob-access-key-id">Access Key ID</label>
+          <input
+             type="text"
+             id="blob-access-key-id"
+             autocorrect="off"
+             spellcheck="false"
+             autocapitalize="off"
+             autocomplete="off"
+             formControlName="blobStorageAccessKeyId">
+          <div
+             class="error error-form"
+             [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId">
+            {{(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId}}
+          </div>
+        </div>
+        <div class="formrow">
+          <label for="blob-secret-access-key">Secret Access Key</label>
+          <input
+             type="password"
+             id="blob-secret-access-key"
+             autocomplete="new-password"
+             formControlName="blobStorageSecretAccessKey">
+          <div
+             class="error error-form"
+             [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageSecretAccessKey">
+            {{(postClusterInitHttp.error | async)?.errors?.blobStorageSecretAccessKey}}
+          </div>
+        </div>
       </div>
     </div>
-    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
-      <input
-         type="checkbox"
-         id="for-anonymous-Auth"
-         formControlName="blobStorageAnonymousAuth">
-      <label for="for-anonymous-Auth" class="margin-right-quarter">
-        Use Anonymous Authentication
-      </label>
-      <span
-          class="fa-stack icon-info"
-          ngbTooltip="Access the service without providing authentication credentials. Use only
-                      if the target bucket or endpoint explicitly allows public or anonymous access.."
-          placement="right">
-          <span class="icon fa-circle-thin fa-stack-2x"></span>
-          <span class="icon fa-info fa-stack-1x"></span>
-      </span>
-      <div
-         class="error error-form"
-         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAnonymousAuth">
-        {{(postClusterInitHttp.error | async)?.errors.blobStorageAnonymousAuth}}
-      </div>
-    </div>
-      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
+      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
           <input
                   type="checkbox"
                   id="for-force-path-style"
-                  formControlName="blobStorageForcePathStyle">
+                  formControlName="blobStoragePathStyleAddressing">
           <label for="for-force-path-style" class="margin-right-quarter">
               Use Path Style Addressing
           </label>
@@ -209,21 +285,23 @@
               ngbTooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while
                           virtual-hosted–style URLs look like https://bucket-name.s3.example.com/key.
                           Some S3-compatible storage services or DNS configurations may require path-style addressing."
-              placement="right">
+              placement="right"
+              container="body">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
               <span class="icon fa-info fa-stack-1x"></span>
           </span>
           <div
               class="error error-form"
-              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageForcePathStyle">
-          {{(postClusterInitHttp.error | async)?.errors.blobStorageForcePathStyle}}
+              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStoragePathStyleAddressing">
+          {{(postClusterInitHttp.error | async)?.errors.blobStoragePathStyleAddressing}}
           </div>
       </div>
       <div class="formrow">
           <input
                   type="checkbox"
                   id="for-disable-ssl-verify"
-                  formControlName="blobStorageDisableSslVerify">
+                  formControlName="blobStorageDisableSslVerify"
+                  [attr.disabled]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://') ? true : null">
           <label for="for-disable-ssl-verify" class="margin-right-quarter">
               Disable SSL Verification
           </label>
@@ -232,7 +310,8 @@
             ngbTooltip="Disables certificate verification for SSL/TLS connections.
             Useful for testing or self-signed certificates, but not recommended
             for production."
-            placement="right">
+            placement="right"
+            container="body">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
               <span class="icon fa-info fa-stack-1x"></span>
           </span>
@@ -261,7 +340,7 @@
       <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
         <div class="formrow">
           <div class="row">
-            <label for="num_storage_partitions">Storage Partitions
+            <label for="num_storage_partitions">Storage Partitions<sup>*</sup>
                 <span class="fa-stack icon-info"
                       [ngbTooltip]="storageTooltip"
                       placement="right">

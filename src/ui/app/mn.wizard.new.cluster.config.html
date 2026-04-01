@@ -95,7 +95,6 @@ licenses/APL2.txt.
             </div>
             <div class="row">
               <h3>Blob Storage Configuration</h3>
-              <small class="text-smaller">Config cannot be changed after setup</small>
             </div>
             <br>
             <mn-columnar-bucket-config
@@ -108,7 +107,8 @@ licenses/APL2.txt.
                [control]="newClusterConfigForm.get('storageMode')">
             </mn-storage-mode>
             -->
-            <br>
+            <sup><b>*</b></sup><small class="text-smaller">- config item cannot be changed after setup</small>
+            <br><br>
             <h3>Local Storage Configuration</h3>
             <br>
             <mn-node-storage-config

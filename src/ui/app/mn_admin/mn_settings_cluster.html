@@ -47,9 +47,208 @@
         </div>
 
         <div
-           ng-if="rbac.cluster.settings.read"
-           ui-view="notifications"
-           class="margin-top-1-5"></div>
+           ng-if="settingsClusterCtl.isColumnar && rbac.cluster.settings.read"
+           class="margin-top-1">
+          <label>Blob Storage Settings</label>
+          <p class="desc">These settings were configured during cluster initialization. Some settings can be modified below.</p>
+          <div ng-if="settingsClusterCtl.blobStorageSettings">
+            <div class="formrow">
+              <label>Storage Scheme</label>
+              <div class="form-inline">
+                <input
+                   type="radio"
+                   id="scheme-s3"
+                   name="blob-storage-scheme"
+                   disabled
+                   ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3' && !settingsClusterCtl.blobStorageIsS3Compat">
+                <label for="scheme-s3">AWS S3</label>
+                <input
+                   type="radio"
+                   id="scheme-s3-compat"
+                   name="blob-storage-scheme"
+                   disabled
+                   ng-checked="settingsClusterCtl.blobStorageIsS3Compat">
+                <label for="scheme-s3-compat">S3-Compatible Storage</label>
+                <input
+                   type="radio"
+                   id="scheme-azblob"
+                   name="blob-storage-scheme"
+                   disabled
+                   ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
+                <label for="scheme-azblob">Azure Blob Storage</label>
+                <input
+                   type="radio"
+                   id="scheme-gs"
+                   name="blob-storage-scheme"
+                   disabled
+                   ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'gs'">
+                <label for="scheme-gs">Google Cloud Storage (GCS)</label>
+              </div>
+            </div>
+            <div class="formrow">
+              <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Container Name' : 'Bucket Name'}}</label>
+              <input
+                 type="text"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageBucket"
+                 disabled>
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3'">
+              <label>Bucket Region</label>
+              <input
+                 type="text"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageRegion"
+                 disabled>
+            </div>
+            <div class="formrow">
+              <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix'}}</label>
+              <input
+                 type="text"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePrefix"
+                 disabled>
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat || settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
+              <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint'}}</label>
+              <input
+                 type="text"
+                 autocorrect="off"
+                 spellcheck="false"
+                 autocapitalize="off"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageEndpoint"
+                 ng-disabled="!rbac.cluster.settings.write"
+                 placeholder="{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082'}}">
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+              <input
+                 type="checkbox"
+                 id="for-force-path-style"
+                 ng-disabled="!rbac.cluster.settings.write"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePathStyleAddressing">
+              <label for="for-force-path-style" class="margin-right-quarter">
+                Use Path Style Addressing
+              </label>
+              <span
+                 class="fa-stack icon-info"
+                 uib-tooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while virtual-hosted-style URLs look like https://bucket-name.s3.example.com/key. Some S3-compatible storage services require path-style addressing."
+                 tooltip-placement="auto right"
+                 tooltip-trigger="mouseenter">
+                <span class="icon fa-circle-thin fa-stack-2x"></span>
+                <span class="icon fa-info fa-stack-1x"></span>
+              </span>
+            </div>
+            <div class="formrow" ng-if="!settingsClusterCtl.blobStorageEndpointIsHttp">
+              <input
+                 type="checkbox"
+                 id="for-disable-ssl-verify"
+                 ng-disabled="!rbac.cluster.settings.write"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify">
+              <label for="for-disable-ssl-verify" class="margin-right-quarter">
+                Disable SSL Verification
+              </label>
+              <span
+                 class="fa-stack icon-info"
+                 uib-tooltip="Disables certificate verification for SSL/TLS connections. Useful for testing or self-signed certificates, but not recommended for production."
+                 tooltip-placement="auto right"
+                 tooltip-trigger="mouseenter">
+                <span class="icon fa-circle-thin fa-stack-2x"></span>
+                <span class="icon fa-info fa-stack-1x"></span>
+              </span>
+              <div ng-if="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify" class="margin-top-half">
+                <p class="error">Warning: Disabling SSL verification in a production environment is highly insecure and exposes the system to serious risks, including Man-in-the-Middle (MITM) attacks.</p>
+              </div>
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat && !settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify && !settingsClusterCtl.blobStorageEndpointIsHttp">
+              <label>Storage Endpoint Certificate(s)
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </label>
+              <textarea
+                 rows="6"
+                 style="font-family: monospace; font-size: 11px;"
+                 autocorrect="off"
+                 spellcheck="false"
+                 autocapitalize="off"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageCertificates"
+                 ng-disabled="!rbac.cluster.settings.write"
+                 placeholder="-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
+...
+-----END CERTIFICATE-----"></textarea>
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3'">
+              <label>Authentication
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.) to obtain credentials automatically. Static Credentials allows you to supply an access key ID and secret access key directly. Anonymous accesses the storage without any credentials."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </label>
+              <div class="form-inline">
+                <input
+                   type="radio"
+                   name="blob-storage-credential-mode"
+                   id="cred-mode-chain"
+                   value="chain"
+                   ng-model="settingsClusterCtl.blobStorageCredentialMode"
+                   ng-disabled="!rbac.cluster.settings.write">
+                <label for="cred-mode-chain">Standard Credential Chain</label>
+                <input
+                   type="radio"
+                   name="blob-storage-credential-mode"
+                   id="cred-mode-static"
+                   value="static"
+                   ng-model="settingsClusterCtl.blobStorageCredentialMode"
+                   ng-disabled="!rbac.cluster.settings.write">
+                <label for="cred-mode-static">Static Credentials</label>
+                <input
+                   type="radio"
+                   name="blob-storage-credential-mode"
+                   id="cred-mode-anonymous"
+                   value="anonymous"
+                   ng-model="settingsClusterCtl.blobStorageCredentialMode"
+                   ng-disabled="!rbac.cluster.settings.write">
+                <label for="cred-mode-anonymous">Anonymous</label>
+              </div>
+              <div
+                 ng-if="settingsClusterCtl.blobStorageCredentialMode === 'static'"
+                 class="indent-1-5 margin-top-half">
+                <div class="formrow">
+                  <label for="blob-access-key-id">Access Key ID</label>
+                  <input
+                     type="text"
+                     id="blob-access-key-id"
+                     autocorrect="off"
+                     spellcheck="false"
+                     autocapitalize="off"
+                     autocomplete="off"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageAccessKeyId"
+                     ng-disabled="!rbac.cluster.settings.write">
+                </div>
+                <div class="formrow">
+                  <label for="blob-secret-access-key">Secret Access Key</label>
+                  <input
+                     type="password"
+                     id="blob-secret-access-key"
+                     autocomplete="new-password"
+                     placeholder="{{settingsClusterCtl.initialBlobStorageSettings.blobStorageSecretAccessKey ? 'Enter new value to change' : ''}}"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageSecretAccessKey"
+                     ng-disabled="!rbac.cluster.settings.write">
+                </div>
+              </div>
+            </div>
+            <div class="margin-bottom-3"></div>
+          </div>
+        </div>
       </div>
 
       <div class="vertical-page-splitter resp-hide-med">&nbsp;</div>
@@ -161,6 +360,12 @@
             </div>
           </div>
         </div>
+
+        <div
+           ng-if="rbac.cluster.settings.read"
+           ui-view="notifications"
+           class="margin-top-1-5"></div>
+
 <div ng-if="!settingsClusterCtl.isColumnar" >
         <div ng-if="rbac.cluster.admin.memcached.read" class="margin-top-1">
           <label>Data Settings</label>

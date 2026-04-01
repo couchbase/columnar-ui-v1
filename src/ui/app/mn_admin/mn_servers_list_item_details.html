@@ -61,7 +61,7 @@
         <span
            ng-repeat="service in (node.services | mnOrderServices)">
           <!--{{service | mnFormatServices}}-->
-          {{(serversListItemDetailsCtl.getServiceQuota(cbas)|mnFormatQuantity) || 'unknown'}}
+          {{(serversListItemDetailsCtl.getServiceQuota('cbas')|mnFormatQuantity) || 'unknown'}}
           {{$last ? '' : '| '}}
         </span>
       </div>

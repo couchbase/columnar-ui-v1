@@ -110,8 +110,12 @@ var wizardForm = {
       blobStorageRegion: new FormControl(''),
       blobStorageScheme: new FormControl("s3", [Validators.required]),
       blobStorageAnonymousAuth: new FormControl(false),
-      blobStorageForcePathStyle: new FormControl(false),
+      blobStorageCredentialMode: new FormControl('chain'),
+      blobStorageAccessKeyId: new FormControl(''),
+      blobStorageSecretAccessKey: new FormControl(''),
+      blobStoragePathStyleAddressing: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
+      blobStorageCertificates: new FormControl(''),
       numStoragePartitions: new FormControl(128),
     }, { validators: [blobStorageValidator] })
   }),
@@ -135,8 +139,10 @@ var wizardForm = {
 
 const bucketDetails = wizardForm.newClusterConfig.get('bucketDetails');
 const schemeControl = bucketDetails.get('blobStorageScheme');
-schemeControl.valueChanges.subscribe(() => {
+const pathStyleControl = bucketDetails.get('blobStoragePathStyleAddressing');
+schemeControl.valueChanges.subscribe((scheme) => {
   bucketDetails.updateValueAndValidity();
+  pathStyleControl.setValue(scheme === 's3-compat');
 });
 const endpointControl = bucketDetails.get('blobStorageEndpoint');
 endpointControl.valueChanges.subscribe(() => {
@@ -422,12 +428,23 @@ class MnWizardService {
     }
     if (data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat") {
       columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
-      columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageAnonymousAuth);
-      columnarSettingsForm.set('blobStorageForcePathStyle', data.blobStorageForcePathStyle);
+      columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageCredentialMode === 'anonymous');
+      columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
+      if (data.blobStorageCredentialMode === 'static') {
+        columnarSettingsForm.set('blobStorageAccessKeyId', data.blobStorageAccessKeyId);
+        columnarSettingsForm.set('blobStorageSecretAccessKey', data.blobStorageSecretAccessKey);
+      }
     }
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
     columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
     columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
+    if (data.blobStorageCertificates) {
+      // Split PEM text into individual certificates and send each as a separate form value
+      const certs = data.blobStorageCertificates.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
+      if (certs) {
+        certs.forEach(cert => columnarSettingsForm.append('blobStorageCertificate', cert.trim()));
+      }
+    }
     columnarSettingsForm.set('numStoragePartitions', data.numStoragePartitions);
     return this.http.post('/settings/analytics', columnarSettingsForm.toString()).pipe(
         switchMap(() => {
@@ -436,9 +453,13 @@ class MnWizardService {
           delete data.blobStorageBucket;
           delete data.blobStoragePrefix;
           delete data.blobStorageAnonymousAuth;
+          delete data.blobStorageCredentialMode;
+          delete data.blobStorageAccessKeyId;
+          delete data.blobStorageSecretAccessKey;
           delete data.blobStorageRegion;
-          delete data.blobStorageForcePathStyle;
+          delete data.blobStoragePathStyleAddressing;
           delete data.blobStorageDisableSslVerify;
+          delete data.blobStorageCertificates;
           delete data.numStoragePartitions;
           return this.http.post('/clusterInit', data);
         })
