@@ -255,14 +255,21 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       }
     });
 
-    // Only send credentials if the user explicitly changed them
-    if (credentialsChanged) {
-      if (currentSettings.blobStorageAccessKeyId !== undefined) {
+    // Only send credentials if the user explicitly changed them.
+    // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
+    // Chain mode (clearing static creds): send both as "" so the backend clears them together.
+    // Static mode: send both non-empty values.
+    if (credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
+      if (currentSettings.blobStorageAccessKeyId &&
+          currentSettings.blobStorageSecretAccessKey &&
+          currentSettings.blobStorageSecretAccessKey !== '***') {
+        // static credentials
         formParams.append('blobStorageAccessKeyId', currentSettings.blobStorageAccessKeyId);
-      }
-      // Don't send the masked placeholder back
-      if (currentSettings.blobStorageSecretAccessKey && currentSettings.blobStorageSecretAccessKey !== '***') {
         formParams.append('blobStorageSecretAccessKey', currentSettings.blobStorageSecretAccessKey);
+      } else if (!currentSettings.blobStorageAccessKeyId) {
+        // switching to chain: explicitly clear both together
+        formParams.append('blobStorageAccessKeyId', '');
+        formParams.append('blobStorageSecretAccessKey', '');
       }
     }
 
