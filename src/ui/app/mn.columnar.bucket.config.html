@@ -247,6 +247,11 @@
              formControlName="blobStorageAccessKeyId">
           <div
              class="error error-form"
+             [hidden]="!(group.errors?.blobStorageAccessKeyIdRequired || group.errors?.blobStorageStaticCredentialsRequired)">
+            Access Key ID is required when using Static Credentials.
+          </div>
+          <div
+             class="error error-form"
              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId">
             {{(postClusterInitHttp.error | async)?.errors?.blobStorageAccessKeyId}}
           </div>
@@ -258,6 +263,11 @@
              id="blob-secret-access-key"
              autocomplete="new-password"
              formControlName="blobStorageSecretAccessKey">
+          <div
+             class="error error-form"
+             [hidden]="!(group.errors?.blobStorageSecretAccessKeyRequired || group.errors?.blobStorageStaticCredentialsRequired)">
+            Secret Access Key is required when using Static Credentials.
+          </div>
           <div
              class="error error-form"
              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageSecretAccessKey">
