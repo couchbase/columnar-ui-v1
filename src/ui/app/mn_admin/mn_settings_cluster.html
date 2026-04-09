@@ -117,6 +117,27 @@
                  ng-disabled="!rbac.cluster.settings.write"
                  placeholder="{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082'}}">
             </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
+              <label>Azure Client ID
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. Leave blank to use the system-assigned managed identity or the default Azure credential chain."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </label>
+              <input
+                 type="text"
+                 autocorrect="off"
+                 spellcheck="false"
+                 autocapitalize="off"
+                 autocomplete="off"
+                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageAzureClientId"
+                 ng-disabled="!rbac.cluster.settings.write"
+                 placeholder="e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+            </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
               <input
                  type="checkbox"
