@@ -235,11 +235,20 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       'blobStorageAnonymousAuth'
     ];
 
+    // Determine if the endpoint is plain HTTP — SSL settings are irrelevant in that case
+    var endpointIsHttp = currentSettings.blobStorageEndpoint &&
+        !currentSettings.blobStorageEndpoint.toLowerCase().startsWith('https://');
+
     nonCredentialFields.forEach(function(field) {
       if (currentSettings[field] === undefined || currentSettings[field] === null) {
         return;
       }
       if (field === 'blobStorageCertificates') {
+        if (endpointIsHttp) {
+          // Explicitly clear certificates when endpoint is plain HTTP
+          formParams.append('blobStorageCertificate', '');
+          return;
+        }
         // Split PEM text into individual certs; backend expects blobStorageCertificate repeated
         var certsText = currentSettings[field];
         if (certsText && typeof certsText === 'string' && certsText.trim()) {
@@ -250,19 +259,29 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
             });
           }
         }
+      } else if (field === 'blobStorageDisableSslVerify') {
+        // Force false when endpoint is plain HTTP
+        formParams.append(field, endpointIsHttp ? false : currentSettings[field]);
       } else {
         formParams.append(field, currentSettings[field]);
       }
     });
 
-    // Only send credentials if the user explicitly changed them
-    if (credentialsChanged) {
-      if (currentSettings.blobStorageAccessKeyId !== undefined) {
+    // Only send credentials if the user explicitly changed them.
+    // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
+    // Chain mode (clearing static creds): send both as "" so the backend clears them together.
+    // Static mode: send both non-empty values. If both are empty, credentials are unchanged.
+    if (credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
+      if (currentSettings.blobStorageAccessKeyId &&
+          currentSettings.blobStorageSecretAccessKey) {
+        // static credentials — user provided new values for both
         formParams.append('blobStorageAccessKeyId', currentSettings.blobStorageAccessKeyId);
-      }
-      // Don't send the masked placeholder back
-      if (currentSettings.blobStorageSecretAccessKey && currentSettings.blobStorageSecretAccessKey !== '***') {
         formParams.append('blobStorageSecretAccessKey', currentSettings.blobStorageSecretAccessKey);
+      } else if (!currentSettings.blobStorageAccessKeyId &&
+                 !currentSettings.blobStorageSecretAccessKey) {
+        // switching to chain: explicitly clear both together
+        formParams.append('blobStorageAccessKeyId', '');
+        formParams.append('blobStorageSecretAccessKey', '');
       }
     }
 

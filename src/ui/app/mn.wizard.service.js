@@ -29,12 +29,28 @@ function blobStorageValidator(group) {
   const scheme = group.get('blobStorageScheme')?.value;
   const endpoint = group.get('blobStorageEndpoint')?.value;
   const region = group.get('blobStorageRegion')?.value;
+  const credentialMode = group.get('blobStorageCredentialMode')?.value;
+  const accessKeyId = group.get('blobStorageAccessKeyId')?.value;
+  const secretAccessKey = group.get('blobStorageSecretAccessKey')?.value;
+
   if ((scheme === 's3-compat' || scheme === 'azblob') && !endpoint) {
     return { blobStorageEndpointRequired: true };
   }
 
   if ((scheme === 's3' || scheme === 's3-compat') && !region) {
     return { blobStorageBucketRequired: true };
+  }
+
+  if ((scheme === 's3' || scheme === 's3-compat') && credentialMode === 'static') {
+    if (!accessKeyId && !secretAccessKey) {
+      return { blobStorageStaticCredentialsRequired: true };
+    }
+    if (!accessKeyId) {
+      return { blobStorageAccessKeyIdRequired: true };
+    }
+    if (!secretAccessKey) {
+      return { blobStorageSecretAccessKeyRequired: true };
+    }
   }
 
   return null;
@@ -146,6 +162,18 @@ schemeControl.valueChanges.subscribe((scheme) => {
 });
 const endpointControl = bucketDetails.get('blobStorageEndpoint');
 endpointControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
+const credentialModeControl = bucketDetails.get('blobStorageCredentialMode');
+credentialModeControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
+const accessKeyIdControl = bucketDetails.get('blobStorageAccessKeyId');
+accessKeyIdControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
+const secretAccessKeyControl = bucketDetails.get('blobStorageSecretAccessKey');
+secretAccessKeyControl.valueChanges.subscribe(() => {
   bucketDetails.updateValueAndValidity();
 });
 
@@ -437,8 +465,13 @@ class MnWizardService {
     }
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
     columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
-    columnarSettingsForm.set('blobStorageDisableSslVerify', data.blobStorageDisableSslVerify);
-    if (data.blobStorageCertificates) {
+    const endpointIsHttp = data.blobStorageEndpoint &&
+        !data.blobStorageEndpoint.toLowerCase().startsWith('https://');
+    columnarSettingsForm.set('blobStorageDisableSslVerify', endpointIsHttp ? false : data.blobStorageDisableSslVerify);
+    if (endpointIsHttp) {
+      // Explicitly clear certificates when endpoint is plain HTTP
+      columnarSettingsForm.set('blobStorageCertificate', '');
+    } else if (data.blobStorageCertificates) {
       // Split PEM text into individual certificates and send each as a separate form value
       const certs = data.blobStorageCertificates.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
       if (certs) {

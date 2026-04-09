@@ -152,6 +152,19 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
         vm.blobStorageSettings,
         vm.credentialsChanged
       ).then(function () {
+        // If new credentials were provided, they are now the existing ones on the server.
+        if (vm.blobStorageSettings.blobStorageAccessKeyId && vm.blobStorageSettings.blobStorageSecretAccessKey) {
+          vm.hasExistingCredentials = true;
+          vm.existingAccessKeyId = vm.blobStorageSettings.blobStorageAccessKeyId;
+        }
+        // If switching away from static (anonymous/chain), credentials are cleared.
+        if (vm.blobStorageCredentialMode !== 'static') {
+          vm.hasExistingCredentials = false;
+          vm.existingAccessKeyId = '';
+        }
+        // Keep access key ID visible (not sensitive), clear secret key
+        vm.blobStorageSettings.blobStorageSecretAccessKey = '';
+        vm.editingCredentials = false;
         vm.initialBlobStorageSettings = _.cloneDeep(vm.blobStorageSettings);
         vm.credentialsChanged = false;
       }, function (resp) {
@@ -349,10 +362,15 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
             vm.blobStorageEndpointIsHttp = isEndpointHttp(val);
           });
 
-          // Mask the secret access key for display
-          if (settings.blobStorageSecretAccessKey) {
-            vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
-          }
+          // Track whether static credentials were previously configured on the server.
+          // Access key ID is not sensitive, so pre-populate it. Secret key stays empty.
+          vm.hasExistingCredentials = !!(settings.blobStorageAccessKeyId && settings.blobStorageSecretAccessKey);
+          vm.existingAccessKeyId = settings.blobStorageAccessKeyId || '';
+          vm.blobStorageSettings.blobStorageSecretAccessKey = '';
+          // editingCredentials becomes true once the user modifies either credential field,
+          // signaling that the "Unchanged" placeholder on the secret key should be removed
+          // (since credentials must be supplied as a pair).
+          vm.editingCredentials = false;
 
           // Register init checker for blob storage settings
           mnSettingsClusterService.registerInitChecker(function() {
@@ -360,16 +378,67 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           });
 
           // Watch for credential changes
+          function updateEditingCredentials() {
+            if (vm.hasExistingCredentials) {
+              var keyIdChanged = vm.blobStorageSettings.blobStorageAccessKeyId !== vm.existingAccessKeyId;
+              var secretProvided = !!vm.blobStorageSettings.blobStorageSecretAccessKey;
+              vm.editingCredentials = keyIdChanged || secretProvided;
+            }
+          }
+
           $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageAccessKeyId', function(newVal, oldVal) {
-            if (newVal !== oldVal && newVal !== undefined && newVal !== vm.initialBlobStorageSettings.blobStorageAccessKeyId) {
+            if (newVal !== oldVal && newVal !== undefined) {
               vm.credentialsChanged = true;
             }
+            updateEditingCredentials();
           });
           $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageSecretAccessKey', function(newVal, oldVal) {
-            if (newVal !== oldVal && newVal !== undefined && newVal !== '***') {
+            if (newVal !== oldVal && newVal !== undefined) {
               vm.credentialsChanged = true;
             }
+            updateEditingCredentials();
           });
+
+          function validateStaticCredentials() {
+            if (vm.blobStorageCredentialMode === 'static') {
+              var accessKeyId = vm.blobStorageSettings.blobStorageAccessKeyId;
+              var secretAccessKey = vm.blobStorageSettings.blobStorageSecretAccessKey;
+              var hasKeyId = !!accessKeyId;
+              var hasSecret = !!secretAccessKey;
+
+              if (vm.hasExistingCredentials) {
+                // Access key ID is pre-populated with the existing value.
+                // If user hasn't touched anything (key ID matches existing, secret empty), keep unchanged — valid.
+                var keyIdUnchanged = accessKeyId === vm.existingAccessKeyId;
+                if (keyIdUnchanged && !hasSecret) {
+                  // No changes — keep existing credentials
+                  vm.blobStorageCredentialErrors = null;
+                } else if (hasKeyId && !hasSecret) {
+                  // User changed key ID but didn't provide secret — need both
+                  vm.blobStorageCredentialErrors = { secretAccessKey: 'Secret Access Key is also required when changing credentials.' };
+                } else if (!hasKeyId) {
+                  // User cleared key ID — need both for a valid pair
+                  vm.blobStorageCredentialErrors = { accessKeyId: 'Access Key ID is required when using Static Credentials.' };
+                } else {
+                  // Both provided — valid new credentials
+                  vm.blobStorageCredentialErrors = null;
+                }
+              } else {
+                // No existing credentials — both fields are required.
+                if (!hasKeyId && !hasSecret) {
+                  vm.blobStorageCredentialErrors = { both: 'Access Key ID and Secret Access Key are required when using Static Credentials.' };
+                } else if (!hasKeyId) {
+                  vm.blobStorageCredentialErrors = { accessKeyId: 'Access Key ID is required when using Static Credentials.' };
+                } else if (!hasSecret) {
+                  vm.blobStorageCredentialErrors = { secretAccessKey: 'Secret Access Key is required when using Static Credentials.' };
+                } else {
+                  vm.blobStorageCredentialErrors = null;
+                }
+              }
+            } else {
+              vm.blobStorageCredentialErrors = null;
+            }
+          }
 
           // Watch for credential mode changes
           $scope.$watch('settingsClusterCtl.blobStorageCredentialMode', function(newVal, oldVal) {
@@ -377,16 +446,36 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
               if (newVal === 'anonymous') {
                 vm.blobStorageSettings.blobStorageAnonymousAuth = true;
                 vm.blobStorageSettings.blobStorageAccessKeyId = '';
-                vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
+                vm.blobStorageSettings.blobStorageSecretAccessKey = '';
+                vm.hasExistingCredentials = false;
+                vm.editingCredentials = false;
               } else if (newVal === 'chain') {
                 vm.blobStorageSettings.blobStorageAnonymousAuth = false;
                 vm.blobStorageSettings.blobStorageAccessKeyId = '';
-                vm.blobStorageSettings.blobStorageSecretAccessKey = '***';
+                vm.blobStorageSettings.blobStorageSecretAccessKey = '';
+                vm.hasExistingCredentials = false;
+                vm.editingCredentials = false;
               } else if (newVal === 'static') {
                 vm.blobStorageSettings.blobStorageAnonymousAuth = false;
+                // Restore existing access key ID if available
+                if (vm.existingAccessKeyId) {
+                  vm.blobStorageSettings.blobStorageAccessKeyId = vm.existingAccessKeyId;
+                  vm.hasExistingCredentials = true;
+                }
               }
             }
+            validateStaticCredentials();
           });
+
+          $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageAccessKeyId', function() {
+            validateStaticCredentials();
+          });
+          $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageSecretAccessKey', function() {
+            validateStaticCredentials();
+          });
+
+          // Run initial validation
+          validateStaticCredentials();
         });
     }
 
