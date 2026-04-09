@@ -129,6 +129,7 @@ var wizardForm = {
       blobStorageCredentialMode: new FormControl('chain'),
       blobStorageAccessKeyId: new FormControl(''),
       blobStorageSecretAccessKey: new FormControl(''),
+      blobStorageAzureClientId: new FormControl(''),
       blobStoragePathStyleAddressing: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
       blobStorageCertificates: new FormControl(''),
@@ -462,6 +463,9 @@ class MnWizardService {
         columnarSettingsForm.set('blobStorageSecretAccessKey', data.blobStorageSecretAccessKey);
       }
     }
+    if (data.blobStorageScheme === "azblob" && data.blobStorageAzureClientId) {
+      columnarSettingsForm.set('blobStorageAzureClientId', data.blobStorageAzureClientId);
+    }
     columnarSettingsForm.set('blobStorageBucket', data.blobStorageBucket);
     columnarSettingsForm.set('blobStoragePrefix', data.blobStoragePrefix);
     const endpointIsHttp = data.blobStorageEndpoint &&
@@ -487,6 +491,7 @@ class MnWizardService {
           delete data.blobStorageCredentialMode;
           delete data.blobStorageAccessKeyId;
           delete data.blobStorageSecretAccessKey;
+          delete data.blobStorageAzureClientId;
           delete data.blobStorageRegion;
           delete data.blobStoragePathStyleAddressing;
           delete data.blobStorageDisableSslVerify;

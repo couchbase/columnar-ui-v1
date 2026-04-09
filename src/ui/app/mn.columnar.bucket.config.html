@@ -1,4 +1,6 @@
 
+
+
 <div [formGroup]="group">
   <div class="formrow">
     <div class="row">
@@ -109,6 +111,35 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStorageBucket}}
       </div>
     </div>
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 'azblob'">
+      <div class="row">
+        <label for="blob-azure-client-id">
+          Azure Client ID
+          <span
+              class="fa-stack icon-info"
+              ngbTooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. Leave blank to use the system-assigned managed identity or the default Azure credential chain."
+              placement="right"
+              container="body">
+            <span class="icon fa-circle-thin fa-stack-2x"></span>
+            <span class="icon fa-info fa-stack-1x"></span>
+          </span>
+        </label>
+      </div>
+      <input
+         type="text"
+         id="blob-azure-client-id"
+         autocorrect="off"
+         spellcheck="false"
+         autocapitalize="off"
+         autocomplete="off"
+         formControlName="blobStorageAzureClientId"
+         placeholder="e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
+      <div
+         class="error error-form"
+         [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageAzureClientId">
+        {{(postClusterInitHttp.error | async)?.errors?.blobStorageAzureClientId}}
+      </div>
+    </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
         <label for="bucket_region">Bucket Region<sup>*</sup></label>
@@ -139,8 +170,8 @@
               <span
                       class="fa-stack icon-info"
                       [ngbTooltip]="group.get('blobStorageScheme').value === 'azblob'
-    ? 'An optional prefix in the container where Enterprise Analytics will store its data. Leave blank to use the root of the container.'
-    : 'An optional prefix in the bucket where Enterprise Analytics will store its data. Leave blank to use the root of the bucket.'"
+    ? 'Optional. The prefix in the container where Enterprise Analytics will store its data. Leave blank to use the root of the container.'
+    : 'Optional. The prefix in the bucket where Enterprise Analytics will store its data. Leave blank to use the root of the bucket.'"
                       placement="right"
                       container="body">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -332,5 +363,44 @@
               {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
           </div>
       </div>
-    </div>
-</div>  
+
+      <div class="formrow">
+        <span
+          class="disclosure inline"
+          [ngClass]="{'disclosed': (showAdvanced.state | async)}"
+          (click)="showAdvanced.click.next()">
+          Advanced
+        </span>
+      </div>
+      <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
+        <div class="formrow">
+          <div class="row">
+            <label for="num_storage_partitions">Storage Partitions<sup>*</sup>
+                <span class="fa-stack icon-info"
+                      ngbTooltip="The number of storage partitions used to distribute data in the blob storage. Range: 1–1024. The default value (128) provides a balance between scalability and object storage API calls. For deployments targeting total number of cores much greater than 128 across all nodes in the cluster, this value may be increased to allow for higher degree of scalability. For development environments, this value may be reduced. Caution: this setting cannot be changed after cluster initialization."
+                      placement="right"
+                      container="body">
+                 <span class="icon fa-circle-thin fa-stack-2x"></span>
+                 <span class="icon fa-info fa-stack-1x"></span>
+               </span>
+            </label>
+          </div>
+          <input
+            type="number"
+            name="numStoragePartitions"
+            id="num_storage_partitions"
+            formControlName="numStoragePartitions">
+          <div
+            class="error error-form"
+            [hidden]="!(postNodeInitHttp.error | async)?.errors?.numStoragePartitions">
+            {{(postNodeInitHttp.error | async)?.errors?.numStoragePartitions}}
+          </div>
+          <div
+            class="error error-form"
+            [hidden]="!(postClusterInitHttp.error | async)?.errors?.numStoragePartitions">
+            {{(postClusterInitHttp.error | async)?.errors?.numStoragePartitions}}
+          </div>
+        </div>
+      </div>
+  </div>
+</div>

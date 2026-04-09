@@ -267,6 +267,11 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       }
     });
 
+    // Send Azure client ID when using Azure (it's optional — omit if empty)
+    if (currentSettings.blobStorageScheme === 'azblob') {
+      formParams.append('blobStorageAzureClientId', currentSettings.blobStorageAzureClientId || '');
+    }
+
     // Only send credentials if the user explicitly changed them.
     // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
     // Chain mode (clearing static creds): send both as "" so the backend clears them together.
