@@ -472,14 +472,17 @@ class MnWizardService {
     const endpointIsHttp = data.blobStorageEndpoint &&
         !data.blobStorageEndpoint.toLowerCase().startsWith('https://');
     columnarSettingsForm.set('blobStorageDisableSslVerify', endpointIsHttp ? false : data.blobStorageDisableSslVerify);
-    if (endpointIsHttp) {
-      // Explicitly clear certificates when endpoint is plain HTTP
-      columnarSettingsForm.set('blobStorageCertificate', '');
-    } else if (data.blobStorageCertificates) {
-      // Split PEM text into individual certificates and send each as a separate form value
-      const certs = data.blobStorageCertificates.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
-      if (certs) {
-        certs.forEach(cert => columnarSettingsForm.append('blobStorageCertificate', cert.trim()));
+    // Certificates are only applicable for s3-compat (schemeConflictErr for other schemes)
+    if (data.blobStorageScheme === 's3-compat') {
+      if (endpointIsHttp) {
+        // Explicitly clear certificates when endpoint is plain HTTP
+        columnarSettingsForm.set('blobStorageCertificate', '');
+      } else if (data.blobStorageCertificates) {
+        // Split PEM text into individual certificates and send each as a separate form value
+        const certs = data.blobStorageCertificates.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
+        if (certs) {
+          certs.forEach(cert => columnarSettingsForm.append('blobStorageCertificate', cert.trim()));
+        }
       }
     }
     columnarSettingsForm.set('numStoragePartitions', data.numStoragePartitions);

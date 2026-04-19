@@ -226,57 +226,56 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
   function postBlobStorageSettings(currentSettings, credentialsChanged) {
     var formParams = new URLSearchParams();
 
-    // Always send all non-credential mutable fields with their current values
-    var nonCredentialFields = [
-      'blobStorageEndpoint',
-      'blobStorageDisableSslVerify',
-      'blobStorageCertificates',
-      'blobStoragePathStyleAddressing',
-      'blobStorageAnonymousAuth'
-    ];
+    var scheme = currentSettings.blobStorageScheme; // 's3', 'azblob', or 'gs'
+    var isS3 = scheme === 's3';
+    var isAzBlob = scheme === 'azblob';
 
     // Determine if the endpoint is plain HTTP — SSL settings are irrelevant in that case
     var endpointIsHttp = currentSettings.blobStorageEndpoint &&
         !currentSettings.blobStorageEndpoint.toLowerCase().startsWith('https://');
 
-    nonCredentialFields.forEach(function(field) {
-      if (currentSettings[field] === undefined || currentSettings[field] === null) {
-        return;
-      }
-      if (field === 'blobStorageCertificates') {
-        if (endpointIsHttp) {
-          // Explicitly clear certificates when endpoint is plain HTTP
-          formParams.append('blobStorageCertificate', '');
-          return;
-        }
-        // Split PEM text into individual certs; backend expects blobStorageCertificate repeated
-        var certsText = currentSettings[field];
-        if (certsText && typeof certsText === 'string' && certsText.trim()) {
-          var certs = certsText.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
-          if (certs) {
-            certs.forEach(function(cert) {
-              formParams.append('blobStorageCertificate', cert.trim());
-            });
-          }
-        }
-      } else if (field === 'blobStorageDisableSslVerify') {
-        // Force false when endpoint is plain HTTP
-        formParams.append(field, endpointIsHttp ? false : currentSettings[field]);
-      } else {
-        formParams.append(field, currentSettings[field]);
-      }
-    });
+    // Endpoint and SSL fields are valid for all schemes
+    formParams.append('blobStorageEndpoint', currentSettings.blobStorageEndpoint || '');
+    formParams.append('blobStorageDisableSslVerify', endpointIsHttp ? false : (currentSettings.blobStorageDisableSslVerify || false));
 
-    // Send Azure client ID when using Azure (it's optional — omit if empty)
-    if (currentSettings.blobStorageScheme === 'azblob') {
+    // Certificates: split PEM blocks; clear if endpoint is plain HTTP
+    if (endpointIsHttp) {
+      // Explicitly clear certificates when endpoint is plain HTTP
+      formParams.append('blobStorageCertificate', '');
+    } else if (currentSettings.blobStorageCertificates) {
+      // Split PEM text into individual certs; backend expects blobStorageCertificate repeated
+      var certsText = currentSettings.blobStorageCertificates;
+      if (certsText && typeof certsText === 'string' && certsText.trim()) {
+        var certs = certsText.match(/-----BEGIN [^\n]+-----[\s\S]*?-----END [^\n]+-----/g);
+        if (certs) {
+          certs.forEach(function(cert) {
+            formParams.append('blobStorageCertificate', cert.trim());
+          });
+        }
+      }
+    }
+
+    // blobStoragePathStyleAddressing is only valid for S3 (schemeConflictErr for azblob/gs)
+    if (isS3) {
+      formParams.append('blobStoragePathStyleAddressing', currentSettings.blobStoragePathStyleAddressing || false);
+    }
+
+    // blobStorageAnonymousAuth is incompatible with azblob (schemeConflictErr)
+    if (!isAzBlob) {
+      formParams.append('blobStorageAnonymousAuth', currentSettings.blobStorageAnonymousAuth || false);
+    }
+
+    // Azure client ID is only valid for azblob (schemeConflictErr for all others)
+    if (isAzBlob) {
       formParams.append('blobStorageAzureClientId', currentSettings.blobStorageAzureClientId || '');
     }
 
-    // Only send credentials if the user explicitly changed them.
+    // S3 credentials are only valid for S3 (schemeConflictErr for azblob/gs).
+    // Only send if the user explicitly changed them.
     // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
     // Chain mode (clearing static creds): send both as "" so the backend clears them together.
     // Static mode: send both non-empty values. If both are empty, credentials are unchanged.
-    if (credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
+    if (isS3 && credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
       if (currentSettings.blobStorageAccessKeyId &&
           currentSettings.blobStorageSecretAccessKey) {
         // static credentials — user provided new values for both
