@@ -131,6 +131,7 @@ var wizardForm = {
       blobStorageSecretAccessKey: new FormControl(''),
       blobStorageAzureClientId: new FormControl(''),
       blobStoragePathStyleAddressing: new FormControl(false),
+      blobStorageChecksumBehavior: new FormControl('when_required'),
       blobStorageDisableSslVerify: new FormControl(false),
       blobStorageCertificates: new FormControl(''),
       numStoragePartitions: new FormControl(128),
@@ -155,6 +156,8 @@ var wizardForm = {
 };
 
 const bucketDetails = wizardForm.newClusterConfig.get('bucketDetails');
+
+
 const schemeControl = bucketDetails.get('blobStorageScheme');
 const pathStyleControl = bucketDetails.get('blobStoragePathStyleAddressing');
 schemeControl.valueChanges.subscribe((scheme) => {
@@ -162,8 +165,12 @@ schemeControl.valueChanges.subscribe((scheme) => {
   pathStyleControl.setValue(scheme === 's3-compat');
 });
 const endpointControl = bucketDetails.get('blobStorageEndpoint');
-endpointControl.valueChanges.subscribe(() => {
+endpointControl.valueChanges.subscribe((endpoint) => {
   bucketDetails.updateValueAndValidity();
+  // When endpoint is an IP literal, the SDK always uses path-style; reflect that in the UI
+  if (MnHelperService.isIpLiteralEndpoint(endpoint)) {
+    pathStyleControl.setValue(true);
+  }
 });
 const credentialModeControl = bucketDetails.get('blobStorageCredentialMode');
 credentialModeControl.valueChanges.subscribe(() => {
@@ -458,7 +465,6 @@ class MnWizardService {
     if (data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat") {
       columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
       columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageCredentialMode === 'anonymous');
-      columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
       if (data.blobStorageCredentialMode === 'static') {
         columnarSettingsForm.set('blobStorageAccessKeyId', data.blobStorageAccessKeyId);
         columnarSettingsForm.set('blobStorageSecretAccessKey', data.blobStorageSecretAccessKey);
@@ -474,6 +480,8 @@ class MnWizardService {
     columnarSettingsForm.set('blobStorageDisableSslVerify', endpointIsHttp ? false : data.blobStorageDisableSslVerify);
     // Certificates are only applicable for s3-compat (schemeConflictErr for other schemes)
     if (data.blobStorageScheme === 's3-compat') {
+      columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
+      columnarSettingsForm.set('blobStorageChecksumBehavior', data.blobStorageChecksumBehavior);
       if (endpointIsHttp) {
         // Explicitly clear certificates when endpoint is plain HTTP
         columnarSettingsForm.set('blobStorageCertificate', '');
@@ -499,6 +507,7 @@ class MnWizardService {
           delete data.blobStorageAzureClientId;
           delete data.blobStorageRegion;
           delete data.blobStoragePathStyleAddressing;
+          delete data.blobStorageChecksumBehavior;
           delete data.blobStorageDisableSslVerify;
           delete data.blobStorageCertificates;
           delete data.numStoragePartitions;

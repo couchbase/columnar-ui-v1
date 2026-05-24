@@ -45,4 +45,9 @@ class MnColumnarbucketConfig extends MnLifeCycleHooksToStream {
     this.showAdvanced = mnHelperService.createToggle();
   }
 
+  isEndpointIpLiteral() {
+    if (!this.group) return false;
+    return MnHelperService.isIpLiteralEndpoint(this.group.get('blobStorageEndpoint').value);
+  }
+
 }

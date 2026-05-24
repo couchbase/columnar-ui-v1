@@ -34,6 +34,17 @@ class MnHelperService {
     UIRouter
   ]}
 
+  static isIpLiteralEndpoint(endpoint) {
+    if (!endpoint) return false;
+    try {
+      var url = new URL(endpoint);
+      var host = url.hostname.replace(/^\[|\]$/g, '');
+      return /^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.includes(':');
+    } catch (e) {
+      return false;
+    }
+  }
+
   static mnLocation() {
     let mnLocation = Object.assign({}, window.location);
     let justHostname = mnLocation.hostname;

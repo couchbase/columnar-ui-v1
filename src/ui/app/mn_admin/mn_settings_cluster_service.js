@@ -227,7 +227,7 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     var formParams = new URLSearchParams();
 
     var scheme = currentSettings.blobStorageScheme; // 's3', 'azblob', or 'gs'
-    var isS3 = scheme === 's3';
+    var isAwsS3OrS3Compat = scheme === 's3';
     var isAzBlob = scheme === 'azblob';
 
     // Determine if the endpoint is plain HTTP — SSL settings are irrelevant in that case
@@ -255,9 +255,12 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       }
     }
 
-    // blobStoragePathStyleAddressing is only valid for S3 (schemeConflictErr for azblob/gs)
-    if (isS3) {
+    // blobStoragePathStyleAddressing and blobStorageChecksumBehavior are only valid for S3-compat
+    // (S3 with a custom endpoint); schemeConflictErr for azblob/gs, not applicable for pure AWS S3
+    var isS3Compat = isAwsS3OrS3Compat && !!currentSettings.blobStorageEndpoint;
+    if (isS3Compat) {
       formParams.append('blobStoragePathStyleAddressing', currentSettings.blobStoragePathStyleAddressing || false);
+      formParams.append('blobStorageChecksumBehavior', currentSettings.blobStorageChecksumBehavior || 'when_required');
     }
 
     // blobStorageAnonymousAuth is incompatible with azblob (schemeConflictErr)
@@ -275,7 +278,7 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
     // Chain mode (clearing static creds): send both as "" so the backend clears them together.
     // Static mode: send both non-empty values. If both are empty, credentials are unchanged.
-    if (isS3 && credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
+    if (isAwsS3OrS3Compat && credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
       if (currentSettings.blobStorageAccessKeyId &&
           currentSettings.blobStorageSecretAccessKey) {
         // static credentials — user provided new values for both

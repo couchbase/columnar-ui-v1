@@ -92,7 +92,7 @@
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageBucket"
                  disabled>
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3'">
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsAwsS3OrS3Compat">
               <label>Bucket Region</label>
               <input
                  type="text"
@@ -118,10 +118,10 @@
                  placeholder="{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082'}}">
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
-              <label>Azure Client ID
+              <label>Azure Client ID (use for User-Assigned Managed Identity)
                 <span
                    class="fa-stack icon-info"
-                   uib-tooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. Leave blank to use the system-assigned managed identity or the default Azure credential chain."
+                   uib-tooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. If not provided, the application will attempt to use the system-assigned managed identity or the default Azure credential chain."
                    tooltip-placement="auto right"
                    tooltip-trigger="mouseenter">
                   <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -142,19 +142,49 @@
               <input
                  type="checkbox"
                  id="for-force-path-style"
-                 ng-disabled="!rbac.cluster.settings.write"
+                 ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageEndpointIsIpLiteral"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePathStyleAddressing">
               <label for="for-force-path-style" class="margin-right-quarter">
                 Use Path Style Addressing
               </label>
               <span
                  class="fa-stack icon-info"
-                 uib-tooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while virtual-hosted-style URLs look like https://bucket-name.s3.example.com/key. Some S3-compatible storage services require path-style addressing."
+                 uib-tooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while virtual-hosted-style URLs look like https://bucket-name.s3.example.com/key. Some S3-compatible storage services require path-style addressing. When the endpoint is an IP address, path-style is always used automatically by the SDK."
                  tooltip-placement="auto right"
                  tooltip-trigger="mouseenter">
                 <span class="icon fa-circle-thin fa-stack-2x"></span>
                 <span class="icon fa-info fa-stack-1x"></span>
               </span>
+            </div>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+              <label>Checksum Behavior
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Controls when checksums are included in requests to S3-compatible storage. 'When Required' only includes checksums when the storage provider requires them. 'When Supported' includes checksums on all supported operations. While 'When Supported' is the S3-default, some S3-compatible stores need 'When Required' to function properly."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </label>
+              <div class="form-inline">
+                <input
+                   type="radio"
+                   name="blob-storage-checksum-behavior"
+                   id="checksum-when-required"
+                   value="when_required"
+                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
+                   ng-disabled="!rbac.cluster.settings.write">
+                <label for="checksum-when-required">When Required</label>
+                <input
+                   type="radio"
+                   name="blob-storage-checksum-behavior"
+                   id="checksum-when-supported"
+                   value="when_supported"
+                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
+                   ng-disabled="!rbac.cluster.settings.write">
+                <label for="checksum-when-supported">When Supported</label>
+              </div>
             </div>
             <div class="formrow" ng-if="!settingsClusterCtl.blobStorageEndpointIsHttp">
               <input
@@ -203,7 +233,7 @@
 ...
 -----END CERTIFICATE-----"></textarea>
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3'">
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsAwsS3OrS3Compat">
               <label>Authentication
                 <span
                    class="fa-stack icon-info"

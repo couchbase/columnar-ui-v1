@@ -351,15 +351,19 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           vm.blobStorageSettings = settings;
           vm.initialBlobStorageSettings = _.cloneDeep(settings);
           vm.blobStorageSchemeName = getBlobStorageSchemeName(settings.blobStorageScheme, settings.blobStorageEndpoint);
-          vm.blobStorageIsS3 = settings.blobStorageScheme === 's3';
-          // Track whether this is an s3-compat config (s3 scheme with an endpoint at load time).
-          // Once true, the endpoint field stays visible even if the user clears it.
           vm.blobStorageIsS3Compat = settings.blobStorageScheme === 's3' && !!settings.blobStorageEndpoint;
+          vm.blobStorageIsAwsS3 = settings.blobStorageScheme === 's3' && !vm.blobStorageIsS3Compat;
+          vm.blobStorageIsAwsS3OrS3Compat = settings.blobStorageScheme === 's3';
           vm.blobStorageEndpointIsHttp = isEndpointHttp(settings.blobStorageEndpoint);
+          vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(settings.blobStorageEndpoint);
           vm.blobStorageCredentialMode = getCredentialMode(settings);
 
           $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageEndpoint', function(val) {
             vm.blobStorageEndpointIsHttp = isEndpointHttp(val);
+            vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(val);
+            if (vm.blobStorageEndpointIsIpLiteral) {
+              vm.blobStorageSettings.blobStoragePathStyleAddressing = true;
+            }
           });
 
           // Track whether static credentials were previously configured on the server.
@@ -555,6 +559,17 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
 
   function isEndpointHttp(endpoint) {
     return !!(endpoint && !endpoint.toLowerCase().startsWith('https://'));
+  }
+
+  function isEndpointIpLiteral(endpoint) {
+    if (!endpoint) return false;
+    try {
+      var url = new URL(endpoint);
+      var host = url.hostname.replace(/^\[|\]$/g, ''); // strip IPv6 brackets
+      return /^(\d{1,3}\.){3}\d{1,3}$/.test(host) || host.includes(':');
+    } catch (e) {
+      return false;
+    }
   }
 
   function getCredentialMode(settings) {

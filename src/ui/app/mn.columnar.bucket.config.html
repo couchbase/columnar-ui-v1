@@ -112,10 +112,10 @@
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 'azblob'">
       <div class="row">
         <label for="blob-azure-client-id">
-          Azure Client ID
+          Azure Client ID (use for User-Assigned Managed Identity)
           <span
               class="fa-stack icon-info"
-              ngbTooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. Leave blank to use the system-assigned managed identity or the default Azure credential chain."
+              ngbTooltip="Optional. The client ID of a user-assigned managed identity to use for authentication. If not provided, the application will attempt to use the system-assigned managed identity or the default Azure credential chain."
               placement="right"
               container="body">
             <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -308,7 +308,8 @@
           <input
                   type="checkbox"
                   id="for-force-path-style"
-                  formControlName="blobStoragePathStyleAddressing">
+                  formControlName="blobStoragePathStyleAddressing"
+                  [attr.disabled]="isEndpointIpLiteral() ? true : null">
           <label for="for-force-path-style" class="margin-right-quarter">
               Use Path Style Addressing
           </label>
@@ -316,16 +317,53 @@
               class="fa-stack icon-info"
               ngbTooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while
                           virtual-hosted–style URLs look like https://bucket-name.s3.example.com/key.
-                          Some S3-compatible storage services or DNS configurations may require path-style addressing."
+                          Some S3-compatible storage services or DNS configurations may require path-style addressing.
+                          When the endpoint is an IP address, path-style is always used automatically by the SDK."
               placement="right"
               container="body">
               <span class="icon fa-circle-thin fa-stack-2x"></span>
               <span class="icon fa-info fa-stack-1x"></span>
           </span>
+          <span *ngIf="isEndpointIpLiteral()" class="text-smaller text-muted margin-left-quarter">
+              (automatically enabled for IP address endpoints)
+          </span>
           <div
               class="error error-form"
               [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStoragePathStyleAddressing">
           {{(postClusterInitHttp.error | async)?.errors.blobStoragePathStyleAddressing}}
+          </div>
+      </div>
+      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+          <div class="row">
+              <label for="blob-storage-checksum-behavior">Checksum Behavior
+                  <span
+                      class="fa-stack icon-info"
+                      ngbTooltip="Controls when checksums are included in requests to S3-compatible storage. 'When Required' only includes checksums when the storage provider requires them. 'When Supported' includes checksums on all supported operations. While 'When Supported' is the S3-default, some S3-compatible stores need 'When Required' to function properly."
+                      placement="right"
+                      container="body">
+                      <span class="icon fa-circle-thin fa-stack-2x"></span>
+                      <span class="icon fa-info fa-stack-1x"></span>
+                  </span>
+              </label>
+          </div>
+          <div class="form-inline">
+              <input
+                  type="radio"
+                  formControlName="blobStorageChecksumBehavior"
+                  value="when_required"
+                  id="checksum-when-required">
+              <label for="checksum-when-required">When Required</label>
+              <input
+                  type="radio"
+                  formControlName="blobStorageChecksumBehavior"
+                  value="when_supported"
+                  id="checksum-when-supported">
+              <label for="checksum-when-supported">When Supported</label>
+          </div>
+          <div
+              class="error error-form"
+              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageChecksumBehavior">
+              {{(postClusterInitHttp.error | async)?.errors.blobStorageChecksumBehavior}}
           </div>
       </div>
       <div class="formrow">
