@@ -61,28 +61,28 @@
                    name="blob-storage-scheme"
                    disabled
                    ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3' && !settingsClusterCtl.blobStorageIsS3Compat">
-                <label for="scheme-s3">AWS S3</label>
+                <label for="scheme-s3" class="cbui-label-no-dim">AWS S3</label>
                 <input
                    type="radio"
                    id="scheme-s3-compat"
                    name="blob-storage-scheme"
                    disabled
                    ng-checked="settingsClusterCtl.blobStorageIsS3Compat">
-                <label for="scheme-s3-compat">S3-Compatible Storage</label>
+                <label for="scheme-s3-compat" class="cbui-label-no-dim">S3-Compatible Storage</label>
                 <input
                    type="radio"
                    id="scheme-azblob"
                    name="blob-storage-scheme"
                    disabled
                    ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
-                <label for="scheme-azblob">Azure Blob Storage</label>
+                <label for="scheme-azblob" class="cbui-label-no-dim">Azure Blob Storage</label>
                 <input
                    type="radio"
                    id="scheme-gs"
                    name="blob-storage-scheme"
                    disabled
                    ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'gs'">
-                <label for="scheme-gs">Google Cloud Storage (GCS)</label>
+                <label for="scheme-gs" class="cbui-label-no-dim">Google Cloud Storage (GCS)</label>
               </div>
             </div>
             <div class="formrow">
@@ -90,21 +90,21 @@
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageBucket"
-                 disabled>
+                 ng-disabled="!rbac.cluster.settings.write">
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsAwsS3OrS3Compat">
               <label>Bucket Region</label>
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageRegion"
-                 disabled>
+                 ng-disabled="!rbac.cluster.settings.write">
             </div>
             <div class="formrow">
               <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix'}}</label>
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePrefix"
-                 disabled>
+                 ng-disabled="!rbac.cluster.settings.write">
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat || settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
               <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint'}}</label>
@@ -138,80 +138,12 @@
                  ng-disabled="!rbac.cluster.settings.write"
                  placeholder="e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
-              <input
-                 type="checkbox"
-                 id="for-force-path-style"
-                 ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageEndpointIsIpLiteral"
-                 ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePathStyleAddressing">
-              <label for="for-force-path-style" class="margin-right-quarter">
-                Use Path Style Addressing
-              </label>
-              <span
-                 class="fa-stack icon-info"
-                 uib-tooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while virtual-hosted-style URLs look like https://bucket-name.s3.example.com/key. Some S3-compatible storage services require path-style addressing. When the endpoint is an IP address, path-style is always used automatically by the SDK."
-                 tooltip-placement="auto right"
-                 tooltip-trigger="mouseenter">
-                <span class="icon fa-circle-thin fa-stack-2x"></span>
-                <span class="icon fa-info fa-stack-1x"></span>
-              </span>
-            </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
-              <label>Checksum Behavior
-                <span
-                   class="fa-stack icon-info"
-                   uib-tooltip="Controls when checksums are included in requests to S3-compatible storage. 'When Required' only includes checksums when the storage provider requires them. 'When Supported' includes checksums on all supported operations. While 'When Supported' is the S3-default, some S3-compatible stores need 'When Required' to function properly."
-                   tooltip-placement="auto right"
-                   tooltip-trigger="mouseenter">
-                  <span class="icon fa-circle-thin fa-stack-2x"></span>
-                  <span class="icon fa-info fa-stack-1x"></span>
-                </span>
-              </label>
-              <div class="form-inline">
-                <input
-                   type="radio"
-                   name="blob-storage-checksum-behavior"
-                   id="checksum-when-required"
-                   value="when_required"
-                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
-                   ng-disabled="!rbac.cluster.settings.write">
-                <label for="checksum-when-required">When Required</label>
-                <input
-                   type="radio"
-                   name="blob-storage-checksum-behavior"
-                   id="checksum-when-supported"
-                   value="when_supported"
-                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
-                   ng-disabled="!rbac.cluster.settings.write">
-                <label for="checksum-when-supported">When Supported</label>
-              </div>
-            </div>
-            <div class="formrow" ng-if="!settingsClusterCtl.blobStorageEndpointIsHttp">
-              <input
-                 type="checkbox"
-                 id="for-disable-ssl-verify"
-                 ng-disabled="!rbac.cluster.settings.write"
-                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify">
-              <label for="for-disable-ssl-verify" class="margin-right-quarter">
-                Disable SSL Verification
-              </label>
-              <span
-                 class="fa-stack icon-info"
-                 uib-tooltip="Disables certificate verification for SSL/TLS connections. Useful for testing or self-signed certificates, but not recommended for production."
-                 tooltip-placement="auto right"
-                 tooltip-trigger="mouseenter">
-                <span class="icon fa-circle-thin fa-stack-2x"></span>
-                <span class="icon fa-info fa-stack-1x"></span>
-              </span>
-              <div ng-if="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify" class="margin-top-half">
-                <p class="error">Warning: Disabling SSL verification in a production environment is highly insecure and exposes the system to serious risks, including Man-in-the-Middle (MITM) attacks.</p>
-              </div>
-            </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat && !settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify && !settingsClusterCtl.blobStorageEndpointIsHttp">
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat"
+                 ng-class="{'cbui-label-inactive': settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp}">
               <label>Storage Endpoint Certificate(s)
                 <span
                    class="fa-stack icon-info"
-                   uib-tooltip="One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
+                   uib-tooltip="Optional. One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
                    tooltip-placement="auto right"
                    tooltip-trigger="mouseenter">
                   <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -225,7 +157,7 @@
                  spellcheck="false"
                  autocapitalize="off"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageCertificates"
-                 ng-disabled="!rbac.cluster.settings.write"
+                 ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp"
                  placeholder="-----BEGIN CERTIFICATE-----
 ...
 -----END CERTIFICATE-----
@@ -237,7 +169,7 @@
               <label>Authentication
                 <span
                    class="fa-stack icon-info"
-                   uib-tooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.) to obtain credentials automatically. Static Credentials allows you to supply an access key ID and secret access key directly. Anonymous accesses the storage without any credentials."
+                   uib-tooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.). Static Credentials allows supplying an access key ID and secret directly. Anonymous accesses storage without credentials."
                    tooltip-placement="auto right"
                    tooltip-trigger="mouseenter">
                   <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -305,6 +237,112 @@
                     {{settingsClusterCtl.blobStorageCredentialErrors.secretAccessKey}}
                   </div>
                 </div>
+              </div>
+            </div>
+            <div class="formrow">
+              <label
+                 class="disclosure inline"
+                 ng-class="{disclosed: settingsClusterCtl.showAdvancedBlobStorage}"
+                 ng-click="settingsClusterCtl.showAdvancedBlobStorage = !settingsClusterCtl.showAdvancedBlobStorage">
+                Advanced
+              </label>
+            </div>
+            <div ng-show="settingsClusterCtl.showAdvancedBlobStorage" class="indent-1-5">
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+                <input
+                   type="checkbox"
+                   id="for-force-path-style"
+                   ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageEndpointIsIpLiteral"
+                   ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePathStyleAddressing">
+                <label for="for-force-path-style" class="margin-right-quarter">
+                  Use Path-Style Addressing
+                </label>
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while virtual-hosted-style URLs look like https://bucket-name.s3.example.com/key. Some S3-compatible storage services require path-style addressing. When the endpoint is an IP address, path-style is always used automatically by the SDK."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </div>
+              <div class="formrow">
+                <input
+                   type="checkbox"
+                   id="for-disable-ssl-verify"
+                   ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageEndpointIsHttp"
+                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify">
+                <label for="for-disable-ssl-verify" class="margin-right-quarter"
+                   ng-class="{'cbui-label-inactive': !rbac.cluster.settings.write || settingsClusterCtl.blobStorageEndpointIsHttp}">
+                  Disable SSL Verification
+                </label>
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Disables certificate verification for SSL/TLS connections. Useful for testing or self-signed certificates, but not recommended for production."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+                <div ng-if="settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify" class="margin-top-half">
+                  <p class="error">Warning: Disabling SSL verification in a production environment is highly insecure and exposes the system to serious risks, including Man-in-the-Middle (MITM) attacks.</p>
+                </div>
+              </div>
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+                <input
+                   type="checkbox"
+                   id="for-override-checksum-behavior"
+                   ng-disabled="!rbac.cluster.settings.write"
+                   ng-model="settingsClusterCtl.overrideChecksumBehavior">
+                <label for="for-override-checksum-behavior" class="margin-right-quarter">
+                  Override Checksum Behavior
+                </label>
+                <span
+                   class="fa-stack icon-info"
+                   uib-tooltip="Overrides the default checksum behavior of the AWS S3 SDK. 'When Required' only sends checksums for operations mandated by the core S3 protocol. 'When Supported' includes them on all compatible operations. While 'When Supported' is the modern AWS S3 default, some third-party S3 providers require 'When Required' to avoid errors."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </div>
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat" ng-show="settingsClusterCtl.overrideChecksumBehavior">
+                <div class="form-inline indent-1-5">
+                  <input
+                     type="radio"
+                     name="blob-storage-checksum-behavior"
+                     id="checksum-when-required"
+                     value="when_required"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
+                     ng-disabled="!rbac.cluster.settings.write">
+                  <label for="checksum-when-required">When Required</label>
+                  <input
+                     type="radio"
+                     name="blob-storage-checksum-behavior"
+                     id="checksum-when-supported"
+                     value="when_supported"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
+                     ng-disabled="!rbac.cluster.settings.write">
+                  <label for="checksum-when-supported">When Supported</label>
+                </div>
+              </div>
+              <div class="formrow">
+                <label class="inline checkbox">Storage Partitions
+                  <span
+                     class="fa-stack icon-info"
+                     uib-tooltip="The number of storage partitions distributing data in blob storage. Cannot be changed after cluster initialization."
+                     tooltip-placement="auto right"
+                     tooltip-trigger="mouseenter">
+                    <span class="icon fa-circle-thin fa-stack-2x"></span>
+                    <span class="icon fa-info fa-stack-1x"></span>
+                  </span>
+                </label>
+                <br>
+                <input
+                   type="number"
+                   ng-model="settingsClusterCtl.blobStorageSettings.numStoragePartitions"
+                   class="input-small input-short-1"
+                   disabled>
               </div>
             </div>
             <div class="margin-bottom-3"></div>

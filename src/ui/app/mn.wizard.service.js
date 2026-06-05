@@ -132,6 +132,7 @@ var wizardForm = {
       blobStorageAzureClientId: new FormControl(''),
       blobStoragePathStyleAddressing: new FormControl(false),
       blobStorageChecksumBehavior: new FormControl('when_required'),
+      overrideChecksumBehavior: new FormControl(false),
       blobStorageDisableSslVerify: new FormControl(false),
       blobStorageCertificates: new FormControl(''),
       numStoragePartitions: new FormControl(128),
@@ -481,9 +482,13 @@ class MnWizardService {
     // Certificates are only applicable for s3-compat (schemeConflictErr for other schemes)
     if (data.blobStorageScheme === 's3-compat') {
       columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
-      columnarSettingsForm.set('blobStorageChecksumBehavior', data.blobStorageChecksumBehavior);
-      if (endpointIsHttp) {
-        // Explicitly clear certificates when endpoint is plain HTTP
+      if (data.overrideChecksumBehavior) {
+        columnarSettingsForm.set('blobStorageChecksumBehavior', data.blobStorageChecksumBehavior);
+      } else {
+        columnarSettingsForm.set('blobStorageChecksumBehavior', 'sdk_default');
+      }
+      if (endpointIsHttp || data.blobStorageDisableSslVerify) {
+        // Explicitly clear certificates when endpoint is plain HTTP or SSL verification is disabled
         columnarSettingsForm.set('blobStorageCertificate', '');
       } else if (data.blobStorageCertificates) {
         // Split PEM text into individual certificates and send each as a separate form value
@@ -508,6 +513,7 @@ class MnWizardService {
           delete data.blobStorageRegion;
           delete data.blobStoragePathStyleAddressing;
           delete data.blobStorageChecksumBehavior;
+          delete data.overrideChecksumBehavior;
           delete data.blobStorageDisableSslVerify;
           delete data.blobStorageCertificates;
           delete data.numStoragePartitions;

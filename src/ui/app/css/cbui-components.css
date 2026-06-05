@@ -2833,7 +2833,7 @@ button.ace-search-options-buttons.checked {
   overflow: auto;
   padding-right: 1rem!important;
 }
-.insights-sidebar.fix-width-0 {
+.insights-sidebar-fix-width-0 {
   padding-left: 1rem;
 }
 .insights-sidebar-open { /* control to open closed sidebar ------------------ */
@@ -2879,7 +2879,7 @@ button.ace-search-options-buttons.checked {
   color: #333;
 }
 
-.insights-sidebar.fix-width-0 .insights-sidebar-body {
+.insights-sidebar-fix-width-0 .insights-sidebar-body {
   border-width: 0!important;
   padding: 0!important;
 }
@@ -4122,4 +4122,13 @@ textarea.certificate-props {
 }
 .radio-chips > input:checked + label {
   border: 1px solid #4287d6;
+}
+
+/* Label dimming for controls that are contextually unavailable (e.g. SSL verify when using HTTP) */
+.cbui-label-inactive {
+  opacity: 0.5;
+}
+.cbui-label-inactive textarea,
+.cbui-label-inactive input {
+  opacity: 0.7;
 }

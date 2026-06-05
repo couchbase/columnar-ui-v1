@@ -86,7 +86,7 @@
     <div class="formrow">
       <div class="row">
         <label for="bucket_name">
-            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Name' : 'Bucket Name' }}<sup>*</sup>
+            {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Name' : 'Bucket Name' }}
         </label>
       </div>
       <input
@@ -140,7 +140,7 @@
     </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
-        <label for="bucket_region">Bucket Region<sup>*</sup></label>
+        <label for="bucket_region">Bucket Region</label>
       </div>
       <input
          type="text"
@@ -164,7 +164,7 @@
     <div class="formrow">
       <div class="row">
           <label for="bucket_path_prefix">
-              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix' }}<sup>*</sup>
+              {{ group.get('blobStorageScheme').value === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix' }}
               <span
                       class="fa-stack icon-info"
                       [ngbTooltip]="group.get('blobStorageScheme').value === 'azblob'
@@ -197,13 +197,14 @@
         {{(postClusterInitHttp.error | async)?.errors?.blobStoragePrefix}}
       </div>
     </div>
-    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+    <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'"
+         [class.cbui-label-inactive]="group.get('blobStorageDisableSslVerify').value || group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://')">
         <div class="row">
             <label for="blob-storage-certificate">
                 Storage Endpoint Certificate(s)
                 <span
                         class="fa-stack icon-info"
-                        ngbTooltip="One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
+                        ngbTooltip="Optional. One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
                         placement="right"
                         container="body">
                     <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -219,7 +220,7 @@
                 spellcheck="false"
                 autocapitalize="off"
                 formControlName="blobStorageCertificates"
-                [attr.disabled]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://') ? true : null"
+                [attr.disabled]="(group.get('blobStorageDisableSslVerify').value || group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://')) ? true : null"
                 placeholder="-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----&#10;-----BEGIN CERTIFICATE-----&#10;...&#10;-----END CERTIFICATE-----"></textarea>
         <div
                 class="error error-form"
@@ -232,7 +233,7 @@
         <label>Authentication
           <span
               class="fa-stack icon-info"
-              ngbTooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.) to obtain credentials automatically. Static Credentials allows you to supply an access key ID and secret access key directly. Anonymous accesses the storage without any credentials."
+              ngbTooltip="Standard Credential Chain uses the default provider chain (instance profile, environment variables, etc.). Static Credentials allows supplying an access key ID and secret directly. Anonymous accesses storage without credentials."
               placement="right"
               container="body">
             <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -304,79 +305,57 @@
         </div>
       </div>
     </div>
-      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
-          <input
-                  type="checkbox"
-                  id="for-force-path-style"
-                  formControlName="blobStoragePathStyleAddressing"
-                  [attr.disabled]="isEndpointIpLiteral() ? true : null">
-          <label for="for-force-path-style" class="margin-right-quarter">
-              Use Path Style Addressing
-          </label>
-          <span
-              class="fa-stack icon-info"
-              ngbTooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while
-                          virtual-hosted–style URLs look like https://bucket-name.s3.example.com/key.
-                          Some S3-compatible storage services or DNS configurations may require path-style addressing.
-                          When the endpoint is an IP address, path-style is always used automatically by the SDK."
-              placement="right"
-              container="body">
-              <span class="icon fa-circle-thin fa-stack-2x"></span>
-              <span class="icon fa-info fa-stack-1x"></span>
-          </span>
-          <span *ngIf="isEndpointIpLiteral()" class="text-smaller text-muted margin-left-quarter">
-              (automatically enabled for IP address endpoints)
-          </span>
-          <div
-              class="error error-form"
-              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStoragePathStyleAddressing">
-          {{(postClusterInitHttp.error | async)?.errors.blobStoragePathStyleAddressing}}
-          </div>
-      </div>
-      <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
-          <div class="row">
-              <label for="blob-storage-checksum-behavior">Checksum Behavior
-                  <span
-                      class="fa-stack icon-info"
-                      ngbTooltip="Controls when checksums are included in requests to S3-compatible storage. 'When Required' only includes checksums when the storage provider requires them. 'When Supported' includes checksums on all supported operations. While 'When Supported' is the S3-default, some S3-compatible stores need 'When Required' to function properly."
-                      placement="right"
-                      container="body">
-                      <span class="icon fa-circle-thin fa-stack-2x"></span>
-                      <span class="icon fa-info fa-stack-1x"></span>
-                  </span>
-              </label>
-          </div>
-          <div class="form-inline">
-              <input
-                  type="radio"
-                  formControlName="blobStorageChecksumBehavior"
-                  value="when_required"
-                  id="checksum-when-required">
-              <label for="checksum-when-required">When Required</label>
-              <input
-                  type="radio"
-                  formControlName="blobStorageChecksumBehavior"
-                  value="when_supported"
-                  id="checksum-when-supported">
-              <label for="checksum-when-supported">When Supported</label>
-          </div>
-          <div
-              class="error error-form"
-              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageChecksumBehavior">
-              {{(postClusterInitHttp.error | async)?.errors.blobStorageChecksumBehavior}}
-          </div>
-      </div>
+
       <div class="formrow">
-          <input
-                  type="checkbox"
-                  id="for-disable-ssl-verify"
-                  formControlName="blobStorageDisableSslVerify"
-                  [attr.disabled]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://') ? true : null">
-          <label for="for-disable-ssl-verify" class="margin-right-quarter">
-              Disable SSL Verification
-          </label>
-        <span
-            class="fa-stack icon-info"
+        <label
+          class="disclosure inline"
+          [ngClass]="{'disclosed': (showAdvanced.state | async)}"
+          (click)="showAdvanced.click.next()">
+          Advanced
+        </label>
+      </div>
+      <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+           <input
+                   type="checkbox"
+                   id="for-force-path-style"
+                   formControlName="blobStoragePathStyleAddressing"
+                   [attr.disabled]="isEndpointIpLiteral() ? true : null">
+           <label for="for-force-path-style" class="margin-right-quarter">
+               Use Path-Style Addressing
+           </label>
+           <span
+               class="fa-stack icon-info"
+               ngbTooltip="Path-style URLs look like https://s3.example.com/bucket-name/key, while
+                           virtual-hosted–style URLs look like https://bucket-name.s3.example.com/key.
+                           Some S3-compatible storage services or DNS configurations may require path-style addressing.
+                           When the endpoint is an IP address, path-style is always used automatically by the SDK."
+               placement="right"
+               container="body">
+               <span class="icon fa-circle-thin fa-stack-2x"></span>
+               <span class="icon fa-info fa-stack-1x"></span>
+           </span>
+           <span *ngIf="isEndpointIpLiteral()" class="text-smaller text-muted margin-left-quarter">
+               (always enabled for IP address endpoints)
+           </span>
+           <div
+               class="error error-form"
+               [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStoragePathStyleAddressing">
+           {{(postClusterInitHttp.error | async)?.errors.blobStoragePathStyleAddressing}}
+           </div>
+        </div>
+        <div class="formrow">
+            <input
+                    type="checkbox"
+                    id="for-disable-ssl-verify"
+                    formControlName="blobStorageDisableSslVerify"
+                    [attr.disabled]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://') ? true : null">
+           <label for="for-disable-ssl-verify" class="margin-right-quarter"
+                  [class.cbui-label-inactive]="group.get('blobStorageEndpoint').value?.toLowerCase().startsWith('http://')">
+                Disable SSL Verification
+            </label>
+         <span
+             class="fa-stack icon-info"
             ngbTooltip="Disables certificate verification for SSL/TLS connections.
             Useful for testing or self-signed certificates, but not recommended
             for production."
@@ -397,22 +376,48 @@
                   [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageDisableSslVerify">
               {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
           </div>
-      </div>
-
-      <div class="formrow">
-        <span
-          class="disclosure inline"
-          [ngClass]="{'disclosed': (showAdvanced.state | async)}"
-          (click)="showAdvanced.click.next()">
-          Advanced
-        </span>
-      </div>
-      <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
+        </div>
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+          <input
+              type="checkbox"
+              id="for-override-checksum-behavior"
+              formControlName="overrideChecksumBehavior">
+          <label for="for-override-checksum-behavior" class="margin-right-quarter">
+              Override Checksum Behavior
+          </label>
+          <span
+              class="fa-stack icon-info"
+              ngbTooltip="Overrides the default checksum behavior of the AWS S3 SDK. 'When Required' only sends checksums for operations mandated by the core S3 protocol. 'When Supported' includes them on all compatible operations. While 'When Supported' is the modern AWS S3 default, some third-party S3 providers require 'When Required' to avoid errors."
+              placement="right"
+              container="body">
+              <span class="icon fa-circle-thin fa-stack-2x"></span>
+              <span class="icon fa-info fa-stack-1x"></span>
+          </span>
+          <div class="form-inline indent-1-5" *ngIf="group.get('overrideChecksumBehavior').value">
+              <input
+                  type="radio"
+                  formControlName="blobStorageChecksumBehavior"
+                  value="when_required"
+                  id="checksum-when-required">
+              <label for="checksum-when-required">When Required</label>
+              <input
+                  type="radio"
+                  formControlName="blobStorageChecksumBehavior"
+                  value="when_supported"
+                  id="checksum-when-supported">
+              <label for="checksum-when-supported">When Supported</label>
+          </div>
+          <div
+              class="error error-form"
+              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageChecksumBehavior">
+              {{(postClusterInitHttp.error | async)?.errors.blobStorageChecksumBehavior}}
+          </div>
+        </div>
         <div class="formrow">
           <div class="row">
-            <label for="num_storage_partitions">Storage Partitions<sup>*</sup>
+            <label for="num_storage_partitions" class="inline checkbox">Storage Partitions<sup>*</sup>
                 <span class="fa-stack icon-info"
-                      ngbTooltip="The number of storage partitions used to distribute data in the blob storage. Range: 1–1024. The default value (128) provides a balance between scalability and object storage API calls. For deployments targeting total number of cores much greater than 128 across all nodes in the cluster, this value may be increased to allow for higher degree of scalability. For development environments, this value may be reduced. Caution: this setting cannot be changed after cluster initialization."
+                      ngbTooltip="Number of storage partitions distributing data in blob storage. Range: 1–1024. Default (128) balances scalability and API calls. Increase for clusters with many more than 128 total cores; decrease for development environments. Cannot be changed after initialization."
                       placement="right"
                       container="body">
                  <span class="icon fa-circle-thin fa-stack-2x"></span>
@@ -424,6 +429,7 @@
             type="number"
             name="numStoragePartitions"
             id="num_storage_partitions"
+            class="input-small input-short-1"
             formControlName="numStoragePartitions">
           <div
             class="error error-form"

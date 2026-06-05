@@ -358,6 +358,24 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(settings.blobStorageEndpoint);
           vm.blobStorageCredentialMode = getCredentialMode(settings);
 
+          // Initialize override checksum behavior: only pre-check if the server has an explicit
+          // user-set value (i.e. when_required or when_supported, not sdk_default)
+          vm.overrideChecksumBehavior = !!settings.blobStorageChecksumBehavior &&
+              settings.blobStorageChecksumBehavior !== 'sdk_default';
+          vm.showAdvancedBlobStorage = false;
+
+          // Sync override flag into the settings object for the service
+          $scope.$watch('settingsClusterCtl.overrideChecksumBehavior', function(val) {
+            vm.blobStorageSettings.overrideChecksumBehavior = val;
+            // When override is enabled and no valid radio option is selected, default to when_required
+            if (val) {
+              var current = vm.blobStorageSettings.blobStorageChecksumBehavior;
+              if (current !== 'when_required' && current !== 'when_supported') {
+                vm.blobStorageSettings.blobStorageChecksumBehavior = 'when_required';
+              }
+            }
+          });
+
           $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageEndpoint', function(val) {
             vm.blobStorageEndpointIsHttp = isEndpointHttp(val);
             vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(val);

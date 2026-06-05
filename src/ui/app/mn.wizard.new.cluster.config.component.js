@@ -10,7 +10,7 @@ licenses/APL2.txt.
 
 import {UIRouter} from '@uirouter/angular';
 import {Component, ChangeDetectionStrategy} from '@angular/core';
-import {map, withLatestFrom, first, filter, startWith} from 'rxjs/operators';
+import {map, withLatestFrom, first, filter, startWith, takeUntil} from 'rxjs/operators';
 import {pipe, combineLatest} from 'rxjs';
 import {clone} from 'ramda';
 
@@ -143,6 +143,19 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
             uiRouter.urlRouter.sync();
           });
       });
+
+    // Scroll to the top of the form when a POST error occurs so the error message is visible
+    mnWizardService.stream.postClusterInitHttp.error
+      .pipe(
+        filter(error => !!error),
+        takeUntil(this.mnOnDestroy)
+      )
+      .subscribe(() => {
+        const scrollContainer = document.querySelector('.dialog-wizard .show-scrollbar');
+        if (scrollContainer) {
+          scrollContainer.scrollTop = 0;
+        }
+      });
   }
 
   getAddressFamily(addressFamilyUI) {
@@ -203,6 +216,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.blobStorageAzureClientId = this.newClusterConfigForm.get('bucketDetails.blobStorageAzureClientId').value;
     rv.blobStoragePathStyleAddressing = this.newClusterConfigForm.get('bucketDetails.blobStoragePathStyleAddressing').value;
     rv.blobStorageChecksumBehavior = this.newClusterConfigForm.get('bucketDetails.blobStorageChecksumBehavior').value;
+    rv.overrideChecksumBehavior = this.newClusterConfigForm.get('bucketDetails.overrideChecksumBehavior').value;
     rv.blobStorageDisableSslVerify = this.newClusterConfigForm.get('bucketDetails.blobStorageDisableSslVerify').value;
     rv.blobStorageCertificates = this.newClusterConfigForm.get('bucketDetails.blobStorageCertificates').value;
     rv.numStoragePartitions = this.newClusterConfigForm.get('bucketDetails.numStoragePartitions').value;

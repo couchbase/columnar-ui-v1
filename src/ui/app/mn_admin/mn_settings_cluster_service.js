@@ -235,12 +235,19 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
         !currentSettings.blobStorageEndpoint.toLowerCase().startsWith('https://');
 
     // Endpoint and SSL fields are valid for all schemes
+    formParams.append('blobStorageBucket', currentSettings.blobStorageBucket || '');
+    formParams.append('blobStoragePrefix', currentSettings.blobStoragePrefix || '');
     formParams.append('blobStorageEndpoint', currentSettings.blobStorageEndpoint || '');
     formParams.append('blobStorageDisableSslVerify', endpointIsHttp ? false : (currentSettings.blobStorageDisableSslVerify || false));
 
-    // Certificates: split PEM blocks; clear if endpoint is plain HTTP
-    if (endpointIsHttp) {
-      // Explicitly clear certificates when endpoint is plain HTTP
+    // Region is only valid for S3
+    if (isAwsS3OrS3Compat) {
+      formParams.append('blobStorageRegion', currentSettings.blobStorageRegion || '');
+    }
+
+    // Certificates: split PEM blocks; clear if endpoint is plain HTTP or SSL verify is disabled
+    if (endpointIsHttp || currentSettings.blobStorageDisableSslVerify) {
+      // Explicitly clear certificates when endpoint is plain HTTP or SSL verification is disabled
       formParams.append('blobStorageCertificate', '');
     } else if (currentSettings.blobStorageCertificates) {
       // Split PEM text into individual certs; backend expects blobStorageCertificate repeated
@@ -260,7 +267,12 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     var isS3Compat = isAwsS3OrS3Compat && !!currentSettings.blobStorageEndpoint;
     if (isS3Compat) {
       formParams.append('blobStoragePathStyleAddressing', currentSettings.blobStoragePathStyleAddressing || false);
-      formParams.append('blobStorageChecksumBehavior', currentSettings.blobStorageChecksumBehavior || 'when_required');
+      if (currentSettings.overrideChecksumBehavior) {
+        formParams.append('blobStorageChecksumBehavior', currentSettings.blobStorageChecksumBehavior || 'when_required');
+      } else {
+        // Explicitly set to sdk_default (leave SDK defaults untouched)
+        formParams.append('blobStorageChecksumBehavior', 'sdk_default');
+      }
     }
 
     // blobStorageAnonymousAuth is incompatible with azblob (schemeConflictErr)

@@ -25,10 +25,11 @@ ng-component, ui-view {display: block;}
   box-shadow: 0px 1px 1px 1px rgba(0,0,0,0.25);
 }
 
-input[type="checkbox"][disabled] + label:before,
-input[type="radio"][disabled] + label:before {
+input[type="checkbox"][disabled] + label,
+input[type="radio"][disabled] + label {
+  cursor: default !important;
   opacity: .5;
 }
-input[type="checkbox"][disabled] + label {
-  cursor: default !important;
+input[type="radio"][disabled] + label.cbui-label-no-dim {
+  opacity: 1;
 }
