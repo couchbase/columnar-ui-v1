@@ -270,8 +270,8 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       if (currentSettings.overrideChecksumBehavior) {
         formParams.append('blobStorageChecksumBehavior', currentSettings.blobStorageChecksumBehavior || 'when_required');
       } else {
-        // Explicitly set to sdk_default (leave SDK defaults untouched)
-        formParams.append('blobStorageChecksumBehavior', 'sdk_default');
+        // empty string means "use SDK defaults" (resets any previous non-default value)
+        formParams.append('blobStorageChecksumBehavior', '');
       }
     }
 

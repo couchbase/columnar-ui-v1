@@ -359,9 +359,9 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           vm.blobStorageCredentialMode = getCredentialMode(settings);
 
           // Initialize override checksum behavior: only pre-check if the server has an explicit
-          // user-set value (i.e. when_required or when_supported, not sdk_default)
-          vm.overrideChecksumBehavior = !!settings.blobStorageChecksumBehavior &&
-              settings.blobStorageChecksumBehavior !== 'sdk_default';
+          // user-set value (i.e. when_required or when_supported, not null/empty)
+          vm.overrideChecksumBehavior = !!settings.blobStorageChecksumBehavior;
+          vm.blobStorageSettings.overrideChecksumBehavior = vm.overrideChecksumBehavior;
           vm.showAdvancedBlobStorage = false;
 
           // Sync override flag into the settings object for the service

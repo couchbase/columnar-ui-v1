@@ -485,7 +485,7 @@ class MnWizardService {
       if (data.overrideChecksumBehavior) {
         columnarSettingsForm.set('blobStorageChecksumBehavior', data.blobStorageChecksumBehavior);
       } else {
-        columnarSettingsForm.set('blobStorageChecksumBehavior', 'sdk_default');
+        columnarSettingsForm.set('blobStorageChecksumBehavior', '');
       }
       if (endpointIsHttp || data.blobStorageDisableSslVerify) {
         // Explicitly clear certificates when endpoint is plain HTTP or SSL verification is disabled
