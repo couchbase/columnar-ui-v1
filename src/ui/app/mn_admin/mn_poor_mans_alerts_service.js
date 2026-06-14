@@ -75,7 +75,7 @@ function mnPoorMansAlertsFactory($http, $state, $uibModal, mnHelper, $timeout) {
       controller: "mnPoorMansAlertsController as poorMansCtl",
       resolve: {
         alertsSilenceURL: mnHelper.wrapInFunction(alertsSilenceURL),
-        alerts: mnHelper.wrapInFunction(_.clone(alerts, true))
+        alerts: mnHelper.wrapInFunction(_.cloneDeep(alerts))
       }
     });
   }

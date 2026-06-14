@@ -98,7 +98,7 @@ function mnSettingsAutoCompactionServiceFactory($http, $q, mnBytesToMBFilter, mn
       return acSettings;
     }
 
-    acSettings = _.clone(acSettings, true);
+    acSettings = _.cloneDeep(acSettings);
 
     acSettings.purgeInterval = Number(acSettings.purgeInterval);
 

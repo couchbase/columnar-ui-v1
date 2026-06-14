@@ -65,7 +65,7 @@ function mnBucketsServiceFactory($q, mnBucketsStats) {
         bucket.isMembase = bucket.bucketType === 'membase';
         bucket.isEphemeral = bucket.bucketType === 'ephemeral';
       });
-      bucketsDetails.byType.names = _.pluck(bucketsDetails, 'name');
+      bucketsDetails.byType.names = _.map(bucketsDetails, 'name');
 
       cache = bucketsDetails;
       mnBucketsService.export.details = bucketsDetails;
