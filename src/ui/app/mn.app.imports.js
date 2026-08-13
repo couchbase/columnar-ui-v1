@@ -111,12 +111,6 @@ let authState = {
   lazyLoad: mnLoadNgModule(() => import('./mn.auth.module.js'), 'MnAuthModule')
 };
 
-let gsiState = {
-  name: "app.admin.gsi.**",
-  url: "/index",
-  lazyLoad: mnLazyload(() => import('./mn_admin/mn_gsi_controller.js'), 'mnGsi')
-};
-
 let viewsState = {
   name: "app.admin.views.**",
   url: "/views",
@@ -228,7 +222,6 @@ let mnAppImports = [
       logsCollectInfo,
       alertsState,
       groupsState,
-      gsiState,
       viewsState,
       settingsState,
       sampleBucketState,

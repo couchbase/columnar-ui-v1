@@ -80,7 +80,7 @@ angular.module('mnAdmin', [
   mnDetailStatsModule,
   mnSelect,
   mnTimezoneDetailsDowngradeModule
-]).config(["$stateProvider", "$urlMatcherFactoryProvider", "mnPluggableUiRegistryProvider", "$httpProvider", mnAdminConfig])
+]).config(["$stateProvider", "$urlMatcherFactoryProvider", "$httpProvider", mnAdminConfig])
   .controller('mnAdminController', mnAdminController)
   .factory('mnAdminService', downgradeInjectable(MnAdminService))
   .factory('mnSessionService', downgradeInjectable(MnSessionService))
@@ -150,7 +150,7 @@ function mnAdminRun($rootScope, $uibModal, $ocLazyLoad, $injector) {
   };
 }
 
-function mnAdminConfig($stateProvider, $urlMatcherFactoryProvider, mnPluggableUiRegistryProvider, $httpProvider) {
+function mnAdminConfig($stateProvider, $urlMatcherFactoryProvider, $httpProvider) {
 
   $httpProvider.interceptors.push(['$q', '$injector', interceptorOf401]);
 
@@ -181,15 +181,6 @@ function mnAdminConfig($stateProvider, $urlMatcherFactoryProvider, mnPluggableUi
     is: function (val) {
       return (/[^/]*/).test(val);
     }
-  });
-
-  mnPluggableUiRegistryProvider.registerConfig({
-    name: 'Indexes',
-    state: 'app.admin.gsi',
-    includedByState: 'app.admin.gsi',
-    plugIn: 'workbenchTab',
-    index: 2,
-    ngShow: "rbac.cluster.collection['.:.:.'].n1ql.index.read"
   });
 
   $stateProvider

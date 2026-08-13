@@ -93,7 +93,6 @@
     "mn_admin/mn_statistics_service": "./app/mn_admin/mn_statistics_service.js",
     "mn_admin/mn_statistics_description": "./app/mn_admin/mn_statistics_description.js",
     "mn_admin/mn_statistics_chart_directive": "./app/mn_admin/mn_statistics_chart_directive.js",
-    "mn_admin/mn_gsi_footer_controller": "./app/mn_admin/mn_gsi_footer_controller.js",
     "mn_admin/mn_documents_service": "./app/mn_admin/mn_documents_service.js"
   }
 }
