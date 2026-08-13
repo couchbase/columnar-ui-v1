@@ -31,7 +31,6 @@ import {MnServerGroupsService} from './mn.server.groups.service.js';
 import {MnFormService} from './mn.form.service.js';
 import {MnExceptionHandlerService} from './mn.exception.handler.service.js';
 import {MnCollectionsService} from './mn.collections.service.js';
-import {MnSettingsSampleBucketsService} from './mn.settings.sample.buckets.service.js';
 import {MnKeyspaceSelectorService} from './mn.keyspace.selector.service.js';
 import {MnHelperService} from './mn.helper.service.js';
 import {MnSettingsAutoCompactionService} from './mn.settings.auto.compaction.service.js';
@@ -49,8 +48,6 @@ import {MnStatsService} from './mn.stats.service.js';
 import {MnSettingsAlertsService} from './mn.settings.alerts.service.js';
 import {MnLogsListService} from './mn.logs.list.service.js';
 import {MnSessionService} from './mn.session.service.js';
-import {MnViewsListService} from './mn.views.list.service.js';
-import {MnViewsEditingService} from './mn.views.editing.service.js';
 import {MnRouterService} from './mn.router.service.js';
 import {MnDocumentsService} from './mn.documents.service.js';
 import {MnSecuritySecretsService} from './mn.security.secrets.service.js';
@@ -82,7 +79,6 @@ class MnAppModule {
         MnFormService,
         MnExceptionHandlerService,
         MnCollectionsService,
-        MnSettingsSampleBucketsService,
         MnKeyspaceSelectorService,
         MnHelperService,
         MnSettingsAutoCompactionService,
@@ -100,8 +96,6 @@ class MnAppModule {
         MnSettingsAlertsService,
         MnLogsListService,
         MnSessionService,
-        MnViewsListService,
-        MnViewsEditingService,
         MnRouterService,
         MnDocumentsService,
         MnSecuritySecretsService,

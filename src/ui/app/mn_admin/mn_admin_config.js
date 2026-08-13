@@ -41,7 +41,6 @@ import {MnAdminService} from "../mn.admin.service.js";
 import {MnSessionService} from "../mn.session.service.js";
 import {MnStatsService} from "../mn.stats.service.js";
 
-import mnDetailStatsModule from "../components/directives/mn_detail_stats_controller.js";
 import mnTimezoneDetailsDowngradeModule from "../mn.timezone.details.downgrade.module.js";
 
 import mnSelect from "../components/directives/mn_select/mn_select.js";
@@ -77,7 +76,6 @@ angular.module('mnAdmin', [
   mnSettingsAutoFailoverService,
   mnUserRolesService,
   mnSettingsClusterService,
-  mnDetailStatsModule,
   mnSelect,
   mnTimezoneDetailsDowngradeModule
 ]).config(["$stateProvider", "$urlMatcherFactoryProvider", "$httpProvider", mnAdminConfig])

@@ -14,32 +14,7 @@ import {Directive, ElementRef, Injector, EventEmitter} from '@angular/core';
 import {UpgradeComponent, setAngularJSGlobal} from '@angular/upgrade/static';
 setAngularJSGlobal(angular);
 
-export {MnDetailStatsDirective, MnMainSpinnerDirective, MnFileReaderDirective};
-
-class MnDetailStatsDirective extends UpgradeComponent {
-  static get annotations() { return [
-    new Directive({
-      selector: "mn-detail-stats",
-      inputs: [
-        "mnTitle",
-        "bucket",
-        "itemId",
-        "service",
-        "prefix",
-        "nodeName"
-      ]
-    })
-  ]}
-
-  static get parameters() { return [
-    ElementRef,
-    Injector
-  ]}
-
-  constructor(elementRef, injector) {
-    super('mnDetailStats', elementRef, injector);
-  }
-}
+export {MnMainSpinnerDirective, MnFileReaderDirective};
 
 class MnMainSpinnerDirective extends UpgradeComponent {
   static get annotations() { return [
