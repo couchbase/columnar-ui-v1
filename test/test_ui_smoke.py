@@ -147,6 +147,12 @@ class Recorder:
     def __init__(self, page):
         self.console = []
         self.responses = []
+        # Some requests fail on every page of a healthy cluster (an unset RBAC
+        # profile 404s, for instance). Asserting "zero failures" per route would
+        # report those against whichever route ran first, so what is already
+        # failing when we reach the admin UI is adopted as a baseline and
+        # subtracted from later routes. Only *new* failures are reported.
+        self.baseline = set()
         page.on('console', self._console)
         page.on('response', self._response)
 
@@ -168,22 +174,143 @@ class Recorder:
         self.console.clear()
         self.responses.clear()
 
+    @staticmethod
+    def _key(kind, text):
+        if kind == 'response':
+            status, _, url = text.partition(' ')
+            return kind, status, url.split('?', 1)[0]
+        return kind, text
+
+    def adopt_baseline(self):
+        """Treat everything currently recorded as pre-existing noise."""
+        for c in self.console:
+            self.baseline.add(self._key('console', c))
+        for r in self.responses:
+            self.baseline.add(self._key('response', r))
+        self.reset()
+        return len(self.baseline)
+
     def problems(self):
-        return ([f'console: {c}' for c in self.console] +
-                [f'response: {r}' for r in self.responses])
+        out = []
+        for c in self.console:
+            if self._key('console', c) not in self.baseline:
+                out.append(f'console: {c}')
+        for r in self.responses:
+            if self._key('response', r) not in self.baseline:
+                out.append(f'response: {r}')
+        return out
 
 
 def hash_route(page, base, route, entry):
-    page.goto(f'{base}/ui/{entry}#!{route}', wait_until='domcontentloaded')
-    page.wait_for_timeout(1500)
+    # The app sets $locationProvider.hashPrefix(""), so routes are "#/servers",
+    # not "#!/servers". Getting this wrong does not error - the browser simply
+    # never navigates, and every route assertion then passes vacuously.
+    page.goto(f'{base}/ui/{entry}#{route}', wait_until='domcontentloaded')
+    page.wait_for_timeout(2500)
 
 
 def current_route(page):
     url = page.url
-    return url.split('#!', 1)[1] if '#!' in url else ''
+    return url.split('#', 1)[1] if '#' in url else ''
 
 
-def run(page, base, user, password, hermetic, entry):
+def click_styled(page, control_id):
+    """Toggle a checkbox/radio through its label.
+
+    These controls are positioned off-viewport for styling, so check() fails
+    with "outside of the viewport" and force=True does not help. The label is
+    the visible hit target - clicked near its left edge, because the terms
+    label wraps the terms-and-conditions hyperlink and a centre click opens
+    that link instead of toggling the control.
+    """
+    page.locator(f'label[for="{control_id}"]').click(position={'x': 6, 'y': 6})
+
+
+def run_wizard(page, check, opts):
+    """Configure a fresh cluster through the setup wizard.
+
+    Deliberately no REST calls: the point is to exercise the wizard's own
+    forms, so a break in mn.wizard.* or mn-columnar-bucket-config fails here
+    rather than being bypassed.
+    """
+    page.click('text=Setup New Cluster')
+    page.wait_for_timeout(2000)
+    page.fill('#for-cluster-name-field', opts.cluster_name)
+    page.fill('#secure-username', opts.user)
+    page.fill('#secure-password', opts.password)
+    page.fill('#secure-password-verify', opts.password)
+    page.click('button[type="submit"]')
+    page.wait_for_timeout(2500)
+
+    on_terms = page.locator('#for-accept-terms').count() > 0
+    check('wizard reaches the terms step', [] if on_terms else ['no terms checkbox'])
+    if not on_terms:
+        return False
+    click_styled(page, 'for-accept-terms')
+    page.click('button[type="submit"]')
+    page.wait_for_timeout(3000)
+
+    # "S3-compatible" is what exposes an endpoint field at all; plain S3 has no
+    # endpoint input. Note the cluster stores this as scheme "s3" plus an
+    # endpoint and path-style addressing, not as "s3-compat".
+    if page.locator('#s3-compat').count() == 0:
+        check('wizard reaches blob storage configuration', ['no blob storage scheme controls'])
+        return False
+    click_styled(page, 's3-compat')
+    page.wait_for_timeout(800)
+    if page.locator('#bucket_endpoint').count() == 0:
+        check('selecting S3-compatible reveals the endpoint field',
+              ['#bucket_endpoint absent after choosing s3-compat'])
+        return False
+    check('wizard reaches blob storage configuration', [])
+
+    page.fill('#bucket_endpoint', opts.s3_endpoint)
+    page.fill('#bucket_name', opts.s3_bucket)
+    page.fill('#bucket_region', opts.s3_region)
+    page.fill('#bucket_path_prefix', opts.s3_prefix)
+    click_styled(page, 'cred-mode-anonymous')
+    page.wait_for_timeout(400)
+    check('anonymous credential mode selected',
+          [] if page.is_checked('#cred-mode-anonymous') else ['not selected'])
+
+    page.click('button[type="submit"]')
+    # Initialising the cluster and bringing analytics up takes a while.
+    for _ in range(60):
+        page.wait_for_timeout(1000)
+        if page.locator('nav.nav-sidebar').count() > 0:
+            break
+    signed_in = page.locator('nav.nav-sidebar').count() > 0
+    check('wizard completes and lands in the admin UI',
+          [] if signed_in else [f'no nav sidebar; url={page.url}'])
+    return signed_in
+
+
+def verify_blob_storage(page, check, opts):
+    """The settings the cluster ended up with must match what we typed."""
+    settings = page.evaluate(
+        """async () => {
+             const r = await fetch('/settings/analytics',
+                                   {headers: {'ns-server-ui': 'yes'}});
+             return r.ok ? await r.json() : {__status: r.status};
+           }""")
+    if not settings or '__status' in settings:
+        status = (settings or {}).get('__status', 'no response')
+        check('blob storage settings readable',
+              [f'GET /settings/analytics returned {status}'])
+        return
+    problems = []
+    for key, expected in (('blobStorageBucket', opts.s3_bucket),
+                          ('blobStorageRegion', opts.s3_region),
+                          ('blobStoragePrefix', opts.s3_prefix),
+                          ('blobStorageEndpoint', opts.s3_endpoint)):
+        if settings.get(key) != expected:
+            problems.append(f'{key}: {settings.get(key)!r} != {expected!r}')
+    if settings.get('blobStorageAnonymousAuth') is not True:
+        problems.append(f'blobStorageAnonymousAuth: {settings.get("blobStorageAnonymousAuth")!r}')
+    check('blob storage was configured through the UI', problems)
+
+
+def run(page, base, opts, hermetic, entry):
     rec = Recorder(page)
     results = []
     last = [time.time()]
@@ -235,18 +362,37 @@ def run(page, base, user, password, hermetic, entry):
                f'start the cluster with the analytics profile'])
         return results
 
-    # --- login ------------------------------------------------------------
+    # --- setup or sign in --------------------------------------------------
     rec.reset()
-    if page.locator('#auth-password-input').count() > 0:
-        page.fill('#auth-username-input', user)
-        page.fill('#auth-password-input', password)
-        page.click('button[type="submit"]')
-        page.wait_for_timeout(4000)
-    signed_in = page.locator('nav.nav-sidebar').count() > 0
-    check('sign in reaches the admin UI', [] if signed_in else ['no nav sidebar after login'])
-    if not signed_in:
+    wizard_ran = False
+    if opts.wizard and page.locator('text=Setup New Cluster').count() > 0:
+        wizard_ran = True
+        if not run_wizard(page, check, opts):
+            return results
+    elif opts.wizard:
+        check('cluster is uninitialised for the wizard run',
+              ['no "Setup New Cluster" button - this cluster is already set up; '
+               'start a fresh one or drop --wizard'])
         return results
-    check('no errors during login', rec.problems())
+    else:
+        if page.locator('#auth-password-input').count() > 0:
+            page.fill('#auth-username-input', opts.user)
+            page.fill('#auth-password-input', opts.password)
+            page.click('button[type="submit"]')
+            page.wait_for_timeout(4000)
+        signed_in = page.locator('nav.nav-sidebar').count() > 0
+        check('sign in reaches the admin UI',
+              [] if signed_in else ['no nav sidebar after login'])
+        if not signed_in:
+            return results
+
+    if wizard_ran:
+        verify_blob_storage(page, check, opts)
+
+    # Everything failing right now is pre-existing: adopt it so the per-route
+    # checks below report only what each route newly breaks.
+    adopted = rec.adopt_baseline()
+    print(f'      (baseline: {adopted} pre-existing failure(s) ignored from here)')
 
     # --- nav --------------------------------------------------------------
     rec.reset()
@@ -299,6 +445,15 @@ def main():
     parser.add_argument('--url', help='base URL of a running cluster, e.g. http://127.0.0.1:8091')
     parser.add_argument('--user', default='Administrator')
     parser.add_argument('--password')
+    parser.add_argument('--wizard', action='store_true',
+                        help='configure a fresh cluster through the setup wizard '
+                             'instead of signing in to an existing one')
+    parser.add_argument('--cluster-name', default='ea-ui-it')
+    parser.add_argument('--s3-endpoint', default='http://host.docker.internal:9090',
+                        help='blob storage endpoint as the *cluster* sees it')
+    parser.add_argument('--s3-bucket', default='ea-it-bucket')
+    parser.add_argument('--s3-region', default='us-east-1')
+    parser.add_argument('--s3-prefix', default='eaIT/')
     parser.add_argument('--serve-source', action='store_true',
                         help='serve src/ui with a stub REST API instead of using a cluster')
     parser.add_argument('--entry', default='index-dev.html',
@@ -335,8 +490,7 @@ def main():
             browser = p.chromium.launch(headless=not args.headed)
             page = browser.new_page(viewport={'width': 1440, 'height': 900})
             try:
-                results = run(page, base, args.user, args.password,
-                                  args.serve_source, args.entry)
+                results = run(page, base, args, args.serve_source, args.entry)
             finally:
                 browser.close()
     finally:

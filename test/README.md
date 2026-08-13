@@ -93,7 +93,22 @@ mean reimplementing ns_server, and a stub that is subtly wrong is worse than no
 stub. Those two are still the failures the product build misses entirely — a
 dangling ES import or a template fetched by URL that was deleted.
 
-**Against a cluster** — the full suite:
+**Against a cluster** — the full suite. Add `--wizard` to configure a *fresh,
+uninitialised* cluster through the setup wizard instead of signing in to one
+that is already set up; the blob storage details are then supplied through
+`mn-columnar-bucket-config` rather than REST, so a break in the wizard fails
+the test instead of being bypassed:
+
+```sh
+python3 test/test_ui_smoke.py --url http://127.0.0.1:9000 --wizard \
+    --user couchbase --password couchbase \
+    --s3-endpoint http://127.0.0.1:9090 --s3-bucket ea-it-bucket
+```
+
+`--s3-endpoint` is the endpoint **as the cluster sees it**, which is not
+necessarily what the test host would use.
+
+Signing in to an existing cluster:
 
 ```sh
 python3 test/test_ui_smoke.py --url http://127.0.0.1:8091 \
