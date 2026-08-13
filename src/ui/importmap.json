@@ -56,13 +56,11 @@
     "ipaddr": "./web_modules/ipaddr.js",
     "ngx-clipboard": "./web_modules/ngx-clipboard.js",
 
-    "angular-ui-codemirror": "./libs/angular-ui-codemirror.js",
     "ngclipboard": "./libs/ngclipboard.js",
     "ace/ace": "./libs/ace/ace.js",
     "ui-ace": "./libs/ui-ace.js",
     "ace/ace-wrapper": "./libs/ace/ace-wrapper.js",
     "ace/@nowzoo/ngx-ace": "./libs/ace/@nowzoo/ngx-ace.js",
-    "angular-legacy-sortable": "./libs/angular-legacy-sortable.js",
     "ui-select": "./libs/ui-select.js",
 
     "app": "./app/app.js",
@@ -92,7 +90,6 @@
     "mn_admin/mn_servers_service": "./app/mn_admin/mn_servers_service.js",
     "mn_admin/mn_statistics_service": "./app/mn_admin/mn_statistics_service.js",
     "mn_admin/mn_statistics_description": "./app/mn_admin/mn_statistics_description.js",
-    "mn_admin/mn_statistics_chart_directive": "./app/mn_admin/mn_statistics_chart_directive.js",
-    "mn_admin/mn_documents_service": "./app/mn_admin/mn_documents_service.js"
+    "mn_admin/mn_statistics_chart_directive": "./app/mn_admin/mn_statistics_chart_directive.js"
   }
 }
