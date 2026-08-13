@@ -99,12 +99,6 @@ let settingsState = {
   lazyLoad: mnLazyload(() => import('./mn_admin/mn_settings_config.js'), "mnSettings")
 };
 
-let sampleBucketState = {
-  name: 'app.admin.settings.sampleBuckets.**',
-  url: '/sampleBuckets',
-  lazyLoad: mnLoadNgModule(() => import('./mn.settings.sample.buckets.module.js'), 'MnSettingsSampleBucketsModule')
-};
-
 let alertsState = {
   name: "app.admin.settings.alerts.**",
   url: "/alerts",
@@ -198,7 +192,6 @@ let mnAppImports = [
       alertsState,
       groupsState,
       settingsState,
-      sampleBucketState,
       autoCompactionState,
       securityState,
       otherSecuritySettingsState,
