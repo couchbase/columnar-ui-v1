@@ -9,7 +9,7 @@ licenses/APL2.txt.
 */
 
 import {Injectable} from '@angular/core';
-import {Subject, BehaviorSubject, combineLatest, zip, fromEvent} from 'rxjs';
+import {Subject, BehaviorSubject, combineLatest, zip} from 'rxjs';
 import {scan, map, shareReplay, distinctUntilChanged,
         debounceTime, pluck, takeUntil, tap,
         withLatestFrom, startWith, pairwise} from 'rxjs/operators';
@@ -17,7 +17,6 @@ import {not, sort, prop, descend, ascend, equals} from 'ramda';
 import {FormBuilder} from '@angular/forms';
 import {UIRouter} from '@uirouter/angular';
 import ipaddr from 'ipaddr';
-import CodeMirror from 'codemirror';
 
 import {singletonGuard} from './mn.core.js';
 import {kvMemoryQuota} from "./constants/constants.js";
@@ -217,13 +216,6 @@ class MnHelperService {
                 shareReplay({refCount: true, bufferSize: 1}));
       }
     };
-  }
-
-  createCodeMirror(elementRef, options) {
-    let instance = CodeMirror.fromTextArea(elementRef, options);
-    let onChange = fromEvent(instance, 'change');
-
-    return { instance, onChange };
   }
 
   createPagenator(component, arrayStream, stateParam, perItem, ajsScope, defaultPageSize) {

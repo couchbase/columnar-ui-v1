@@ -111,12 +111,6 @@ let authState = {
   lazyLoad: mnLoadNgModule(() => import('./mn.auth.module.js'), 'MnAuthModule')
 };
 
-let viewsState = {
-  name: "app.admin.views.**",
-  url: "/views",
-  lazyLoad: mnLoadNgModule(() => import('./mn.views.module.js'), "MnViewsModule")
-};
-
 let settingsState = {
   name: "app.admin.settings.**",
   url: "/settings",
@@ -222,7 +216,6 @@ let mnAppImports = [
       logsCollectInfo,
       alertsState,
       groupsState,
-      viewsState,
       settingsState,
       sampleBucketState,
       autoCompactionState,
