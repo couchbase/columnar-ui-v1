@@ -25,7 +25,6 @@ import mnSettingsAutoFailoverService from "./mn_settings_auto_failover_service.j
 import mnSettingsAutoCompactionService from "./mn_settings_auto_compaction_service.js";
 import mnAuditService from "./mn_audit_service.js";
 import mnUserRolesService from "./mn_user_roles_service.js";
-import mnXDCRService from "./mn_xdcr_service.js";
 
 export default 'mnSettingsNotificationsService';
 
@@ -43,8 +42,7 @@ angular.module('mnSettingsNotificationsService', [
   mnSettingsAutoCompactionService,
   mnAuditService,
   mnUserRolesService,
-  mnXDCRService
-]).factory('mnSettingsNotificationsService', ["$http", "mnPoolDefault", "mnBucketsService", "mnPools", "$q", "$window", "mnAnalyticsService", "mnViewsListService", "mnAuditService", "mnMBtoBytesFilter", "mnPermissions", "mnSettingsClusterService", "mnSettingsAutoFailoverService", "mnSettingsAutoCompactionService", "mnTasksDetails", "mnXDCRService", "mnUserRolesService", "mnStatsServiceDowngraded", function ($http, mnPoolDefault, mnBucketsService, mnPools, $q, $window, mnAnalyticsService, mnViewsListService, mnAuditService, mnMBtoBytesFilter, mnPermissions, mnSettingsClusterService, mnSettingsAutoFailoverService, mnSettingsAutoCompactionService, mnTasksDetails, mnXDCRService, mnUserRolesService, mnStatsServiceDowngraded) {
+]).factory('mnSettingsNotificationsService', ["$http", "mnPoolDefault", "mnBucketsService", "mnPools", "$q", "$window", "mnAnalyticsService", "mnViewsListService", "mnAuditService", "mnMBtoBytesFilter", "mnPermissions", "mnSettingsClusterService", "mnSettingsAutoFailoverService", "mnSettingsAutoCompactionService", "mnTasksDetails", "mnUserRolesService", "mnStatsServiceDowngraded", function ($http, mnPoolDefault, mnBucketsService, mnPools, $q, $window, mnAnalyticsService, mnViewsListService, mnAuditService, mnMBtoBytesFilter, mnPermissions, mnSettingsClusterService, mnSettingsAutoFailoverService, mnSettingsAutoCompactionService, mnTasksDetails, mnUserRolesService, mnStatsServiceDowngraded) {
   var mnSettingsNotificationsService = {};
 
   function sumWithoutNull(array, average) {
@@ -430,10 +428,6 @@ angular.module('mnSettingsNotificationsService', [
         queries[8] = mnSettingsAutoCompactionService.getAutoCompaction();
       }
 
-      // collect info about XDCR
-      if (mnPermissions.export.cluster.xdcr.remote_clusters.read) {
-        queries[9] = mnXDCRService.getReplicationState().then(null, () => ({}))
-      }
 
       if (mnPermissions.export.cluster.tasks.read) {
         queries[10] = mnTasksDetails.get(mnHttpParams);
