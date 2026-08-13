@@ -14,8 +14,8 @@ import mnServersFailoverDialogTemplate from "./mn_servers_failover_dialog.html";
 
 export default mnServersListItemController;
 
-mnServersListItemController.$inject = ["$scope", "$rootScope", "$uibModal", "mnServersService", "mnMemoryQuotaService", "mnGsiService", "mnPromiseHelper", "mnPermissions", "mnPoolDefault"];
-function mnServersListItemController($scope, $rootScope, $uibModal, mnServersService, mnMemoryQuotaService, mnGsiService, mnPromiseHelper, mnPermissions, mnPoolDefault) {
+mnServersListItemController.$inject = ["$scope", "$rootScope", "$uibModal", "mnServersService", "mnMemoryQuotaService", "mnPromiseHelper", "mnPermissions", "mnPoolDefault"];
+function mnServersListItemController($scope, $rootScope, $uibModal, mnServersService, mnMemoryQuotaService, mnPromiseHelper, mnPermissions, mnPoolDefault) {
   var vm = this;
 
   vm.cancelEjectServer = cancelEjectServer;
@@ -140,13 +140,7 @@ function mnServersListItemController($scope, $rootScope, $uibModal, mnServersSer
         warnings.isLastCBAS = mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'cbas', true);
         warnings.isLastBackup = mnMemoryQuotaService.isOnlyOneNodeWithService(nodes.allNodes, node.services, 'backup', true);
       }
-      return mnPermissions.export.cluster.collection['.:.:.'].n1ql.index.read ? mnGsiService.getIndexStatus().then(function (indexStatus) {
-        warnings.isThereIndex = !!_.find(indexStatus.indexes, function (index) {
-          return _.indexOf(index.hosts, node.hostname) > -1;
-        });
-        warnings.isThereReplica = warnings.isThereIndex;
-        return warnings;
-      }) : warnings;
+      return warnings;
     }).then(function (warnings) {
       if (_.some(_.values(warnings))) {
         $uibModal.open({

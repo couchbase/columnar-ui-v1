@@ -38,7 +38,6 @@ import mnEncryptionStatus from "../components/directives/mn_encryption_status/mn
 
 import mnServersService from "./mn_servers_service.js";
 import mnServersListItemDetailsService from "./mn_servers_list_item_details_service.js";
-import mnGsiService from "./mn_gsi_service.js";
 import mnGroupsService from "./mn_groups_service.js";
 import mnCertificatesService from "./mn_certificates_service.js";
 import mnStatisticsNewService from "./mn_statistics_service.js";
@@ -88,7 +87,6 @@ angular
     mnSelectableNodesList,
     mnServersService,
     mnServersListItemDetailsService,
-    mnGsiService,
     mnGroupsService,
     mnCertificatesService,
     mnStatisticsNewService,

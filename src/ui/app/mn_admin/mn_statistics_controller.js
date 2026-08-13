@@ -26,7 +26,6 @@ import mnStatisticsChart from "./mn_statistics_chart_directive.js";
 import mnStatisticsNewService from "./mn_statistics_service.js";
 import mnStatisticsDescriptionService from "./mn_statistics_description_service.js";
 import mnUserRolesService from "./mn_user_roles_service.js";
-import mnGsiService from "./mn_gsi_service.js";
 
 import mnStatisticsDetailedChartController from "./mn_statistics_detailed_chart_controller.js";
 import mnGroupDialogController from "./mn_statistics_group_controller.js";
@@ -57,7 +56,6 @@ angular
     mnStatisticsDescriptionService,
     mnUserRolesService,
     mnStoreService,
-    mnGsiService,
     mnPoolDefault
   ])
   .controller('mnStatisticsNewController', mnStatisticsNewController)
@@ -236,7 +234,7 @@ function mnStatisticsGroupsController($scope, $uibModal, $timeout,
   }
 }
 
-function mnStatisticsNewController($scope, mnStatisticsNewService, $state, $http, mnPoller, $uibModal, mnHelper, $window, mnUserRolesService, permissions, $timeout, mnStoreService, mnGsiService, mnTasksDetails, $anchorScroll, $location, mnPoolDefault) {
+function mnStatisticsNewController($scope, mnStatisticsNewService, $state, $http, mnPoller, $uibModal, mnHelper, $window, mnUserRolesService, permissions, $timeout, mnStoreService, mnTasksDetails, $anchorScroll, $location, mnPoolDefault) {
   var vm = this;
 
   vm.mnStatisticsNewScope = $scope;

@@ -23,7 +23,6 @@ import mnViewsListService from "./mn_views_list_service.js";
 import mnSettingsClusterService from "./mn_settings_cluster_service.js";
 import mnSettingsAutoFailoverService from "./mn_settings_auto_failover_service.js";
 import mnSettingsAutoCompactionService from "./mn_settings_auto_compaction_service.js";
-import mnGsiService from "./mn_gsi_service.js";
 import mnAuditService from "./mn_audit_service.js";
 import mnUserRolesService from "./mn_user_roles_service.js";
 import mnXDCRService from "./mn_xdcr_service.js";
@@ -42,11 +41,10 @@ angular.module('mnSettingsNotificationsService', [
   mnSettingsClusterService,
   mnSettingsAutoFailoverService,
   mnSettingsAutoCompactionService,
-  mnGsiService,
   mnAuditService,
   mnUserRolesService,
   mnXDCRService
-]).factory('mnSettingsNotificationsService', ["$http", "mnPoolDefault", "mnBucketsService", "mnPools", "$q", "$window", "mnAnalyticsService", "mnViewsListService", "mnGsiService", "mnAuditService", "mnMBtoBytesFilter", "mnPermissions", "mnSettingsClusterService", "mnSettingsAutoFailoverService", "mnSettingsAutoCompactionService", "mnTasksDetails", "mnXDCRService", "mnUserRolesService", "mnStatsServiceDowngraded", function ($http, mnPoolDefault, mnBucketsService, mnPools, $q, $window, mnAnalyticsService, mnViewsListService, mnGsiService, mnAuditService, mnMBtoBytesFilter, mnPermissions, mnSettingsClusterService, mnSettingsAutoFailoverService, mnSettingsAutoCompactionService, mnTasksDetails, mnXDCRService, mnUserRolesService, mnStatsServiceDowngraded) {
+]).factory('mnSettingsNotificationsService', ["$http", "mnPoolDefault", "mnBucketsService", "mnPools", "$q", "$window", "mnAnalyticsService", "mnViewsListService", "mnAuditService", "mnMBtoBytesFilter", "mnPermissions", "mnSettingsClusterService", "mnSettingsAutoFailoverService", "mnSettingsAutoCompactionService", "mnTasksDetails", "mnXDCRService", "mnUserRolesService", "mnStatsServiceDowngraded", function ($http, mnPoolDefault, mnBucketsService, mnPools, $q, $window, mnAnalyticsService, mnViewsListService, mnAuditService, mnMBtoBytesFilter, mnPermissions, mnSettingsClusterService, mnSettingsAutoFailoverService, mnSettingsAutoCompactionService, mnTasksDetails, mnXDCRService, mnUserRolesService, mnStatsServiceDowngraded) {
   var mnSettingsNotificationsService = {};
 
   function sumWithoutNull(array, average) {
@@ -70,7 +68,6 @@ angular.module('mnSettingsNotificationsService', [
     var perBucketStats = source[1];
     var pools = source[2];
     var poolsDefault = source[3];
-    var indexStatus = source[4];
     var auditSettings = source[5];
     var indexSettings = source[6];
     var autoFailoverSettings = source[7];
@@ -316,10 +313,6 @@ angular.module('mnSettingsNotificationsService', [
       calculateAvgWeekAndHour(stats, "total_avg_index_num_rows_returned");
     }
 
-    if (indexStatus) {
-      stats.istats.total_indexes = indexStatus.indexes.length;
-    }
-
     if (autoCompactionSettings) {
       stats.cluster_settings.compaction = {
         database_trigger_percent_enabled: !!autoCompactionSettings.databaseFragmentationThreshold.percentageFlag,
@@ -424,9 +417,6 @@ angular.module('mnSettingsNotificationsService', [
       queries.push(pools);
       queries.push(poolDefault);
 
-      if (mnPermissions.export.cluster.collection['.:.:.'].n1ql.index.read) {
-        queries[4] = mnGsiService.getIndexStatus(mnHttpParams);
-      }
       if (mnPools.export.isEnterprise && mnPermissions.export.cluster.admin.security.read) {
         queries[5] = mnAuditService.getAuditSettings();
       }
