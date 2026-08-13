@@ -34,12 +34,6 @@ let collectionsState = {
   lazyLoad: mnLoadNgModule(() => import('./mn.collections.module.js'), 'MnCollectionsModule')
 };
 
-let XDCRState = {
-  name: 'app.admin.replications.**',
-  url: '/replications',
-  lazyLoad: mnLoadNgModule(() => import('./mn.xdcr.module.js'), "MnXDCRModule")
-};
-
 let otherSecuritySettingsState = {
   name: 'app.admin.security.other.**',
   url: '/other',
@@ -221,7 +215,6 @@ let mnAppImports = [
       autoCompactionState,
       securityState,
       collectionsState,
-      XDCRState,
       otherSecuritySettingsState,
       auditState,
       samlState,

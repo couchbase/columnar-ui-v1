@@ -45,7 +45,6 @@ import {MnUserRolesService} from './mn.user.roles.service.js';
 import {MnPoolsService} from './mn.pools.service.js';
 import {MnAdminService} from './mn.admin.service.js';
 import {MnAlertsService} from './mn.alerts.service.js';
-import {MnXDCRService} from "./mn.xdcr.service.js";
 import {MnStatsService} from './mn.stats.service.js';
 import {MnSettingsAlertsService} from './mn.settings.alerts.service.js';
 import {MnLogsListService} from './mn.logs.list.service.js';
@@ -97,7 +96,6 @@ class MnAppModule {
         MnPoolsService,
         MnAdminService,
         MnAlertsService,
-        MnXDCRService,
         MnStatsService,
         MnSettingsAlertsService,
         MnLogsListService,
