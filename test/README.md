@@ -130,6 +130,24 @@ instead of rendering; and the encryption-status tooltip template is still served
 `EXPECTED_NAV`, `LIVE_ROUTES` and `REMOVED_ROUTES` at the top of the file are the
 knobs to update when a page is added or removed.
 
+### Analytics workbench
+
+`--workbench` adds six checks that drive the cbas-ui workbench rather than its
+REST API, so a break in the editor, the execute button or the results pane
+fails the test instead of being bypassed:
+
+1. the workbench loads (i.e. the cbas pluggable UI is installed)
+2. `SELECT 1;` runs and returns `{"$1": 1}`
+3. the samples page offers travel-sample
+4. travel-sample installs — polled via `/_p/cbas/api/v1/samples` until the
+   server stops offering it, which is the only completion signal the UI has
+5. the five standalone (`INTERNAL`) collections it creates exist
+6. one of them is queryable — `SELECT VALUE COUNT(*)` returns a positive count
+
+It is opt-in because installing the sample takes about a minute and mutates the
+cluster. `WORKBENCH_SAMPLE` / `SAMPLE_COLLECTIONS` near the top of the file are
+the knobs.
+
 ## CI
 
 `test/run_ci.sh` is the whole job. It needs `python3` and `docker` — no product

@@ -28,6 +28,7 @@ import argparse
 import http.server
 import json
 import os
+import re
 import socketserver
 import sys
 import threading
@@ -310,6 +311,170 @@ def verify_blob_storage(page, check, opts):
     check('blob storage was configured through the UI', problems)
 
 
+# --- Analytics workbench ----------------------------------------------------
+# These drive the cbas-ui pluggable UI rather than its REST API: the point is
+# that the workbench itself works, so a break in the editor, the execute button
+# or the results pane fails here instead of being bypassed.
+#
+# TODO: link creation (S3/Azure/GCS external links) once there is a mock to
+# point them at.
+# TODO: RBAC - create a limited user and assert the workbench honours it.
+
+WORKBENCH_SAMPLE = 'travel-sample'
+SAMPLE_SCOPE = 'inventory'
+# travel-sample creates these as standalone (INTERNAL) collections.
+SAMPLE_COLLECTIONS = ['airline', 'airport', 'hotel', 'landmark', 'route']
+
+
+def workbench_query(page, sql, timeout_ms=20000):
+    """Type a query into the workbench editor and execute it.
+
+    Returns (status, results_text). The results pane is an ace editor, so its
+    text carries ace's gutter line numbers; callers match substrings rather
+    than parsing it strictly.
+    """
+    page.click('.wb-ace-editor')
+    page.wait_for_timeout(300)
+    # clear whatever the previous query left behind
+    page.keyboard.press('Control+A')
+    page.keyboard.press('Meta+A')
+    page.keyboard.press('Backspace')
+    page.keyboard.type(sql)
+    page.wait_for_timeout(200)
+    page.click('button.wb-button-execute')
+
+    deadline = timeout_ms
+    status = ''
+    while deadline > 0:
+        page.wait_for_timeout(500)
+        deadline -= 500
+        if page.locator('.wb-result-status').count():
+            status = page.locator('.wb-result-status').first.inner_text().strip()
+            if status and 'executing' not in status.lower():
+                break
+    results = ''
+    if page.locator('.wb-results-json').count():
+        results = ' '.join(page.locator('.wb-results-json').first.inner_text().split())
+    return status, results
+
+
+def wait_for_analytics(page, check, timeout_s=240):
+    """Wait for the analytics service to register with ns_server.
+
+    Right after the wizard the cluster is initialised but cbas is still coming
+    up - it has to bootstrap its storage against the blob endpoint first - and
+    until it registers, ns_server's _p/cbas proxy answers 404 for everything.
+    The UI polls through that proxy from the dashboard, so asserting routes
+    before this settles reports a transient 404 as a page failure. Waiting is
+    better than ignoring the endpoint: it asserts something true, and a service
+    that never comes up is a real failure rather than a suppressed one.
+    """
+    waited = 0
+    while waited < timeout_s:
+        status = page.evaluate(
+            """async () => {
+                 try {
+                   const r = await fetch('/_p/cbas/api/v1/samples',
+                                         {headers: {'ns-server-ui': 'yes'}});
+                   return r.status;
+                 } catch (e) { return 0; }
+               }""")
+        if status and status != 404:
+            check(f'analytics service is available (after {waited}s)', [])
+            return True
+        page.wait_for_timeout(5000)
+        waited += 5
+    check('analytics service is available', [f'_p/cbas still 404 after {timeout_s}s'])
+    return False
+
+
+def run_workbench(page, base, check, entry):
+    """Query, install travel-sample, then query what the sample created."""
+    hash_route(page, base, '/cbas/workbench', entry)
+    page.wait_for_timeout(4000)
+    if page.locator('.wb-ace-editor').count() == 0:
+        check('workbench is available', ['no query editor - is the cbas pluggable UI installed?'])
+        return
+    check('workbench is available', [])
+
+    status, results = workbench_query(page, 'SELECT 1;')
+    problems = []
+    if 'success' not in status.lower():
+        problems.append(f'status was {status!r}')
+    if '"$1": 1' not in results:
+        problems.append(f'unexpected results: {results[:120]}')
+    check('workbench runs SELECT 1', problems)
+
+    # --- install travel-sample through the samples page ---------------------
+    hash_route(page, base, '/cbas/samples', entry)
+    page.wait_for_timeout(3000)
+    available = page.evaluate(
+        """async () => {
+             const r = await fetch('/_p/cbas/api/v1/samples',
+                                   {headers: {'ns-server-ui': 'yes'}});
+             return r.ok ? await r.json() : null;
+           }""")
+    if available is None:
+        check('samples page lists travel-sample', ['GET /_p/cbas/api/v1/samples failed'])
+        return
+    if WORKBENCH_SAMPLE in available:
+        if page.locator('#travelSample').count() == 0:
+            check('samples page lists travel-sample', ['no travel-sample checkbox'])
+            return
+        check('samples page lists travel-sample', [])
+        # styled checkbox again: the input is off-viewport, the label is the target
+        if not page.is_checked('#travelSample'):
+            page.locator('label[for="travelSample"]').click(position={'x': 6, 'y': 6})
+            page.wait_for_timeout(400)
+        page.click('button:has-text("Load Sample Data")')
+        # The POST only starts the load; the sample is ready when the server
+        # stops offering it as available.
+        installed = False
+        for _ in range(60):
+            page.wait_for_timeout(5000)
+            still = page.evaluate(
+                """async () => {
+                     const r = await fetch('/_p/cbas/api/v1/samples',
+                                           {headers: {'ns-server-ui': 'yes'}});
+                     return r.ok ? await r.json() : null;
+                   }""")
+            if still is not None and WORKBENCH_SAMPLE not in still:
+                installed = True
+                break
+        check(f'{WORKBENCH_SAMPLE} installs from the samples page',
+              [] if installed else ['still listed as available after 5 minutes'])
+        if not installed:
+            return
+    else:
+        check('samples page lists travel-sample', [])
+        check(f'{WORKBENCH_SAMPLE} installs from the samples page', [])
+
+    # --- query what the sample created --------------------------------------
+    hash_route(page, base, '/cbas/workbench', entry)
+    page.wait_for_timeout(4000)
+    status, results = workbench_query(
+        page,
+        'SELECT VALUE d.DatasetName FROM Metadata.`Dataset` d '
+        f'WHERE d.DatabaseName = "{WORKBENCH_SAMPLE}" AND d.DatasetType = "INTERNAL" '
+        'ORDER BY d.DatasetName;')
+    missing = [c for c in SAMPLE_COLLECTIONS if f'"{c}"' not in results]
+    check(f'{WORKBENCH_SAMPLE} standalone collections exist',
+          ([f'status was {status!r}'] if 'success' not in status.lower() else [])
+          + [f'missing collection: {m}' for m in missing])
+
+    collection = SAMPLE_COLLECTIONS[0]
+    status, results = workbench_query(
+        page, f'SELECT VALUE COUNT(*) FROM `{WORKBENCH_SAMPLE}`.{SAMPLE_SCOPE}.{collection};',
+        timeout_ms=60000)
+    counts = [int(n) for n in re.findall(r'\b(\d+)\b', results)]
+    problems = []
+    if 'success' not in status.lower():
+        problems.append(f'status was {status!r}')
+    elif not any(c > 0 for c in counts):
+        problems.append(f'no positive row count in {results[:120]}')
+    check(f'standalone collection {SAMPLE_SCOPE}.{collection} is queryable', problems)
+
+
 def run(page, base, opts, hermetic, entry):
     rec = Recorder(page)
     results = []
@@ -389,6 +554,10 @@ def run(page, base, opts, hermetic, entry):
     if wizard_ran:
         verify_blob_storage(page, check, opts)
 
+    # cbas registers a little after cluster init; until it does, the dashboard's
+    # polls through the _p/cbas proxy 404. Settle that before snapshotting.
+    wait_for_analytics(page, check)
+
     # Everything failing right now is pre-existing: adopt it so the per-route
     # checks below report only what each route newly breaks.
     adopted = rec.adopt_baseline()
@@ -424,6 +593,11 @@ def run(page, base, opts, hermetic, entry):
         problems += rec.problems()
         check(f'removed route {route} does not render', problems)
 
+    # --- analytics workbench ----------------------------------------------
+    if opts.workbench:
+        rec.reset()
+        run_workbench(page, base, check, entry)
+
     # --- the tooltip template that import analysis cannot see -------------
     rec.reset()
     hash_route(page, base, '/servers', entry)
@@ -445,6 +619,9 @@ def main():
     parser.add_argument('--url', help='base URL of a running cluster, e.g. http://127.0.0.1:8091')
     parser.add_argument('--user', default='Administrator')
     parser.add_argument('--password')
+    parser.add_argument('--workbench', action='store_true',
+                        help='also exercise the analytics workbench: run a query, install '
+                             'travel-sample, and query a standalone collection it creates')
     parser.add_argument('--wizard', action='store_true',
                         help='configure a fresh cluster through the setup wizard '
                              'instead of signing in to an existing one')
@@ -462,6 +639,10 @@ def main():
                              'the symlinked source, so no make install is needed; index.html '
                              'exercises the built bundle')
     parser.add_argument('--junit-xml', help='write a JUnit report here')
+    parser.add_argument('--junit-suite', default='ui.smoke',
+                        help='suite name in the JUnit report. UiSmokeIT passes its own '
+                             'package so these cases group with it rather than under a '
+                             'stray top-level "ui" package')
     parser.add_argument('--headed', action='store_true', help='show the browser')
     args = parser.parse_args()
 
@@ -498,7 +679,7 @@ def main():
             server.shutdown()
 
     if args.junit_xml:
-        junit_xml.write(args.junit_xml, 'ui.smoke',
+        junit_xml.write(args.junit_xml, args.junit_suite,
                         [(name, '\n'.join(problems) if problems else None, seconds)
                          for name, problems, seconds in results])
 
