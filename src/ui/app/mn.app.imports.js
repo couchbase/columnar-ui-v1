@@ -105,12 +105,6 @@ let alertsState = {
   lazyLoad: mnLoadNgModule(() => import('./mn.settings.alerts.module.js'), "MnSettingsAlertsModule")
 };
 
-let autoCompactionState = {
-  name: 'app.admin.settings.autoCompaction.**',
-  url: '/autoCompaction',
-  lazyLoad: mnLoadNgModule(() => import('./mn.settings.auto.compaction.module.js'), 'MnSettingsAutoCompactionModule')
-}
-
 let securityState = {
   name: "app.admin.security.**",
   url: "/security",
@@ -192,7 +186,6 @@ let mnAppImports = [
       alertsState,
       groupsState,
       settingsState,
-      autoCompactionState,
       securityState,
       otherSecuritySettingsState,
       auditState,
