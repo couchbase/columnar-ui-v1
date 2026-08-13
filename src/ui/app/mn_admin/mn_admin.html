@@ -513,19 +513,6 @@
        ui-sref="app.admin.servers.list">
       Servers
     </a>
-    <!-- <a
-       ng-class="{currentnav: ('app.admin.collections' | includedByState) || ('app.admin.buckets' | includedByState)}"
-       ng-show="rbac.cluster.bucket['.'].settings.read"
-       ui-sref="app.admin.buckets">
-      Databases
-    </a> -->
-    <!-- <a
-       mn-tab="buckets"
-       ng-class="{currentnav: ('app.admin.collections' | includedByState) || ('app.admin.buckets' | includedByState)}"
-       ng-show="rbac.cluster.bucket['.'].settings.read"
-       ui-sref="app.admin.buckets">
-      Buckets
-    </a> -->
     <a
        ng-show="rbac.cluster.admin.security.read || rbac.cluster.admin.users.read"
        mn-tab="security"

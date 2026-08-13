@@ -28,12 +28,6 @@ let wizardState = {
   lazyLoad: mnLoadNgModule(() => import('./mn.wizard.module.js'), 'MnWizardModule')
 };
 
-let collectionsState = {
-  name: 'app.admin.collections.**',
-  url: '/collections',
-  lazyLoad: mnLoadNgModule(() => import('./mn.collections.module.js'), 'MnCollectionsModule')
-};
-
 let otherSecuritySettingsState = {
   name: 'app.admin.security.other.**',
   url: '/other',
@@ -92,12 +86,6 @@ let groupsState = {
   name: 'app.admin.groups.**',
   url: '/groups',
   lazyLoad: mnLazyload(() => import('./mn_admin/mn_groups_controller.js'), 'mnGroups')
-};
-
-let bucketsState = {
-  name: 'app.admin.buckets.**',
-  url: '/buckets',
-  lazyLoad: mnLoadNgModule(() => import('./mn.buckets.module.js'), 'MnBucketsModule')
 };
 
 let authState = {
@@ -204,7 +192,6 @@ let mnAppImports = [
       wizardState,
       overviewState,
       serversState,
-      bucketsState,
       logsState,
       logsListState,
       logsCollectInfo,
@@ -214,7 +201,6 @@ let mnAppImports = [
       sampleBucketState,
       autoCompactionState,
       securityState,
-      collectionsState,
       otherSecuritySettingsState,
       auditState,
       samlState,
