@@ -89,7 +89,9 @@ function mnPoolDefaultFactory(mnPools, mnHelper, $http, $q, $window, $location, 
       //TODO replace serverGroupsUri in isGroupsAvailable using mixed cluster version
       poolDefault.isGroupsAvailable = !!(pools.isEnterprise && poolDefault.serverGroupsUri);
       poolDefault.isEnterprise = pools.isEnterprise;
-      poolDefault.isColumnar = pools.prodName === 'Enterprise Analytics';
+      // Keyed on prod, the stable product identifier, rather than on
+      // prodName, which is a display string that a rebrand changes.
+      poolDefault.isColumnar = pools.prod === 'analytics';
       poolDefault.thisNode = _.find(poolDefault.nodes, function (n) {
         return n.thisNode;
       });
