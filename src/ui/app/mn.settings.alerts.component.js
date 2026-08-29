@@ -169,7 +169,7 @@ class MnSettingsAlertsComponent extends MnLifeCycleHooksToStream {
 
   packTestEmailData() {
     let params = this.getAlertsData();
-    params.subject = 'Test email from Enterprise Analytics';
+    params.subject = 'Test email from Operational Insights';
     params.body = 'This email was sent to you to test the email alert email server settings.';
     return params;
   }

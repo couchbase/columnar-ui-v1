@@ -12,6 +12,7 @@ import angular from 'angular';
 import _ from 'lodash';
 
 import mnPoolDefault from './mn_pool_default.js';
+import {productName} from '../constants/constants.js';
 
 export default 'mnFilters';
 
@@ -654,7 +655,7 @@ function mnFormatServices() {
     case 'index': return 'Index';
     case 'fts': return 'Search';
     case 'eventing': return 'Eventing';
-    case 'cbas': return 'Enterprise Analytics';
+    case 'cbas': return productName;
     case 'backup': return 'Backup';
     default: return service;
     }

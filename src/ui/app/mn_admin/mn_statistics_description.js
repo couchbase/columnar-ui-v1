@@ -246,7 +246,7 @@ service["7.2"] = {
   stats: compat72Combined,
 };
 
-// 7.6 has stats very similar to 7.0, but with some changes for Enterprise Analytics
+// 7.6 has stats very similar to 7.0, but with some changes for Operational Insights
 service["7.6"] = {
   "kvGroups": service["7.0"].kvGroups,
   stats: compat76Combined,
@@ -972,25 +972,25 @@ function get76CompatDesc() {
         "cbas/failed_at_parse_records_count": {
           unit: "number/sec",
           title: "Parse Fail Rate (Deprecated)",
-          desc: "Number of records Enterprise Analytics failed to parse per second. (Deprecated)",
+          desc: "Number of records Operational Insights failed to parse per second. (Deprecated)",
           metric: {name: "cbas_failed_to_parse_records_count"},
         },
         "cbas_failed_to_parse_records_total": {
           unit: "number/sec",
           title: "Parse Fail Rate",
-          desc: "Number of records Enterprise Analytics failed to parse per second.",
+          desc: "Number of records Operational Insights failed to parse per second.",
           metric: {name: "cbas_failed_to_parse_records_total"},
         },
         "cbas/incoming_records_count": {
           unit: "number/sec",
           title: "Ops Rate (Deprecated)",
-          desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket. (Deprecated)",
+          desc: "Operations (gets + sets + deletes) per second processed by Operational Insights for this bucket. (Deprecated)",
           metric: {name: "cbas_incoming_records_count"},
         },
         "cbas_incoming_records_total": {
           unit: "number/sec",
           title: "Ops Rate",
-          desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket.",
+          desc: "Operations (gets + sets + deletes) per second processed by Operational Insights for this bucket.",
           metric: {name: "cbas_incoming_records_total"},
         },
       },
@@ -1026,109 +1026,109 @@ function get76CompatDesc() {
         "cbas_disk_used": {
           unit: "bytes",
           title: "Total Disk Size (Deprecated)",
-          desc: "The total disk size used by Enterprise Analytics. (Deprecated)",
+          desc: "The total disk size used by Operational Insights. (Deprecated)",
           metric: {name: "cbas_disk_used_bytes_total"},
         },
         "cbas_disk_used_bytes": {
           unit: "bytes",
           title: "Total Disk Size",
-          desc: "The total disk size used by Enterprise Analytics.",
+          desc: "The total disk size used by Operational Insights.",
           metric: {name: "cbas_disk_used_bytes"},
         },
         "cbas_gc_time": {
           unit: "millisecond/sec",
           title: "Garbage Collection Time (Deprecated)",
-          desc: "The amount of time in milliseconds spent performing JVM garbage collections for Enterprise Analytics node. (Deprecated)",
+          desc: "The amount of time in milliseconds spent performing JVM garbage collections for Operational Insights node. (Deprecated)",
           metric: {name: "cbas_gc_time_milliseconds_total"},
         },
         "cbas_gc_time_seconds_total": {
           unit: "millisecond/sec",
           title: "Garbage Collection Time",
-          desc: "The amount of time in seconds spent performing JVM garbage collections for Enterprise Analytics node.",
+          desc: "The amount of time in seconds spent performing JVM garbage collections for Operational Insights node.",
           metric: {name: "cbas_gc_time_seconds_total"},
         },
         "cbas_rebalance_successful_total": {
           unit: "number",
           title: "Total Successful Rebalances",
-          desc: "Total number of successful rebalances for Enterprise Analytics on this server.",
+          desc: "Total number of successful rebalances for Operational Insights on this server.",
           metric: {name: "cbas_rebalance_successful_total"},
         },
         "cbas_rebalance_cancelled_total": {
           unit: "number",
           title: "Total Cancelled Rebalances",
-          desc: "Total number of cancelled rebalances for Enterprise Analytics on this server.",
+          desc: "Total number of cancelled rebalances for Operational Insights on this server.",
           metric: {name: "cbas_rebalance_cancelled_total"},
         },
         "cbas_rebalance_failed_total": {
           unit: "number",
           title: "Total Failed Rebalances",
-          desc: "Total number of failed rebalances for Enterprise Analytics on this server.",
+          desc: "Total number of failed rebalances for Operational Insights on this server.",
           metric: {name: "cbas_rebalance_failed_total"},
         },
         "cbas_http_requests_total": {
           unit: "number",
           title: "Total HTTP Requests",
-          desc: "Total number of received HTTP requests for Enterprise Analytics on this server.",
+          desc: "Total number of received HTTP requests for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_total"},
         },
         "cbas_queued_http_requests_size": {
           unit: "number",
           title: "Queued HTTP Requests",
-          desc: "Number of queued http requests for Enterprise Analytics on this server.",
+          desc: "Number of queued http requests for Operational Insights on this server.",
           metric: {name: "cbas_queued_http_requests_size"},
         },
         "cbas_http_requests_failed_400_total": {
           unit: "number",
           title: "Status 400",
-          desc: "Total number of failed requests with HTTP status code 400 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 400 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_400_total"},
         },
         "cbas_http_requests_failed_401_total": {
           unit: "number",
           title: "Status 401",
-          desc: "Total number of failed requests with HTTP status code 401 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 401 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_401_total"},
         },
         "cbas_http_requests_failed_403_total": {
           unit: "number",
           title: "Status 403",
-          desc: "Total number of failed requests with HTTP status code 403 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 403 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_403_total"},
         },
         "cbas_http_requests_failed_404_total": {
           unit: "number",
           title: "Status 404",
-          desc: "Total number of failed requests with HTTP status code 404 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 404 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_404_total"},
         },
         "cbas_http_requests_failed_405_total": {
           unit: "number",
           title: "Status 405",
-          desc: "Total number of failed requests with HTTP status code 405 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 405 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_405_total"},
         },
         "cbas_http_requests_failed_409_total": {
           unit: "number",
           title: "Status 409",
-          desc: "Total number of failed requests with HTTP status code 409 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 409 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_409_total"},
         },
         "cbas_http_requests_failed_413_total": {
           unit: "number",
           title: "Status 413",
-          desc: "Total number of failed requests with HTTP status code 413 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 413 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_413_total"},
         },
         "cbas_http_requests_failed_500_total": {
           unit: "number",
           title: "Status 500",
-          desc: "Total number of failed requests with HTTP status code 500 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 500 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_500_total"},
         },
         "cbas_http_requests_failed_503_total": {
           unit: "number",
           title: "Status 503",
-          desc: "Total number of failed requests with HTTP status code 503 for Enterprise Analytics on this server.",
+          desc: "Total number of failed requests with HTTP status code 503 for Operational Insights on this server.",
           metric: {name: "cbas_http_requests_failed_503_total"},
         }
       },
@@ -1163,7 +1163,7 @@ function get70CompatDesc() {
         "sysproc_mem_resident_java_cbas": {
           unit: "bytes",
           title: "Service Memory Resident",
-          desc: "The memory used for Enterprise Analytics service (cbas process + java process resident memory)."
+          desc: "The memory used for Operational Insights service (cbas process + java process resident memory)."
         },
         "sysproc_mem_resident_java": {
           unit: "bytes",
@@ -1173,7 +1173,7 @@ function get70CompatDesc() {
         "sysproc_mem_resident_cbas": {
           unit: "bytes",
           title: "Sysproc Memory Resident",
-          desc: "The memory used for the Enterprise Analytics system process."
+          desc: "The memory used for the Operational Insights system process."
         }
       },
       "@kv-": {
@@ -1244,7 +1244,7 @@ function get70CompatDesc() {
         "cbas_failed_to_parse_records_count": {
           unit: "number/sec",
           title: "Parse Fail Rate",
-          desc: "Number of records Enterprise Analytics failed to parse per second."
+          desc: "Number of records Operational Insights failed to parse per second."
         },
       },
       "@cbas": {
@@ -1261,32 +1261,32 @@ function get70CompatDesc() {
         "cbas_heap_memory_committed_bytes": {
           unit: "bytes",
           title: "Heap Committed",
-          desc: "Bytes of JVM heap committed for Enterprise Analytics on this server."
+          desc: "Bytes of JVM heap committed for Operational Insights on this server."
         },
         "cbas_pending_requests": {
           unit: "number",
           title: "Pending Requests",
-          desc: "Number of pending requests for Enterprise Analytics on this server."
+          desc: "Number of pending requests for Operational Insights on this server."
         },
         "cbas_queued_jobs": {
           unit: "number",
           title: "Queued Jobs",
-          desc: "Number of queued jobs for Enterprise Analytics on this server."
+          desc: "Number of queued jobs for Operational Insights on this server."
         },
         "cbas_running_jobs": {
           unit: "number",
           title: "Running Jobs",
-          desc: "Number of running jobs for Enterprise Analytics on this server."
+          desc: "Number of running jobs for Operational Insights on this server."
         },
         "cbas_active_links": {
           unit: "number",
           title: "Active Links",
-          desc: "Number of active links for Enterprise Analytics on this server."
+          desc: "Number of active links for Operational Insights on this server."
         },
         "cbas_requests_total": {
           unit: "number",
           title: "Total Requests",
-          desc: "Total number of received requests for Enterprise Analytics on this server."
+          desc: "Total number of received requests for Operational Insights on this server."
         }
       }
     }
@@ -1596,33 +1596,33 @@ function get65CompatDesc() {
         },
         "ep_dcp_cbas_backoff": {
           unit: "number/sec",
-          title: "DCP Enterprise Analytics Backoffs",
-          desc: "Number of backoffs per second for Enterprise Analytics DCP connections (measured from ep_dcp_cbas_backoff)"
+          title: "DCP Operational Insights Backoffs",
+          desc: "Number of backoffs per second for Operational Insights DCP connections (measured from ep_dcp_cbas_backoff)"
         },
         "ep_dcp_cbas_count": {
           unit: "number",
-          title: "DCP Enterprise Analytics Connections",
-          desc: "Number of internal Enterprise Analytics DCP connections in this bucket (measured from ep_dcp_cbas_count)"
+          title: "DCP Operational Insights Connections",
+          desc: "Number of internal Operational Insights DCP connections in this bucket (measured from ep_dcp_cbas_count)"
         },
         "ep_dcp_cbas_items_remaining": {
           unit: "number",
-          title: "DCP Enterprise Analytics Items Remaining",
+          title: "DCP Operational Insights Items Remaining",
           desc: "Number of items remaining to be sent to consumer in this bucket (measured from ep_dcp_cbas_items_remaining)"
         },
         "ep_dcp_cbas_items_sent": {
           unit: "number/sec",
-          title: "DCP Enterprise Analytics Items Sent",
+          title: "DCP Operational Insights Items Sent",
           desc: "Number of items per second being sent for a producer for this bucket (measured from ep_dcp_cbas_items_sent)"
         },
         "ep_dcp_cbas_producer_count": {
           unit: "number",
-          title: "DCP Enterprise Analytics Senders",
-          desc: "Number of Enterprise Analytics senders for this bucket (measured from ep_dcp_cbas_producer_count)"
+          title: "DCP Operational Insights Senders",
+          desc: "Number of Operational Insights senders for this bucket (measured from ep_dcp_cbas_producer_count)"
         },
         "ep_dcp_cbas_total_bytes": {
           unit: "bytes/sec",
-          title: "DCP Enterprise Analytics Drain Rate",
-          desc:"Number of bytes per second being sent for Enterprise Analytics DCP connections for this bucket (measured from ep_dcp_cbas_total_bytes)"
+          title: "DCP Operational Insights Drain Rate",
+          desc:"Number of bytes per second being sent for Operational Insights DCP connections for this bucket (measured from ep_dcp_cbas_total_bytes)"
         },
         "ep_dcp_eventing_backoff": {
           unit: "number/sec",
@@ -2368,17 +2368,17 @@ function get65CompatDesc() {
         "cbas/failed_at_parser_records_count_total": {
           unit: "number",
           title: "Parse Fail Since Connect",
-          desc: "Number of records Enterprise Analytics failed to parse during bucket synchronization - since last bucket connect."
+          desc: "Number of records Operational Insights failed to parse during bucket synchronization - since last bucket connect."
         },
         "cbas/incoming_records_count": {
           unit: "number/sec",
           title: "Ops Rate",
-          desc: "Operations (gets + sets + deletes) per second processed by Enterprise Analytics for this bucket."
+          desc: "Operations (gets + sets + deletes) per second processed by Operational Insights for this bucket."
         },
         "cbas/incoming_records_count_total": {
           unit: "number",
           title: "Ops Since Connect",
-          desc: "Number of operations (gets + sets + deletes) processed by Enterprise Analytics for this bucket since last bucket connect."
+          desc: "Number of operations (gets + sets + deletes) processed by Operational Insights for this bucket since last bucket connect."
         }
       },
 
@@ -2386,22 +2386,22 @@ function get65CompatDesc() {
         "cbas_disk_used": {
           unit: "bytes",
           title: "Total Disk Size",
-          desc: "The total disk size used by Enterprise Analytics."
+          desc: "The total disk size used by Operational Insights."
         },
         "cbas_gc_count": {
           unit: "number/sec",
           title: "Garbage Collection Rate",
-          desc: "Number of JVM garbage collections per second for this Enterprise Analytics node."
+          desc: "Number of JVM garbage collections per second for this Operational Insights node."
         },
         "cbas_gc_time": {
           unit: "millisecond/sec",
           title: "Garbage Collection Time",
-          desc: "The amount of time in milliseconds spent performing JVM garbage collections for Enterprise Analytics node."
+          desc: "The amount of time in milliseconds spent performing JVM garbage collections for Operational Insights node."
         },
         "cbas_heap_used": {
           unit: "bytes",
           title: "Heap Used",
-          desc: "Bytes of JVM heap used by Enterprise Analytics on this server."
+          desc: "Bytes of JVM heap used by Operational Insights on this server."
         },
         "cbas_system_load_average": {
           unit: "number",
@@ -2411,17 +2411,17 @@ function get65CompatDesc() {
         "cbas_thread_count": {
           unit: "number",
           title: "Thread Count",
-          desc: "Number of threads for Enterprise Analytics node."
+          desc: "Number of threads for Operational Insights node."
         },
         "cbas_io_reads": {
           unit: "bytes/sec",
           title: "Read Rate",
-          desc: "Number of disk bytes read on Enterprise Analytics node per second."
+          desc: "Number of disk bytes read on Operational Insights node per second."
         },
         "cbas_io_writes": {
           unit: "bytes/sec",
           title: "Write Rate",
-          desc: "Number of disk bytes written on Enterprise Analytics node per second."
+          desc: "Number of disk bytes written on Operational Insights node per second."
         }
       },
 

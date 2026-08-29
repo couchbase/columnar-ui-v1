@@ -1,8 +1,10 @@
 # columnar-ui-v1
 
-Cluster management UI for Enterprise Analytics (EA). Handles cluster configuration, security (users, roles, LDAP, certificates, audit), metrics dashboards, and server topology management.
+Cluster management UI for Couchbase Operational Insights (OI), the product formerly called Enterprise Analytics. Handles cluster configuration, security (users, roles, LDAP, certificates, audit), metrics dashboards, and server topology management.
 
-This is a **fork of Couchbase ns_server's Angular UI**, rebranded and scoped down to be EA-specific. It originated when EA was an integrated service within Couchbase Server; the fork retains the cluster operations layer but removes data-plane features (document browser, N1QL workbench, map-reduce views). The package name `ns_server-ui` is a leftover from the fork origin.
+This is a **fork of Couchbase ns_server's Angular UI**, rebranded and scoped down to be product-specific. It originated when analytics was an integrated service within Couchbase Server; the fork retains the cluster operations layer but removes data-plane features (document browser, N1QL workbench, map-reduce views). The package name `ns_server-ui` is a leftover from the fork origin.
+
+**The repository name is not renamed and should not be.** `columnar-ui-v1` dates from the Columnar era, two product names ago, and survived the rename to Enterprise Analytics untouched. The same holds across the tree: `cbas-core`, `cbas-ui` and `cbas` are named for the Couchbase Analytics Service, the manifest still declares `COLUMNAR_COMPAT_VERSION`, and `prod` stays `"analytics"`. These are frozen identifiers -- renaming them buys nothing and breaks every existing reference. Only display names follow a rebrand.
 
 ## Build
 
@@ -62,7 +64,7 @@ All source lives under `src/ui/app/`:
 - `MnSettingsClusterService` — auto-failover, compaction, query settings
 - `MnTasksService` — background task tracking
 
-## What's EA-Specific vs ns_server Origin
+## What's OI-Specific vs ns_server Origin
 
 **Retained from ns_server**: cluster topology, server management, auto-failover, RBAC/LDAP/certificates, audit logging, metrics dashboards, blob storage config (S3/Azure/GCS), GSI index management.
 

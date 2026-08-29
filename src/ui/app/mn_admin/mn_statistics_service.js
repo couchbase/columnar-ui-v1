@@ -666,7 +666,7 @@ function mnStatisticsNewServiceFactory($http, mnServersService, mnPoller, $rootS
         }]
       },
         {
-          name: "Enterprise Analytics",
+          name: "Operational Insights",
           enterprise: true,
           charts: [{
             stats: (mnPoolDefault.export.compat.atLeast76 ?

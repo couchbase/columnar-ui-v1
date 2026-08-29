@@ -16,6 +16,7 @@ import {not, pipe, includes, all, equals} from 'ramda';
 import {FormControl, FormGroup} from '@angular/forms';
 
 import {MnLifeCycleHooksToStream} from './mn.core.js';
+import {productName} from './constants/constants.js';
 import template from "./mn.security.audit.item.html";
 
 export {MnSecurityAuditItemComponent};
@@ -149,7 +150,7 @@ class MnSecurityAuditItemComponent extends MnLifeCycleHooksToStream {
     case "view_engine":
       return "Views";
     case "analytics":
-        return "Enterprise Analytics";
+        return productName;
     default:
       return name.charAt(0).toUpperCase() + name.substr(1).toLowerCase();
     }

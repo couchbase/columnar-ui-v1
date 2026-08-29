@@ -15,7 +15,7 @@ import {map} from 'rxjs/operators';
 
 import {MnHelperService} from './mn.helper.service.js';
 import {MnAdminService} from './mn.admin.service.js';
-import {servicesEnterprise} from './constants/constants.js';
+import {productName, servicesEnterprise} from './constants/constants.js';
 
 export {
   MnParseVersion,
@@ -413,7 +413,7 @@ class MnFormatServices {
       case 'index': return 'Index';
       case 'fts': return 'Search';
       case 'eventing': return 'Eventing';
-      case 'cbas': return 'Enterprise Analytics';
+      case 'cbas': return productName;
       case 'backup': return 'Backup';
       default: return service;
     }

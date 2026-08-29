@@ -15,7 +15,7 @@ import {switchMap, shareReplay, pluck,
         distinctUntilChanged, map} from 'rxjs/operators';
 
 import {singletonGuard} from './mn.core.js';
-import {servicesEnterprise} from './constants/constants.js';
+import {productName, servicesEnterprise} from './constants/constants.js';
 import {servicesCE} from './constants/constants.js';
 
 export {MnPoolsService};
@@ -68,7 +68,7 @@ class MnPoolsService {
   getServiceVisibleName(service) {
     switch (service) {
     case "kv": return "Data";
-    case "cbas": return "Enterprise Analytics";
+    case "cbas": return productName;
 
     }
   }

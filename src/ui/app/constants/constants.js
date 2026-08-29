@@ -67,11 +67,17 @@ let IEC = {
   Gi: 1073741824
 };
 
+// The product name, and the display label for the analytics service --
+// they are the same string.  Kept here because four call sites need it
+// and nothing else made them agree.
+let productName = "Operational Insights";
+
 let servicesEnterprise = ["kv","cbas"];
 let servicesCE = ["kv", "index", "fts", "n1ql"];
 let kvMemoryQuota = 100;
 
 export {
+  productName,
   daysOfWeek,
   knownAlerts,
   timeUnitToSeconds,

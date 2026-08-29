@@ -12,6 +12,7 @@ import angular from 'angular';
 import uiRouter from '@uirouter/angularjs';
 import {upgradeModule} from '@uirouter/angular-hybrid';
 import oclazyLoad from 'oclazyload';
+import {productName} from './constants/constants.js';
 import ngSanitize from 'angular-sanitize';
 import ngAnimate from 'angular-animate';
 import uiBootstrap from 'angular-ui-bootstrap';
@@ -81,7 +82,7 @@ function appRun($state, $urlRouter, $exceptionHandler, mnPools, $window, $rootSc
   }
 
 
-  $rootScope.mnTitle = "Enterprise Analytics";
+  $rootScope.mnTitle = productName;
 
   $state.defaultErrorHandler(function (error) {
     error && $exceptionHandler(error);

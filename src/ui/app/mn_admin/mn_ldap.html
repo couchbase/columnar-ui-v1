@@ -11,7 +11,7 @@ licenses/APL2.txt.
 <div ng-if="rbac.cluster.admin.security.write">
    <h3>LDAP</h3>
    <p style="width: 476px">
-      Enterprise Analytics can be configured to authenticate users by means of LDAP; and to map the LDAP groups of which a user is a member to roles defined on Enterprise Analytics.
+      Operational Insights can be configured to authenticate users by means of LDAP; and to map the LDAP groups of which a user is a member to roles defined on Operational Insights.
    </p>
   <form
      novalidate
@@ -113,7 +113,7 @@ licenses/APL2.txt.
                   <label
                      for="ldap-cert-server"
                      ng-disabled="mnLDAPCtl.config.connect.encryption == 'None'"
-                     uib-tooltip="Use the certificate already loaded in your Enterprise Analytics cluster"
+                     uib-tooltip="Use the certificate already loaded in your Operational Insights cluster"
                      tooltip-trigger="mouseenter"
                      tooltip-placement="top">
                     Couchbase
@@ -798,7 +798,7 @@ licenses/APL2.txt.
           <p>
             Your certificate choices for connecting to your LDAP host are either
             none (and no hostname verification will occur), use the certificate
-            already loaded in your Enterprise Analytics cluster,
+            already loaded in your Operational Insights cluster,
             or choose <b>Paste Cert</b> and paste in your own certificate text.
           </p>
           <p>
@@ -817,7 +817,7 @@ licenses/APL2.txt.
           <div ng-show="sectFocus == 'user auth'">
             <p>
               This section lets you map
-              simple usernames (that will be used to log into Enterprise Analytics) to
+              simple usernames (that will be used to log into Operational Insights) to
               LDAP DNs. You can expand the test section to test your mapping with
               a real user.
             </p>
@@ -832,7 +832,7 @@ licenses/APL2.txt.
             <p>
               This section lets you build a query so that Enterprise
               Analytics can discover the LDAP groups a particular user belongs to
-              (which you can then map to Enterprise Analytics groups in Security >
+              (which you can then map to Operational Insights groups in Security >
               Users > Groups). You can discover a user's groups with a user attribute
               or by constructing a query.
             </p>
