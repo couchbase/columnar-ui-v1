@@ -1,0 +1,31 @@
+<!--
+     Copyright 2026-Present Couchbase, Inc.
+
+     Use of this software is governed by the Business Source License included
+     in the file licenses/BSL-Couchbase.txt.  As of the Change Date specified
+     in that file, in accordance with the Business Source License, use of this
+     software will be governed by the Apache License, Version 2.0, included in
+     the file licenses/APL2.txt.
+-->
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>cbas-ui behaviour tests</title>
+
+    <!--
+      The same loader the product uses. es-module-shims-options.js carries the
+      fetch hook that turns an `import ... from "./x.html"` into a module
+      exporting the template text, which is how every dialog template in this
+      UI is loaded; without it the controller module cannot even be imported.
+      The importmap is the product's own, so "angular", "lodash",
+      "components/mn_pools" and the rest resolve to exactly what ships.
+    -->
+    <script src="/ui/libs/es-module-shims-options.js"></script>
+    <script async src="/ui/libs/es-module-shims.js"></script>
+    <script type="importmap-shim" src="/harness/importmap.json"></script>
+    <script type="module-shim" src="/harness/run.js"></script>
+  </head>
+  <body></body>
+</html>

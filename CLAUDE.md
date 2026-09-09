@@ -72,7 +72,24 @@ All source lives under `src/ui/app/`:
 
 ## Tests
 
-No unit or integration tests in this project. E2E tests live in the main `testrunner/` project.
+`test/` holds the UI suite. It sits outside `src/ui` on purpose: CMake symlinks the whole of that directory into the build output, so anything placed under it ships to customers. Run from the repo root, not from `src/ui`.
+
+| Layer | Needs | Catches |
+|---|---|---|
+| `check_ui.py` | python3 | Structural breakage: dangling imports, missing assets, DI mismatches, links to removed pages |
+| `test_check_ui.py` | python3 | That `check_ui.py` still fails when it should |
+| `test_ui_smoke.py --serve-source` | docker | The app failing to boot, or asking at runtime for a module or template that no longer exists |
+| `test_cbas_dialogs.py` | docker + `../cbas-ui` | The analytics workbench's dialogs building the wrong statement, or showing the wrong fields |
+| `test_cbas_mutations.py` | docker + `../cbas-ui` | A case in `test_cbas_dialogs.py` that can no longer fail |
+| `test_ui_smoke.py --url ...` | playwright + a cluster | Nav contents, every live route loading clean, removed pages not rendering, the workbench running a query |
+
+`test/README.md` documents each of these; `test/run_ci.sh` runs everything that does not need a cluster.
+
+**Two jobs run this suite, and both are driven from this repo.** `run_ci.sh` is the whole of [cbas-ui-test](https://analytics.jenkins.couchbase.com/job/cbas-ui-test/), which triggers on changes to *either* this project or `cbas-ui`. The cluster mode needs an analytics-profile cluster with an s3mock backing store, so it runs from `analytics`, in `cbas/cbas-server/src/test/java/com/couchbase/analytics/test/ui/UiSmokeIT.java` ([cbas-other-tests](https://analytics.jenkins.couchbase.com/job/cbas-other-tests/)): that test brings up the cluster, copies this `test/` directory into the playwright image and runs the same script against it. The browser work lives here so that both jobs share one implementation.
+
+So a UI test belongs in this directory even when what it exercises is `cbas-ui`: that project vendors no angular, lodash or ace, and the importmap that resolves them is this repo's.
+
+E2E tests of the broader product live in the main `testrunner/` project.
 
 ## Related Projects
 

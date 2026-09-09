@@ -11,6 +11,8 @@ placed under it ships to customers.
 | `check_ui.py` | python3 | Structural breakage: dangling imports, missing assets, DI mismatches, links to removed pages |
 | `test_check_ui.py` | python3 | That `check_ui.py` still fails when it should |
 | `test_ui_smoke.py --serve-source` | docker (or local playwright) | The app failing to boot, or asking at runtime for a module/template that no longer exists |
+| `test_cbas_dialogs.py` | docker (or local playwright) + `../cbas-ui` | The analytics workbench's dialogs building the wrong statement, or showing the wrong fields |
+| `test_cbas_mutations.py` | docker (or local playwright) + `../cbas-ui` | A case in `test_cbas_dialogs.py` that can no longer fail |
 | `test_ui_smoke.py --url ...` | playwright + a cluster | Nav contents, every live route loading clean, removed pages not rendering |
 
 ### `check_ui.py` — structural checks
@@ -148,6 +150,62 @@ It is opt-in because installing the sample takes about a minute and mutates the
 cluster. `WORKBENCH_SAMPLE` / `SAMPLE_COLLECTIONS` near the top of the file are
 the knobs.
 
+### `test_cbas_dialogs.py` — the analytics workbench's dialogs
+
+```sh
+python3 test/test_cbas_dialogs.py                         # ../../cbas-ui/cbas-ui
+python3 test/test_cbas_dialogs.py --cbas-ui path/to/cbas-ui/cbas-ui
+```
+
+The workbench is a pluggable UI in the sibling `cbas-ui` project, but the
+browser it runs in is this repo's: it imports `angular`, `lodash`, `ace` and the
+ns_server components through `src/ui/importmap.json` and vendors none of them.
+So the tests that drive it live here, and run in the same job.
+
+Two pieces of the product do the heavy lifting, and neither is a stand-in:
+
+- `libs/es-module-shims-options.js` carries the fetch hook that turns
+  `import template from "./cw_cbas_catalog_dialog.html"` into a module exporting
+  the template text. Every dialog in that UI is loaded that way, so without it
+  the controller cannot even be imported.
+- `importmap.json` resolves the bare specifiers. The harness serves it verbatim,
+  only rebasing its relative targets onto `/ui/`.
+
+Stubbed, and nothing else: `$http`, the ns_server and query-ui services that UI
+does not own, and `$uibModal`, which is how a dialog reports OK and the only
+thing between a test and a real modal. Everything the assertions touch — the
+controller, the query service, the constants, the templates — is what ships.
+
+So each case judges a dialog by its product: either the statement the workbench
+would have sent (every DDL path funnels through `executeQueryUtil`, which the
+harness replaces), or the markup a user would have been shown (the template the
+dialog opened with, compiled against that dialog's own scope).
+
+That second half matters more than it looks. `ng-if="sourceCanVendCredentials()"`
+naming a function the scope does not have is simply always false: the option
+never appears, nothing is logged, and no other layer can see it.
+
+The cases are in `test/cbas/cases.js`; `test/cbas/env.js` is where a new one
+starts — `makeEnv()` returns the injector's controller, the dialogs it opened
+and the statements so far.
+
+### `test_cbas_mutations.py` — tests for those tests
+
+```sh
+python3 test/test_cbas_mutations.py
+```
+
+The same idea as `test_check_ui.py`, applied to the layer above: each entry
+breaks one decision the dialogs make, copies the `cbas-ui` tree with that damage
+in place, and asserts a case notices. Two real gaps turned up this way while the
+suite was being written — a substring assertion that survived renaming the
+column it checked, and a helper that asserted a feature flag was off after
+having just written `false` to it.
+
+A mutation whose text is gone is a failure, not a skip. Re-point it rather than
+deleting it; a mutation that no longer applies has quietly stopped testing
+anything.
+
 ## CI
 
 `test/run_ci.sh` is the whole job. It needs `python3` and `docker` — no product
@@ -157,10 +215,10 @@ build, no cluster, no JDK, no maven:
 test/run_ci.sh
 ```
 
-It runs all three layers, continuing past a failure so one run reports
-everything that is broken rather than only the first thing.
+It runs every layer that does not need a cluster, continuing past a failure so
+one run reports everything that is broken rather than only the first thing.
 
-The two structural layers run directly under `python3`. The browser layer runs
+The two structural layers run directly under `python3`. The browser layers run
 inside the official playwright image, because a bare Jenkins agent has no
 chromium shared libraries (`libglib-2.0` and friends) and installing them needs
 root — `playwright install --with-deps` cannot help without sudo. Docker is
@@ -177,5 +235,9 @@ failure text attached, instead of a single pass/fail blob.
 Any of the layers can also be run on its own with `--junit-xml <path>`.
 
 The cluster-based run (`--url`) is not part of this job: it needs an
-analytics-profile cluster with an s3mock backing store, so it belongs in a job
-that already provisions one, after its deploy step.
+analytics-profile cluster with an s3mock backing store, so it is driven from
+`analytics`, by
+`cbas/cbas-server/src/test/java/com/couchbase/analytics/test/ui/UiSmokeIT.java`.
+That test brings the cluster up, copies this directory into the playwright image
+and runs `test_ui_smoke.py` against it — the same script this job runs against a
+stub, so there is one implementation of the browser work rather than two.

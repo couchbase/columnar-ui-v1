@@ -19,6 +19,9 @@
 #
 # Runs every layer even if an earlier one fails, so one run reports everything
 # that is broken rather than only the first thing.
+#
+# The cbas-ui layers additionally need the cbas-ui project checked out beside
+# this one; set CBAS_UI to point elsewhere.
 
 set -u -o pipefail
 
@@ -45,9 +48,14 @@ run() {
     fi
 }
 
-smoke() {
+# Runs one command inside the playwright image, with src/ and test/ staged at
+# /work along with any extra trees named after the command as name=path pairs.
+# Anything it writes to /work/reports is copied back out, failure or not: those
+# files carry the per-case detail.
+in_playwright() {
+    local command="$1"; shift
     if ! docker info >/dev/null 2>&1; then
-        echo "docker is not available; the browser layer needs it" >&2
+        echo "docker is not available; the browser layers need it" >&2
         return 1
     fi
     echo "using $PLAYWRIGHT_IMAGE"
@@ -57,9 +65,14 @@ smoke() {
     # the daemon cannot see silently mounts an empty directory - the test then
     # fails with "can't open file", which reads like a missing file rather than
     # a missing mount. docker cp works whether the daemon is local or not.
-    local stage cid rc
+    local stage cid rc extra
     stage=$(mktemp -d) || return 1
     cp -R src test "$stage"/ || { rm -rf "$stage"; return 1; }
+    # name=path, so a tree staged from elsewhere still lands where the command
+    # expects it rather than under whatever the source directory was called.
+    for extra in "$@"; do
+        cp -R "${extra#*=}" "$stage/${extra%%=*}" || { rm -rf "$stage"; return 1; }
+    done
 
     # --ipc=host is playwright's recommendation; chromium can exhaust the
     # default 64MB /dev/shm and crash mid-run otherwise.
@@ -68,8 +81,7 @@ smoke() {
         bash -c "pip install --quiet --no-warn-script-location \
                      --disable-pip-version-check --root-user-action=ignore \
                      playwright==$PLAYWRIGHT_VERSION &&
-                 python test/test_ui_smoke.py --serve-source \
-                        --junit-xml /work/ui-smoke.xml") || { rm -rf "$stage"; return 1; }
+                 mkdir -p /work/reports && $command") || { rm -rf "$stage"; return 1; }
 
     # The "/." matters: -w already created /work, and docker cp copies a source
     # directory *into* an existing destination. Without it the tree lands at
@@ -79,15 +91,41 @@ smoke() {
 
     docker start -a "$cid"
     rc=$?
-    # Copy the report out even on failure: it carries the per-case detail.
-    docker cp "$cid:/work/ui-smoke.xml" "$REPORTS/ui-smoke.xml" >/dev/null 2>&1
+    docker cp "$cid:/work/reports/." "$REPORTS/" >/dev/null 2>&1
     docker rm -f "$cid" >/dev/null 2>&1
     return $rc
+}
+
+smoke() {
+    in_playwright "python test/test_ui_smoke.py --serve-source \
+                          --junit-xml /work/reports/ui-smoke.xml"
+}
+
+# The analytics workbench is a pluggable UI in the sibling cbas-ui project, but
+# the browser it runs in is this repo's: it imports angular, lodash, ace and the
+# ns_server components through src/ui's importmap and vendors none of them. Both
+# layers run in one container so the image is prepared once, and both always
+# run, so one report says everything that is broken.
+cbas_dialogs() {
+    local cbas_ui="${CBAS_UI:-$(cd .. && pwd)/cbas-ui}"
+    if [ ! -f "$cbas_ui/cbas-ui/cw_cbas_controller.js" ]; then
+        echo "no cbas-ui checkout at $cbas_ui" >&2
+        echo "set CBAS_UI, or sync the cbas-ui project beside this one" >&2
+        return 1
+    fi
+    in_playwright "status=0
+                   python test/test_cbas_dialogs.py --cbas-ui /work/cbas-ui/cbas-ui \
+                          --junit-xml /work/reports/cbas-dialogs.xml || status=1
+                   echo; echo '### cbas-ui tests-for-the-tests'
+                   python test/test_cbas_mutations.py --cbas-ui /work/cbas-ui/cbas-ui \
+                          --junit-xml /work/reports/cbas-mutations.xml || status=1
+                   exit \$status" "cbas-ui=$cbas_ui"
 }
 
 run "structural checks"        python3 test/check_ui.py       --junit-xml "$REPORTS/ui-check.xml"
 run "checks-for-the-checks"    python3 test/test_check_ui.py  --junit-xml "$REPORTS/ui-check-meta.xml"
 run "browser smoke (hermetic)" smoke
+run "cbas-ui dialogs"          cbas_dialogs
 
 echo
 if [ "$status" -ne 0 ]; then
