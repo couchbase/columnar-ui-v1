@@ -54,6 +54,13 @@ LIVE_ROUTES = ['/overview', '/servers', '/logs', '/settings', '/security']
 # 401s are how the UI discovers it is not logged in yet; they are not failures.
 IGNORED_STATUSES = (401,)
 
+# What /pools reports as prodName for the analytics profile: the display name
+# of the product this UI belongs to, and the value productName carries in
+# src/ui/app/constants/constants.js. The UI never compares against it -
+# isColumnar is keyed on prod - but a cluster naming itself something else is
+# either on a stale profile or half-way through a rename, and worth reporting.
+PRODUCT_NAME = 'Operational Insights'
+
 
 # ---------------------------------------------------------------------------
 # Hermetic mode: serve src/ui with just enough REST to let the app boot.
@@ -65,10 +72,13 @@ class _StubHandler(http.server.SimpleHTTPRequestHandler):
         # mnPools derives isInitialized from pools.pools.length, so this list
         # must be non-empty or the app routes to the setup wizard instead of
         # the login page.
-        # prodName drives poolDefault.isColumnar; this UI is only compatible
-        # with an analytics-profile cluster, so the stub must claim to be one.
+        # prod drives poolDefault.isColumnar; this UI is only compatible with
+        # an analytics-profile cluster, so the stub must claim to be one. It is
+        # the stable identifier, not the display name in prodName, that the UI
+        # keys on.
         '/pools': {'isEnterprise': True, 'uuid': 'stub',
-                   'prodName': 'Enterprise Analytics',
+                   'prod': 'analytics',
+                   'prodName': PRODUCT_NAME,
                    'implementationVersion': '0.0.0-0000-enterprise-analytics',
                    'componentsVersion': {},
                    'pools': [{'name': 'default', 'uri': '/pools/default'}]},
@@ -515,17 +525,27 @@ def run(page, base, opts, hermetic, entry):
     # This UI is only compatible with an analytics-profile cluster. Against a
     # default_profile cluster nearly everything below fails in confusing ways,
     # so say so plainly instead.
-    prod = page.evaluate(
+    # Keyed on prod, the identifier ns_server holds fixed across a rebrand,
+    # rather than on prodName, which is the display name and does change.
+    pools = page.evaluate(
         """async () => {
              const r = await fetch('/pools');
              if (!r.ok) return null;
-             return (await r.json()).prodName || '';
+             const p = await r.json();
+             return {prod: p.prod || '', prodName: p.prodName || ''};
            }""")
-    if prod is not None and prod != 'Enterprise Analytics':
+    if pools is not None and pools['prod'] != 'analytics':
         check('cluster runs the analytics profile',
-              [f'prodName is {prod!r}, expected "Enterprise Analytics" - '
+              [f'prod is {pools["prod"]!r}, expected "analytics" - '
                f'start the cluster with the analytics profile'])
         return results
+    # The display name is asserted separately and does not gate the rest of
+    # the run: a cluster on the analytics profile under a stale or wrong name
+    # is still worth exercising, and the mismatch is reported on its own.
+    if pools is not None:
+        check('cluster reports the current product name',
+              [] if pools['prodName'] == PRODUCT_NAME else
+              [f'prodName is {pools["prodName"]!r}, expected {PRODUCT_NAME!r}'])
 
     # --- setup or sign in --------------------------------------------------
     rec.reset()
