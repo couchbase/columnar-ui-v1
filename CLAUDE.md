@@ -79,7 +79,7 @@ All source lives under `src/ui/app/`:
 | `check_ui.py` | python3 | Structural breakage: dangling imports, missing assets, DI mismatches, links to removed pages |
 | `test_check_ui.py` | python3 | That `check_ui.py` still fails when it should |
 | `test_ui_smoke.py --serve-source` | docker | The app failing to boot, or asking at runtime for a module or template that no longer exists |
-| `test_cbas_dialogs.py` | docker + `../cbas-ui` | The analytics workbench's dialogs building the wrong statement, or showing the wrong fields |
+| `test_cbas_dialogs.py` | docker + `../cbas-ui` | The analytics workbench's dialogs, and the Security section's Analytics RBAC page, building the wrong statement or showing the wrong fields |
 | `test_cbas_mutations.py` | docker + `../cbas-ui` | A case in `test_cbas_dialogs.py` that can no longer fail |
 | `test_ui_smoke.py --url ...` | playwright + a cluster | Nav contents, every live route loading clean, removed pages not rendering, the workbench running a query |
 
@@ -90,6 +90,27 @@ All source lives under `src/ui/app/`:
 So a UI test belongs in this directory even when what it exercises is `cbas-ui`: that project vendors no angular, lodash or ace, and the importmap that resolves them is this repo's.
 
 E2E tests of the broader product live in the main `testrunner/` project.
+
+## Commit Messages
+
+Every commit message must end with the trailer, naming whichever model did the work:
+
+```
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+```
+
+It belongs in the trailing paragraph, contiguous with `Change-Id:` — a blank line between them
+splits the footer, and the `commit-msg` hook then mints a second `Change-Id` and orphans the
+change. Keep the subject at 50 characters or under; Gerrit warns above that.
+
+### Keep the body short
+
+The body says **why** — the defect, the constraint, the reason the obvious approach was rejected.
+It is not a narration of the diff: what changed is already in the diff, and restating it hunk by
+hunk only leaves two accounts to keep in step. A couple of sentences is usually the right length;
+a file-by-file tour is not.
+
+The same rule as `../analytics/CLAUDE.md`, which is where it was written down first.
 
 ## Related Projects
 

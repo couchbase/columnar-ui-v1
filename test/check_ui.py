@@ -42,6 +42,11 @@ EXTERNAL_STATES = (
     'app.admin.query',
     'app.admin.docs',
     'app.admin.settings.query',
+    # cbas-ui's Service RBAC tab, registered into the Security section. The
+    # Security nav entry names it as the landing state for a viewer who may
+    # reach the service but holds no platform role over users or security
+    # settings, so this repo links to a state the pluggable UI defines.
+    'app.admin.security.analyticsRbac',
 )
 
 # Files with no importer in this repo that must NOT be deleted. Each entry

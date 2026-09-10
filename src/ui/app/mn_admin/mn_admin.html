@@ -513,11 +513,22 @@
        ui-sref="app.admin.servers.list">
       Servers
     </a>
+    <!-- The analytics clauses are for the Service RBAC tab, which cbas-ui
+         plugs into this section. A user may be entitled to administer the
+         service's own RBAC while holding no platform role over users or
+         security settings at all - the entitlement is a service role, which
+         ns_server knows nothing about - so gating the section on those two
+         alone put the only page that administers it behind a door they could
+         not open. The landing state falls through for the same reason: both
+         of the others are themselves behind those permissions. -->
     <a
-       ng-show="rbac.cluster.admin.security.read || rbac.cluster.admin.users.read"
+       ng-show="rbac.cluster.admin.security.read || rbac.cluster.admin.users.read ||
+                rbac.cluster.analytics.access || rbac.cluster.analytics.manage"
        mn-tab="security"
        ng-class="{currentnav: ('app.admin.security' | includedByState)}"
-       ui-sref="{{rbac.cluster.admin.users.read ? 'app.admin.security.roles.user' : 'app.admin.security.certificate'}}">
+       ui-sref="{{rbac.cluster.admin.users.read ? 'app.admin.security.roles.user' :
+                 (rbac.cluster.admin.security.read ? 'app.admin.security.certificate' :
+                  'app.admin.security.analyticsRbac')}}">
       Security
     </a>
     <a

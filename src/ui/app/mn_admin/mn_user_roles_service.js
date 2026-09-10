@@ -23,8 +23,104 @@ angular
   .factory("mnUserRolesService", ["$q", "$http", "mnPoolDefault", "mnStoreService", "mnStatisticsNewService", mnUserRolesFactory]);
 
 function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisticsNewService) {
+  // Service roles and direct privileges are the engine's own, not ns_server's:
+  // they are granted with SQL++ and live in the service's metadata, so they are
+  // read with a query rather than from /settings/rbac. Only USER grantees
+  // matter here - a grant to another role belongs on the Service RBAC tab,
+  // which is where these are administered.
+  //
+  // Both halves come back in one statement because this rides the poller: two
+  // reads would double what the users page costs the service every tick. A row
+  // with a RoleName is an assignment, a row without is a privilege.
+  //
+  // Ownership is excluded. The engine records it for every object its owner
+  // created, so counting it would report thousands of "direct privileges"
+  // against whoever built the databases, none of them granted by anyone.
+  //
+  // Id is the account the grant was made to. It is not the same question as the
+  // name it was made under: delete a user, create another of that name, and the
+  // rows left behind still say the old account and grant nothing.
+  var ANALYTICS_GRANTS_QUERY =
+      "SELECT a.Assignee AS Grantee, a.AssigneeDomain AS Domain, a.AssigneeId AS Id, " +
+      "a.AssignedRoleName AS RoleName " +
+      "FROM Metadata.`AssignedRole` AS a WHERE a.GranteeType = 'USER' " +
+      "UNION ALL " +
+      // Every column aliased, including the ones whose names look right
+      // already: SQL++ does not rename a UNION ALL branch positionally, so
+      // without these the privilege half comes back as GranteeDomain and
+      // GranteeUuid and the two halves are read with different keys.
+      "SELECT p.Grantee AS Grantee, p.GranteeDomain AS Domain, p.GranteeUuid AS Id, " +
+      "NULL AS RoleName " +
+      "FROM Metadata.`Privilege` AS p " +
+      "WHERE p.GranteeType = 'USER' AND p.Privilege != 'OWNERSHIP'";
+
+  // What each built-in service role allows, in the engine's own hierarchy:
+  // sys_root contains sys_data_admin and sys_security_admin, sys_data_admin
+  // contains sys_data_reader, and sys_data_reader contains sys_view_reader.
+  // A role the engine did not create has no description to give.
+  var BUILT_IN_ROLES = {
+    sys_root: {
+      name: "Service Root",
+      includes: ["sys_data_admin", "sys_security_admin"],
+      description: "Full control: everything Service Data Admin and Service RBAC Admin allow, " +
+        "plus the service's own diagnostic functions, which no other role can run."
+    },
+    sys_security_admin: {
+      name: "Service RBAC Admin",
+      description: "Create and drop service roles, and grant and revoke privileges. " +
+        "Cannot grant Service Root, which needs a platform role that can manage this " +
+        "service, nor Service RBAC Admin, which needs that or Service Root."
+    },
+    sys_data_admin: {
+      name: "Service Data Admin",
+      includes: ["sys_data_reader"],
+      description: "Create, alter and drop databases, scopes, collections, views, indexes, " +
+        "functions, links and catalogs, and write their data. Includes Service Data Reader."
+    },
+    sys_data_reader: {
+      name: "Service Data Reader",
+      includes: ["sys_view_reader"],
+      description: "Read collections and describe links. Includes Service View Reader."
+    },
+    sys_view_reader: {
+      name: "Service View Reader",
+      description: "Read views."
+    }
+  };
+
+  var SERVICE_ROLE_FOOTER = " Service roles are granted on Security > Service RBAC.";
+
+  // Platform roles that carry cluster.analytics!manage, which the service
+  // treats as a master key: ensureAuthorized returns before consulting service
+  // RBAC at all, so a user holding one of these has full access no matter what
+  // the metadata says. Showing them as having no service roles would be the
+  // opposite of the truth.
+  //
+  // This is a list of role names standing in for a permission, because
+  // /settings/rbac/users answers with roles and there is nothing on it that
+  // resolves a permission for another user. It mirrors menelaus_roles.erl:
+  // admin has {[], all}, analytics_admin has {[analytics], [manage]}, and
+  // eventing_admin has {[analytics], all} - deliberately, per MB-42835. A role
+  // added to that list there and not here shows the wrong thing here.
+  var ANALYTICS_MANAGE_ROLES = ["admin", "analytics_admin", "eventing_admin"];
+
+  // The platform role granting the bypass, or null. The name is wanted, not
+  // just a yes/no: "all" on its own invites the question which role did that.
+  function analyticsManageRole(user) {
+    var held = (user.roles || []).map(function (role) { return role.role; });
+    return ANALYTICS_MANAGE_ROLES.filter(function (name) {
+      return held.indexOf(name) >= 0;
+    })[0] || null;
+  }
+
   var mnUserRolesService = {
     getState: getState,
+    getAnalyticsGrants: getAnalyticsGrants,
+    getAnalyticsPrivilegesDescription: getAnalyticsPrivilegesDescription,
+    getAnalyticsUnavailableDescription: getAnalyticsUnavailableDescription,
+    getAnalyticsRoleDescription: getAnalyticsRoleDescription,
+    analyticsManageRole: analyticsManageRole,
+    getAnalyticsManageDescription: getAnalyticsManageDescription,
     addUser: addUser,
     deleteUser: deleteUser,
     unlockUser: unlockUser,
@@ -610,7 +706,127 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
     }
   }
 
-  function getState(params) {
+  // A user's service roles and the count of privileges granted straight to
+  // them, both keyed by domain and name - which together are what identifies an
+  // account, the same name in the other domain being someone else. The grant's
+  // own account id rides along so getState can tell a live grant from one left
+  // by a deleted user of that name.
+  //
+  // Answers empty rather than failing: this decorates the users table and must
+  // never be the reason it does not load, whether analytics is unreachable or
+  // the viewer simply may not read its metadata.
+  function getAnalyticsGrants() {
+    return $http({
+      method: "POST",
+      url: "/_p/cbas/api/v1/request",
+      headers: {
+        "Content-Type": "application/json",
+        "ignore-401": "true",
+        "Analytics-Priority": "-1"
+      },
+      data: {statement: ANALYTICS_GRANTS_QUERY, source: "ui_users"},
+      mnHttp: {isNotForm: true, group: "global"}
+    }).then(function (resp) {
+      var grants = {roles: {}, privileges: {}, ids: {}, available: true};
+      if (resp.data && resp.data.errors) {
+        grants.available = false;
+        return grants;
+      }
+      ((resp.data && resp.data.results) || []).forEach(function (row) {
+        var key = (row.Domain || "local") + ":" + row.Grantee;
+        if (row.Id) {
+          grants.ids[key] = row.Id;
+        }
+        if (row.RoleName) {
+          grants.roles[key] = (grants.roles[key] || []).concat(row.RoleName);
+        } else {
+          grants.privileges[key] = (grants.privileges[key] || 0) + 1;
+        }
+      });
+      return grants;
+    }, function () {
+      // Unreachable, or refused. Either way the columns cannot be filled, and
+      // saying so is the whole point of the flag: an empty answer and an answer
+      // of "none" look identical in the table, and the second is a claim.
+      return {roles: {}, privileges: {}, ids: {}, available: false};
+    });
+  }
+
+  // The tooltip behind the "all" label: which platform role is responsible, and
+  // that it outranks anything on the Service RBAC tab.
+  //
+  // Named by its display name, taken from the roles the server describes -
+  // "analytics_admin" is an internal id, and the display name follows a product
+  // rename where the id does not. Falls back to the id when the role list has
+  // not arrived, which is better than saying nothing.
+  function getAnalyticsManageDescription(roleId, rolesByRole) {
+    var described = rolesByRole && rolesByRole[roleId];
+    var name = (described && described.name) || roleId;
+    return "Can manage this service through the " + name +
+      " platform role, which bypasses service roles entirely." + SERVICE_ROLE_FOOTER;
+  }
+
+  // The tooltip behind a dash that means "not read". Without it the column is
+  // indistinguishable from a user who holds nothing, which is a claim this page
+  // is in no position to make when the service did not answer.
+  function getAnalyticsUnavailableDescription() {
+    return "Could not be read: the analytics service did not answer. This is not " +
+      "a claim that the user holds nothing." + SERVICE_ROLE_FOOTER;
+  }
+
+  // The tooltip behind the direct-privilege count. Says what makes a privilege
+  // direct, because the number is otherwise indistinguishable from whatever the
+  // user's roles happen to carry - which is the larger number, and not this one.
+  function getAnalyticsPrivilegesDescription(count) {
+    return count + " privilege(s) granted straight to this user, not through any " +
+      "service role. Privileges their roles carry are not counted here." + SERVICE_ROLE_FOOTER;
+  }
+
+  // The tooltip behind a role name. Always says where these are administered,
+  // because this page shows them and cannot change them.
+  function getAnalyticsRoleDescription(roleName) {
+    var known = BUILT_IN_ROLES[roleName];
+    return (known ? known.description
+             : "A custom service role. Its privileges are listed on the Service RBAC tab.") +
+      SERVICE_ROLE_FOOTER;
+  }
+
+  function getState(params, withAnalyticsRoles) {
+    if (withAnalyticsRoles) {
+      return $q.all([getStateWithoutAnalyticsRoles(params), getAnalyticsGrants()])
+        .then(function (results) {
+          var state = results[0];
+          var grants = results[1];
+          state.analyticsUnavailable = !grants.available;
+          (state.users || []).forEach(function (user) {
+            var key = (user.domain || "local") + ":" + user.id;
+            var stale = isStaleGrant(user, grants.ids[key]);
+            user.analyticsRoles = stale ? [] : (grants.roles[key] || []);
+            user.analyticsPrivileges = stale ? 0 : (grants.privileges[key] || 0);
+            user.analyticsManageRole = analyticsManageRole(user);
+          });
+          return state;
+        });
+    }
+    return getStateWithoutAnalyticsRoles(params);
+  }
+
+  // Whether what the metadata records under this name was granted to somebody
+  // else: an account of that name that has since been deleted. The engine
+  // compares the same two ids and refuses such a grant, so crediting the live
+  // user with it would show roles and privileges they do not have.
+  //
+  // Both ids must be present before this says yes. ns_server issues none for an
+  // external user, and the engine mints its own and stores it nowhere else, so
+  // there is nothing to compare and the name is the identity there - which is
+  // how the engine treats an external user too. The Service RBAC tab separates
+  // the two accounts into their own rows; here there is only one row per user,
+  // so the stale grants are simply not shown against it.
+  function isStaleGrant(user, grantedToId) {
+    return !!(user.uuid && grantedToId && user.uuid !== grantedToId);
+  }
+
+  function getStateWithoutAnalyticsRoles(params) {
     return getUsers(params).then(function (resp) {
       var i;
       for (let key in resp.data.users) {

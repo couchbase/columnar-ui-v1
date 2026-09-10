@@ -11,7 +11,7 @@ placed under it ships to customers.
 | `check_ui.py` | python3 | Structural breakage: dangling imports, missing assets, DI mismatches, links to removed pages |
 | `test_check_ui.py` | python3 | That `check_ui.py` still fails when it should |
 | `test_ui_smoke.py --serve-source` | docker (or local playwright) | The app failing to boot, or asking at runtime for a module/template that no longer exists |
-| `test_cbas_dialogs.py` | docker (or local playwright) + `../cbas-ui` | The analytics workbench's dialogs building the wrong statement, or showing the wrong fields |
+| `test_cbas_dialogs.py` | docker (or local playwright) + `../cbas-ui` | The analytics workbench's dialogs, and the Security section's Service RBAC page, building the wrong statement or showing the wrong fields |
 | `test_cbas_mutations.py` | docker (or local playwright) + `../cbas-ui` | A case in `test_cbas_dialogs.py` that can no longer fail |
 | `test_ui_smoke.py --url ...` | playwright + a cluster | Nav contents, every live route loading clean, removed pages not rendering |
 
@@ -185,9 +185,33 @@ That second half matters more than it looks. `ng-if="sourceCanVendCredentials()"
 naming a function the scope does not have is simply always false: the option
 never appears, nothing is logged, and no other layer can see it.
 
-The cases are in `test/cbas/cases.js`; `test/cbas/env.js` is where a new one
-starts — `makeEnv()` returns the injector's controller, the dialogs it opened
-and the statements so far.
+The cases are in `test/cbas/cases.js` for the workbench and
+`test/cbas/rbac_cases.js` for the Security section's Service RBAC page;
+`test/cbas/env.js` and `test/cbas/rbac_env.js` are where a new one starts —
+each returns the injector's controller, the dialogs it opened and the statements
+so far. The boundary both stub is in `test/cbas/stubs.js`.
+
+`test/cbas/users_cases.js` covers one thing in this repo's own source rather
+than cbas-ui's: the analytics-roles column on Users & Groups, whose values come
+from a query against the analytics service. `users_env.js` builds an injector
+over `mn_user_roles_service.js` for it. Note that `test_cbas_mutations.py`
+cannot reach these - it mutates the cbas-ui tree, which is the only one the
+harness parameterises - so they are the one layer here without a
+test-for-the-test.
+
+The RBAC page raises the stakes on the statement half: analytics roles and
+privileges have no REST API behind them, so a grant *is* a statement, and the
+grammar reads several of them two ways. `GRANT CREATE COLLECTION ...` is one
+privilege with an `ON` after it and a different one without; a grantee written
+without `USER` is a role. Both alternatives parse, execute and grant the wrong
+thing, which is why those cases assert whole statements rather than fragments.
+
+That page's reads are stubbed by which metadata dataset they name, so seeding
+`makeRbacEnv({roles, privileges, assignments, users})` is enough to drive it.
+It also renders the page, not just the dialogs: `renderPage()` compiles
+`cbas_rbac.html` against the controller under its real alias, which is the only
+way to see that the action opening a dialog is wired to anything. An `ng-click`
+naming a method the alias does not have is silently inert.
 
 ### `test_cbas_mutations.py` — tests for those tests
 

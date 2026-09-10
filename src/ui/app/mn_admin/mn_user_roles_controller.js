@@ -14,6 +14,7 @@ import uiSelect from "ui-select";
 
 import mnHelper from "../components/mn_helper.js";
 import mnPromiseHelper from "../components/mn_promise_helper.js";
+import mnPermissions from "../components/mn_permissions.js";
 import mnPoll from "../components/mn_poll.js";
 import mnSortableTable from "../components/directives/mn_sortable_table.js";
 import mnSpinner from "../components/directives/mn_spinner.js";
@@ -48,6 +49,7 @@ angular
   .module("mnUserRoles", [
     uiSelect,
     mnHelper,
+    mnPermissions,
     mnPromiseHelper,
     mnPoll,
     mnSortableTable,
@@ -63,7 +65,7 @@ angular
     mnSearch,
     mnTimezoneDetailsDowngradeModule
   ])
-  .controller("mnUserRolesController", ["$scope", "$uibModal", "mnPromiseHelper", "mnUserRolesService", "mnPoller", "mnHelper", "$state", "poolDefault", "permissions", "mnTimezoneDetailsServiceDowngrade", mnUserRolesController])
+  .controller("mnUserRolesController", ["$scope", "$uibModal", "mnPromiseHelper", "mnUserRolesService", "mnPoller", "mnHelper", "$state", "poolDefault", "permissions", "mnTimezoneDetailsServiceDowngrade", "mnPermissions", mnUserRolesController])
   .controller("mnUserRolesDeleteDialogController", mnUserRolesDeleteDialogController)
   .controller("mnUserRolesLockDialogController", mnUserRolesLockDialogController)
   .controller("mnUserRolesUnlockDialogController", mnUserRolesUnlockDialogController)
@@ -71,7 +73,7 @@ angular
   .controller("mnUserRolesAddDialogController", mnUserRolesAddDialogController)
   .controller("mnRolesController", mnRolesController);
 
-function mnUserRolesController($scope, $uibModal, mnPromiseHelper, mnUserRolesService, mnPoller, mnHelper, $state, poolDefault, permissions, mnTimezoneDetailsServiceDowngrade) {
+function mnUserRolesController($scope, $uibModal, mnPromiseHelper, mnUserRolesService, mnPoller, mnHelper, $state, poolDefault, permissions, mnTimezoneDetailsServiceDowngrade, mnPermissions) {
   var vm = this;
 
   vm.deleteUser = deleteUser;
@@ -92,6 +94,22 @@ function mnUserRolesController($scope, $uibModal, mnPromiseHelper, mnUserRolesSe
   vm.isDesc = isDesc;
   vm.getRoleParams = getRoleParams;
   vm.localGMTOffset = mnTimezoneDetailsServiceDowngrade.getLocalGMTString();
+  // Service roles are read with a query against the service, so the column is
+  // shown to whoever may reach it - the same gate the Service RBAC tab uses,
+  // and for the same reason: a service role can carry the right to administer
+  // RBAC, and no platform permission reports that, so managing the service is
+  // not the only way to be entitled to this. The service decides row by row
+  // what such a viewer may see. They are read-only here either way: granting
+  // and revoking is the Service RBAC tab's job.
+  vm.getAnalyticsRoleDescription = mnUserRolesService.getAnalyticsRoleDescription;
+  vm.getAnalyticsPrivilegesDescription = mnUserRolesService.getAnalyticsPrivilegesDescription;
+  vm.getAnalyticsUnavailableDescription = mnUserRolesService.getAnalyticsUnavailableDescription;
+  vm.getAnalyticsManageDescription = function (roleId) {
+    return mnUserRolesService.getAnalyticsManageDescription(roleId, vm.rolesByRole);
+  };
+  vm.showAnalyticsRoles = !!(mnPermissions.export.cluster.analytics &&
+                             (mnPermissions.export.cluster.analytics.access ||
+                              mnPermissions.export.cluster.analytics.manage));
 
   activate();
 
@@ -145,7 +163,7 @@ function mnUserRolesController($scope, $uibModal, mnPromiseHelper, mnUserRolesSe
     });
 
     new mnPoller($scope, function () {
-      return mnUserRolesService.getState($state.params);
+      return mnUserRolesService.getState($state.params, vm.showAnalyticsRoles);
     })
       .subscribe("state", vm)
       .setInterval(10000)

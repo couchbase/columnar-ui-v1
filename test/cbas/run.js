@@ -13,9 +13,11 @@ licenses/APL2.txt.
 // throws, and a case that throws is a failure.
 
 import cases from "./cases.js";
+import rbacCases from "./rbac_cases.js";
+import usersCases from "./users_cases.js";
 
 const results = [];
-for (const [name, fn] of cases) {
+for (const [name, fn] of cases.concat(rbacCases).concat(usersCases)) {
   const started = performance.now();
   let failure = null;
   try {

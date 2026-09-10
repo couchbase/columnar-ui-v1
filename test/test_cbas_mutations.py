@@ -117,6 +117,237 @@ MUTATIONS = [
      """                ng-required="!options.vendedCredentials"
                 ng-disabled="options.vendedCredentials\"""",
      ''),
+
+    # Service RBAC. Every one of these produces a statement the server accepts
+    # and executes - just not the grant the form described - so nothing but an
+    # assertion on the statement notices.
+    ('a backtick in a name is no longer escaped',
+     'cw_rbac_service.js',
+     """  return "`" + String(name == null ? "" : name).replace(/`/g, "``") + "`";""",
+     """  return "`" + String(name == null ? "" : name) + "`";"""),
+
+    ('an external user is granted as the local user of the same name',
+     'cw_rbac_service.js',
+     """  var domain = String(grantee.domain || "local").toLowerCase() === "external" ? "EXTERNAL " : "";
+  return domain + "USER " + quoteId(grantee.name);""",
+     """  return "USER " + quoteId(grantee.name);"""),
+
+    ('a role grantee is written as a bare name, which means something else',
+     'cw_rbac_service.js',
+     """    return "ROLE " + quoteId(grantee.name);""",
+     """    return quoteId(grantee.name);"""),
+
+    ('a privilege over objects not yet created grows an ON',
+     'cw_rbac_service.js',
+     """    return " " + objectTypeKey + scopeClause;""",
+     """    return " ON " + objectTypeKey + scopeClause;"""),
+
+    ('an index grant drops the collections it applies to',
+     'cw_rbac_service.js',
+     """    return " INDEX ON ANY COLLECTION" + scopeClause;""",
+     """    return " INDEX" + scopeClause;"""),
+
+    ('a two-word privilege can be written with no object to disambiguate it',
+     'cw_rbac_service.js',
+     """      if (TWO_WORD_PRIVILEGES.indexOf(privilege) >= 0) {
+        throw new Error(privilege + " is a privilege on an object and cannot be granted without one");
+      }""",
+     ''),
+
+    ('a target form the grammar rejects is written anyway',
+     'cw_rbac_service.js',
+     """  if (targetsFor(objectTypeKey, isDdl).indexOf(targetKind) < 0) {
+    throw new Error("a " + (isDdl ? "DDL" : "") + " privilege on " + objectTypeKey +
+                    " cannot be targeted " + targetKind);
+  }""",
+     ''),
+
+    ('a stored grant is revoked at the wrong scope',
+     'cw_rbac_service.js',
+     """  if (target.ScopeName) {
+    return "SCOPE";
+  }""",
+     ''),
+
+    ('ownership rows flood the list of granted privileges',
+     'cw_rbac_service.js',
+     """FROM Metadata.`Privilege` AS p WHERE p.Privilege != 'OWNERSHIP'""",
+     """FROM Metadata.`Privilege` AS p"""),
+
+    ('a grantee holding grants but no cluster user is dropped from the page',
+     'cw_rbac_controller.js',
+     """      var key = granteeKey(name, "USER", domain) + "#" + (granteeId || "");""",
+     """      var key = granteeKey(name, "USER", domain) + "#" + (granteeId || "");
+      if (!live) { return {id: name, domain: domain, roles: [], privileges: []}; }"""),
+
+    ('the privileges ticked survive a change of object type',
+     'cw_rbac_controller.js',
+     """      if (newType !== oldType) {
+        options.privileges = {};
+        options.targetKind = "ANY";
+      }""",
+     ''),
+
+    ('the RBAC page depends on the workbench again, and is blank without it',
+     'cw_rbac_service.js',
+     """  .factory("cwRbacService", ["$q", "$http", "cwConstantsService", cwRbacServiceFactory]);""",
+     """  .factory("cwRbacService", ["$q", "$http", "cwConstantsService", "cwQueryService", cwRbacServiceFactory]);"""),
+
+    ('a grant to a user is written as a grant to a role of that name',
+     'cw_rbac_controller.js',
+     """    grantPrivilege({name: user.id, type: "USER", domain: user.domain}, granteeLabel(user));""",
+     """    grantPrivilege({name: user.id, type: "ROLE"}, granteeLabel(user));"""),
+
+    ('an external user is granted to as though they were local',
+     'cw_rbac_controller.js',
+     """    grantPrivilege({name: user.id, type: "USER", domain: user.domain}, granteeLabel(user));""",
+     """    grantPrivilege({name: user.id, type: "USER"}, granteeLabel(user));"""),
+
+    # The markup half. A checkbox bound to a model nothing reads simply never
+    # ticks anything, and no assertion short of a rendered template sees it.
+    ('the user row loses the action that grants to that user',
+     'cbas_rbac.html',
+     """<button class="outline" ng-click="rbacCtl.grantToUser(user)">Grant Privilege</button>""",
+     ''),
+
+                # The grantee-scoped purge. It is addressed by account, and every segment of
+    # that address has to survive the trip intact.
+    ('a grantee name is not encoded into its path segment',
+     'cw_rbac_service.js',
+     """          encodeURIComponent(grantee.id), encodeURIComponent(grantee.uuid)].join("/");""",
+     """          grantee.id, encodeURIComponent(grantee.uuid)].join("/");"""),
+
+    ('the purge names the grantee without saying which account',
+     'cw_rbac_service.js',
+     """          encodeURIComponent(grantee.id), encodeURIComponent(grantee.uuid)].join("/");""",
+     """          encodeURIComponent(grantee.id), ""].join("/");"""),
+
+    ('a purge that removed nothing is reported as a failure',
+     'cw_rbac_controller.js',
+     """          if (!removed && rows) {""",
+     """          if (removed && rows) {"""),
+
+    ('a superseded grantee is denied the purge again',
+     'cbas_rbac.html',
+     """<span ng-if="rbacCtl.canManage && user.unknown && user.uuid">""",
+     """<span ng-if="rbacCtl.canManage && user.unknown && user.uuid && !user.superseded">"""),
+
+    ('an orphan keeps a per-row revoke that removes more than the row',
+     'cbas_rbac.html',
+     """<a ng-if="rbacCtl.canManage && !user.unknown"
+                     ng-click="rbacCtl.revokeGrant(user.id, grant)">revoke</a>""",
+     """<a ng-if="rbacCtl.canManage"
+                     ng-click="rbacCtl.revokeGrant(user.id, grant)">revoke</a>"""),
+
+    # Who may change any of this. The tab is shown to anyone who may reach the
+    # service, so these decisions are the only thing between a read-only viewer
+    # and a page full of actions the engine would refuse - and between an
+    # administrator who holds only a service role and a page with none.
+    ('a read-only viewer is offered every action anyway',
+     'cw_rbac_controller.js',
+     """      rbacCtl.canManage = canManage(data.whoami, data.assignments, includedByRole);""",
+     """      rbacCtl.canManage = true;"""),
+
+    ('an administrator who holds only a service role is offered none',
+     'cw_rbac_controller.js',
+     """    return cwRbacService.holdsAdminServiceRole(
+      rolesHeldBy(whoami, assignmentRows), includedByRole);""",
+     """    return false;"""),
+
+    ('the viewer is matched by name alone, so the other domain\'s account counts',
+     'cw_rbac_controller.js',
+     """        row.Assignee === whoami.id &&
+        String(row.AssigneeDomain || "local").toLowerCase() ===
+          String(whoami.domain || "local").toLowerCase();""",
+     """        row.Assignee === whoami.id;"""),
+
+    ('a role that was granted an administering role stops carrying it',
+     'cw_rbac_service.js',
+     """    return isAdminServiceRole(name) ||
+      rolesIncludedBy(name, grantedRoleNamesByRole).some(isAdminServiceRole);""",
+     """    return isAdminServiceRole(name);"""),
+
+    ('a grantee is called orphaned on a user list that was never read',
+     'cw_rbac_controller.js',
+     """          unknown: usersReadable,""",
+     """          unknown: true,"""),
+
+        ('the viewer drops off the page when the user list is refused',
+     'cw_rbac_controller.js',
+     """    if (whoami) {
+      var self = ensure(whoami.id, whoami.domain);
+      self.unknown = false;
+      self.self = true;
+    }""",
+     """    if (false) {
+      ensure(whoami.id, whoami.domain);
+    }"""),
+
+    # Matching a grant to an account rather than to a name. Both directions are
+    # wrong in their own way: one shows a dead grant as live, the other orphans
+    # every external grantee on the cluster.
+    ('a grant left by a deleted account is shown as the live user\'s',
+     'cw_rbac_controller.js',
+     """      return !!(user.uuid && granteeId && user.uuid !== granteeId);""",
+     """      return false;"""),
+
+    ('a grantee with no directory uuid is treated as a mismatch',
+     'cw_rbac_controller.js',
+     """      return !!(user.uuid && granteeId && user.uuid !== granteeId);""",
+     """      return user.uuid !== granteeId;"""),
+
+    ('the grant no longer says which account it was made to',
+     'cw_rbac_service.js',
+     """    "SELECT a.Assignee, a.AssigneeDomain, a.AssigneeId, a.GranteeType, a.AssignedRoleName " +""",
+     """    "SELECT a.Assignee, a.AssigneeDomain, a.GranteeType, a.AssignedRoleName " +"""),
+
+    ('the page gives up when the platform refuses its user list',
+     'cw_rbac_service.js',
+     """    }, function () {
+      return query(USERS_QUERY).then(function (rows) {
+        return rows.map(toUser);
+      });
+    });""",
+     """    });"""),
+
+    ('two rows for one name collide in the table',
+     'cbas_rbac.html',
+     """track by user.key""",
+     """track by (user.domain + ':' + user.id)"""),
+
+    ('a count of nothing is shown as a bare zero',
+     'cbas_rbac.html',
+     """            <span ng-if="user.privileges.length">{{user.privileges.length}}</span>
+            <span class="grayblack-3" ng-if="!user.privileges.length">&mdash;</span>""",
+     """            <span>{{user.privileges.length}}</span>"""),
+
+    # An unreachable service. Reported as whatever the proxy put in the body, or
+    # not told apart from a statement the service refused, and the administrator
+    # is sent looking for a mistake they did not make.
+    ('an unreachable service is reported as a refused statement',
+     'cw_rbac_service.js',
+     """        error.unavailable = !errors && SERVICE_DOWN_STATUSES.indexOf(error.status) >= 0;""",
+     """        error.unavailable = false;"""),
+
+    ('a statement the service refused is called unreachable',
+     'cw_rbac_service.js',
+     """        error.unavailable = !errors && SERVICE_DOWN_STATUSES.indexOf(error.status) >= 0;""",
+     """        error.unavailable = true;"""),
+
+    ('the tables render empty behind the unreachable message',
+     'cbas_rbac.html',
+     """  <div ng-if="!rbacCtl.loading && !rbacCtl.unavailable">""",
+     """  <div ng-if="!rbacCtl.loading">"""),
+
+    ('a read-only page stops saying why its actions are missing',
+     'cbas_rbac.html',
+     """    <p class="text-small grayblack-3 margin-bottom-half" ng-if="!rbacCtl.canManage">""",
+     """    <p class="text-small grayblack-3 margin-bottom-half" ng-if="false">"""),
+
+    ('the privilege checkbox writes to a model nothing reads',
+     'cw_rbac_grant_dialog.html',
+     """             ng-model="options.privileges[privilege.privilege]">""",
+     """             ng-model="options.privilege[privilege.privilege]">"""),
 ]
 
 

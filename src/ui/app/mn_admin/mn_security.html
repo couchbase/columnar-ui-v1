@@ -13,7 +13,10 @@ licenses/APL2.txt.
      class="sub-nav"
      mn-pluggable-ui-tabs
      mn-tab-bar-name="securityTab">
+    <!-- mn-tab is the anchor a pluggable UI registers itself after; cbas-ui's
+         Service RBAC tab plugs in here, beside the users it grants roles to. -->
     <a
+       mn-tab="users"
        ui-sref="app.admin.security.roles.user"
        ng-show="rbac.cluster.admin.users.read || !poolDefault.compat.atLeast79"
        ng-class="{selected: ('app.admin.security.roles.user' | includedByState) ||

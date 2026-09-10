@@ -104,8 +104,18 @@
       >
         <span>groups</span>
       </span>
-      <span class="cbui-table-cell flex-grow-3">
-        <span>roles</span>
+      <span class="cbui-table-cell flex-grow-1-5">
+        <span>platform roles</span>
+      </span>
+      <span
+         class="cbui-table-cell flex-grow-1-5 resp-hide-sml"
+         ng-if="userRolesCtl.showAnalyticsRoles">
+        service roles
+      </span>
+      <span
+         class="cbui-table-cell flex-grow-half resp-hide-sml"
+         ng-if="userRolesCtl.showAnalyticsRoles">
+        direct privileges
       </span>
       <span class="cbui-table-cell flex-grow-half resp-hide-xsml">
         <span
@@ -170,7 +180,7 @@
         >
           {{userRolesCtl.parseGroupNames(user)}}
         </span>
-        <span class="cbui-table-cell flex-grow-3 wrap">
+        <span class="cbui-table-cell flex-grow-1-5 wrap">
           <span
             class="relative"
             ng-repeat="role in user.roles track by $index"
@@ -188,6 +198,71 @@
               <span ng-show="!$last">,</span>
             </span>
           </span>
+        </span>
+        <span
+           class="cbui-table-cell flex-grow-1-5 wrap resp-hide-sml"
+           ng-if="userRolesCtl.showAnalyticsRoles">
+          <span
+             class="relative"
+             ng-if="user.analyticsManageRole"
+             tooltip-trigger="mouseenter"
+             tooltip-append-to-body="true"
+             tooltip-placement="auto top"
+             ng-click="$event.stopPropagation()"
+             uib-tooltip="{{userRolesCtl.getAnalyticsManageDescription(user.analyticsManageRole)}}">
+            <span class="label lt-blue">all</span><span
+               ng-if="user.analyticsRoles.length">,</span>
+          </span>
+          <span
+             class="relative"
+             ng-repeat="role in user.analyticsRoles track by $index"
+             tooltip-trigger="mouseenter"
+             tooltip-append-to-body="true"
+             tooltip-placement="auto top"
+             ng-click="$event.stopPropagation()"
+             uib-tooltip="{{userRolesCtl.getAnalyticsRoleDescription(role)}}">
+            <span class="break-word">{{role}}<span ng-if="!$last">,</span></span>
+          </span>
+          <span
+             class="grayblack-3"
+             ng-if="!userRolesCtl.state.analyticsUnavailable
+                    && !user.analyticsRoles.length && !user.analyticsManageRole">&mdash;</span>
+          <!-- A dash that means "not read" rather than "none". The manage role
+               above still shows, being derived from the platform roles this
+               page already has rather than from the service. -->
+          <span
+             class="grayblack-4 relative"
+             ng-if="userRolesCtl.state.analyticsUnavailable && !user.analyticsManageRole"
+             tooltip-trigger="mouseenter"
+             tooltip-append-to-body="true"
+             tooltip-placement="auto top"
+             ng-click="$event.stopPropagation()"
+             uib-tooltip="{{userRolesCtl.getAnalyticsUnavailableDescription()}}">&mdash;</span>
+        </span>
+        <span
+           class="cbui-table-cell flex-grow-half resp-hide-sml"
+           ng-if="userRolesCtl.showAnalyticsRoles">
+          <span
+             class="relative"
+             ng-if="user.analyticsPrivileges"
+             tooltip-trigger="mouseenter"
+             tooltip-append-to-body="true"
+             tooltip-placement="auto top"
+             ng-click="$event.stopPropagation()"
+             uib-tooltip="{{userRolesCtl.getAnalyticsPrivilegesDescription(user.analyticsPrivileges)}}">
+            {{user.analyticsPrivileges}}
+          </span>
+          <span class="grayblack-3"
+                ng-if="!userRolesCtl.state.analyticsUnavailable
+                       && !user.analyticsPrivileges">&mdash;</span>
+          <span
+             class="grayblack-4 relative"
+             ng-if="userRolesCtl.state.analyticsUnavailable"
+             tooltip-trigger="mouseenter"
+             tooltip-append-to-body="true"
+             tooltip-placement="auto top"
+             ng-click="$event.stopPropagation()"
+             uib-tooltip="{{userRolesCtl.getAnalyticsUnavailableDescription()}}">&mdash;</span>
         </span>
         <span class="cbui-table-cell flex-grow-half resp-hide-xsml">
           {{user.domain === "local" ? "Couchbase" : "External"}}
