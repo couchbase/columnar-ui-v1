@@ -722,14 +722,14 @@ function mnPrettyVersion(parseVersionFilter) {
       return;
     }
     var a = parseVersionFilter(str);
-    // Example default result: "Enterprise Edition 1.8.0-7  build 7"
-    // Example full result: "Enterprise Edition 1.8.0-7  build 7-g35c9cdd"
+    // Example default result: "Operational Insights 1.8.0-7 build 7"
+    // Example full result: "Operational Insights 1.8.0-7 build 7-g35c9cdd"
     var suffix = "";
     if (full && a[2]) {
       suffix = '-' + a[2];
     }
     //return [a[3], /*"Edition",*/ a[0], "build",  a[1] + suffix].join(' ');
-    return ["Enterprise", "Analytics", a[0], "build", a[1] + suffix].join(' ');
+    return [productName, a[0], "build", a[1] + suffix].join(' ');
   };
 }
 function encodeURIComponentFilter() {

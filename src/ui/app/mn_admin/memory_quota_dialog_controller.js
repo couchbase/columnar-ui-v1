@@ -12,6 +12,8 @@ import angular from 'angular';
 import _ from 'lodash';
 import uiBootstrap from 'angular-ui-bootstrap';
 
+import {productName} from '../constants/constants.js';
+
 import mnPoolDefault from '../components/mn_pool_default.js';
 import mnPromiseHelper from "../components/mn_promise_helper.js";
 import mnSettingsClusterService from "./mn_settings_cluster_service.js";
@@ -80,7 +82,7 @@ function mnMemoryQuotaDialogController($q, $uibModalInstance, mnPoolDefault, mnP
     if (firstTimeAddedServices.fts)
       services.push("Full Text Search");
     if (firstTimeAddedServices.cbas)
-      services.push("Analytics");
+      services.push(productName);
     if (firstTimeAddedServices.eventing)
       services.push("Eventing");
 
