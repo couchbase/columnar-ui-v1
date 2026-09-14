@@ -32,9 +32,16 @@ function blobStorageValidator(group) {
   const credentialMode = group.get('blobStorageCredentialMode')?.value;
   const accessKeyId = group.get('blobStorageAccessKeyId')?.value;
   const secretAccessKey = group.get('blobStorageSecretAccessKey')?.value;
+  const downloaderClientType = group.get('blobStorageS3DownloaderClientType')?.value;
+  const certificates = group.get('blobStorageCertificates')?.value;
 
   if ((scheme === 's3-compat' || scheme === 'azblob') && !endpoint) {
     return { blobStorageEndpointRequired: true };
+  }
+
+  // the CRT client has no hook for a custom trust store; the cluster rejects the pair, so say so up front
+  if (scheme === 's3-compat' && downloaderClientType === 'crt' && certificates && certificates.trim()) {
+    return { blobStorageCrtCertificates: true };
   }
 
   if ((scheme === 's3' || scheme === 's3-compat') && !region) {
@@ -133,6 +140,7 @@ var wizardForm = {
       blobStoragePathStyleAddressing: new FormControl(false),
       blobStorageChecksumBehavior: new FormControl('when_required'),
       overrideChecksumBehavior: new FormControl(false),
+      blobStorageS3DownloaderClientType: new FormControl('crt'),
       blobStorageDisableSslVerify: new FormControl(false),
       blobStorageCertificates: new FormControl(''),
       numStoragePartitions: new FormControl(128),
@@ -161,9 +169,28 @@ const bucketDetails = wizardForm.newClusterConfig.get('bucketDetails');
 
 const schemeControl = bucketDetails.get('blobStorageScheme');
 const pathStyleControl = bucketDetails.get('blobStoragePathStyleAddressing');
+const overrideChecksumControl = bucketDetails.get('overrideChecksumBehavior');
+const checksumControl = bucketDetails.get('blobStorageChecksumBehavior');
+const downloaderClientTypeControl = bucketDetails.get('blobStorageS3DownloaderClientType');
 schemeControl.valueChanges.subscribe((scheme) => {
   bucketDetails.updateValueAndValidity();
-  pathStyleControl.setValue(scheme === 's3-compat');
+  // "S3-Compatible Storage" is a wizard-only preset: it fills in what a compatible store usually needs
+  // (path-style addressing, when_required checksums, the async downloader) as explicit values, and the
+  // cluster stores plain scheme "s3" plus those values. Nothing downstream infers them from the endpoint.
+  const compat = scheme === 's3-compat';
+  pathStyleControl.setValue(compat);
+  overrideChecksumControl.setValue(compat);
+  if (compat) {
+    checksumControl.setValue('when_required');
+  }
+  downloaderClientTypeControl.setValue(compat ? 'async' : 'crt');
+});
+const certificatesControl = bucketDetails.get('blobStorageCertificates');
+certificatesControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
+});
+downloaderClientTypeControl.valueChanges.subscribe(() => {
+  bucketDetails.updateValueAndValidity();
 });
 const endpointControl = bucketDetails.get('blobStorageEndpoint');
 endpointControl.valueChanges.subscribe((endpoint) => {
@@ -455,15 +482,14 @@ class MnWizardService {
 
   postClusterInit(data) {
     const columnarSettingsForm = new URLSearchParams();
-    if (data.blobStorageScheme === "s3-compat" || data.blobStorageScheme === "azblob") {
+    // both S3 radios are the one wire scheme "s3"; "s3-compat" only differs in the values it preset
+    const isS3 = data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat";
+    // required for S3-compatible storage and Azure; optional for AWS S3 (a VPC interface endpoint)
+    if (data.blobStorageEndpoint && (isS3 || data.blobStorageScheme === "azblob")) {
       columnarSettingsForm.set('blobStorageEndpoint', data.blobStorageEndpoint);
     }
-    if (data.blobStorageScheme === "s3-compat") {
-      columnarSettingsForm.set('blobStorageScheme', "s3");
-    } else {
-      columnarSettingsForm.set('blobStorageScheme', data.blobStorageScheme);
-    }
-    if (data.blobStorageScheme === "s3" || data.blobStorageScheme === "s3-compat") {
+    columnarSettingsForm.set('blobStorageScheme', isS3 ? "s3" : data.blobStorageScheme);
+    if (isS3) {
       columnarSettingsForm.set('blobStorageRegion', data.blobStorageRegion);
       columnarSettingsForm.set('blobStorageAnonymousAuth', data.blobStorageCredentialMode === 'anonymous');
       if (data.blobStorageCredentialMode === 'static') {
@@ -479,14 +505,19 @@ class MnWizardService {
     const endpointIsHttp = data.blobStorageEndpoint &&
         !data.blobStorageEndpoint.toLowerCase().startsWith('https://');
     columnarSettingsForm.set('blobStorageDisableSslVerify', endpointIsHttp ? false : data.blobStorageDisableSslVerify);
-    // Certificates are only applicable for s3-compat (schemeConflictErr for other schemes)
-    if (data.blobStorageScheme === 's3-compat') {
+    if (isS3) {
       columnarSettingsForm.set('blobStoragePathStyleAddressing', data.blobStoragePathStyleAddressing);
       if (data.overrideChecksumBehavior) {
         columnarSettingsForm.set('blobStorageChecksumBehavior', data.blobStorageChecksumBehavior);
       } else {
         columnarSettingsForm.set('blobStorageChecksumBehavior', '');
       }
+      if (data.blobStorageS3DownloaderClientType) {
+        columnarSettingsForm.set('blobStorageS3DownloaderClientType', data.blobStorageS3DownloaderClientType);
+      }
+    }
+    // Certificates are only offered with the S3-compatible preset (schemeConflictErr for non-S3 schemes)
+    if (data.blobStorageScheme === 's3-compat') {
       if (endpointIsHttp || data.blobStorageDisableSslVerify) {
         // Explicitly clear certificates when endpoint is plain HTTP or SSL verification is disabled
         columnarSettingsForm.set('blobStorageCertificate', '');
@@ -514,6 +545,7 @@ class MnWizardService {
           delete data.blobStoragePathStyleAddressing;
           delete data.blobStorageChecksumBehavior;
           delete data.overrideChecksumBehavior;
+          delete data.blobStorageS3DownloaderClientType;
           delete data.blobStorageDisableSslVerify;
           delete data.blobStorageCertificates;
           delete data.numStoragePartitions;

@@ -19,6 +19,22 @@ angular
   .module('mnPoolDefault', [mnPools, mnHelper])
   .factory('mnPoolDefault', ["mnPools", "mnHelper", "$http", "$q", "$window", "$location", "$httpParamSerializerJQLike", "$state", mnPoolDefaultFactory]);
 
+// Compares a dotted columnar compat level ("2.3.0", "2.3.0.1") with wanted segments. An absent level
+// means the cluster is on this build and has not established one yet, which counts as current.
+function prodCompatAtLeast(version, wanted) {
+  if (!version) {
+    return true;
+  }
+  var have = String(version).split('.').map(Number);
+  for (var i = 0; i < wanted.length; i++) {
+    var h = have[i] || 0;
+    if (h !== wanted[i]) {
+      return h > wanted[i];
+    }
+  }
+  return true;
+}
+
 function mnPoolDefaultFactory(mnPools, mnHelper, $http, $q, $window, $location, $httpParamSerializerJQLike, $state) {
   var latest = {};
   var mnPoolDefault = {
@@ -124,6 +140,11 @@ function mnPoolDefaultFactory(mnPools, mnHelper, $http, $q, $window, $location, 
         "76": version76,
         "764": version764,
         "79": version79,
+      };
+      // the columnar compat level is what a mixed-version cluster can honour, unlike the node's own version
+      poolDefault.prodCompatVersion = poolDefault.thisNode.prodCompatVersion;
+      poolDefault.prodCompat = {
+        atLeast230: prodCompatAtLeast(poolDefault.prodCompatVersion, [2, 3, 0])
       };
       poolDefault.capiBase = $window.location.protocol === "https:" ? poolDefault.thisNode.couchApiBaseHTTPS : poolDefault.thisNode.couchApiBase;
 

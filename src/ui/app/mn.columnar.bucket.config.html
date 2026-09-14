@@ -227,6 +227,11 @@
                 [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageCertificates">
             {{(postClusterInitHttp.error | async)?.errors.blobStorageCertificates}}
         </div>
+        <div
+                class="error error-form"
+                [hidden]="!group.errors?.blobStorageCrtCertificates">
+            The CRT parallel downloader client cannot use custom certificates. Choose the Async or Sync client under Advanced, or remove the certificates.
+        </div>
     </div>
     <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
       <div class="row">
@@ -315,7 +320,36 @@
         </label>
       </div>
       <div [hidden]="!(showAdvanced.state | async)" class="indent-1-5">
-        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3'">
+          <div class="row">
+            <label for="bucket_endpoint_aws">
+              Storage Endpoint (optional)
+              <span
+                  class="fa-stack icon-info"
+                  ngbTooltip="Leave blank to use the standard AWS S3 endpoint for the bucket region. Set it to reach S3 through a VPC interface endpoint, e.g. https://bucket.vpce-0123456789abcdef0-abcdefgh.s3.us-east-1.vpce.amazonaws.com. An S3 gateway endpoint needs no setting here."
+                  placement="right"
+                  container="body">
+                <span class="icon fa-circle-thin fa-stack-2x"></span>
+                <span class="icon fa-info fa-stack-1x"></span>
+              </span>
+            </label>
+          </div>
+          <input
+             type="text"
+             autocorrect="off"
+             spellcheck="false"
+             autocapitalize="off"
+             name="blobStorageEndpoint"
+             id="bucket_endpoint_aws"
+             formControlName="blobStorageEndpoint"
+             placeholder="e.g. https://bucket.vpce-...s3.us-east-1.vpce.amazonaws.com">
+          <div
+             class="error error-form"
+             [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageEndpoint">
+            {{(postClusterInitHttp.error | async)?.errors?.blobStorageEndpoint}}
+          </div>
+        </div>
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
            <input
                    type="checkbox"
                    id="for-force-path-style"
@@ -377,7 +411,7 @@
               {{(postClusterInitHttp.error | async)?.errors.blobStorageDisableSslVerify}}
           </div>
         </div>
-        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3-compat'">
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
           <input
               type="checkbox"
               id="for-override-checksum-behavior"
@@ -411,6 +445,48 @@
               class="error error-form"
               [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageChecksumBehavior">
               {{(postClusterInitHttp.error | async)?.errors.blobStorageChecksumBehavior}}
+          </div>
+        </div>
+        <div class="formrow" *ngIf="group.get('blobStorageScheme').value == 's3' || group.get('blobStorageScheme').value == 's3-compat'">
+          <div class="row">
+            <label>Parallel Downloader Client
+              <span
+                  class="fa-stack icon-info"
+                  ngbTooltip="The AWS SDK client used for parallel downloads (cache fills and recovery). CRT gives the best throughput against AWS S3 but cannot use custom certificates. Some S3-compatible stores need the Async or Sync client."
+                  placement="right"
+                  container="body">
+                <span class="icon fa-circle-thin fa-stack-2x"></span>
+                <span class="icon fa-info fa-stack-1x"></span>
+              </span>
+            </label>
+          </div>
+          <div class="form-inline">
+            <input
+               type="radio"
+               formControlName="blobStorageS3DownloaderClientType"
+               value="crt"
+               id="downloader-crt">
+            <label for="downloader-crt">CRT</label>
+            <input
+               type="radio"
+               formControlName="blobStorageS3DownloaderClientType"
+               value="async"
+               id="downloader-async">
+            <label for="downloader-async">Async</label>
+            <input
+               type="radio"
+               formControlName="blobStorageS3DownloaderClientType"
+               value="sync"
+               id="downloader-sync">
+            <label for="downloader-sync">Sync</label>
+          </div>
+          <div *ngIf="showAwsEndpointCrtHint()" class="text-smaller text-muted margin-top-quarter">
+            This endpoint is AWS S3 itself; the CRT client performs best against AWS S3.
+          </div>
+          <div
+              class="error error-form"
+              [hidden]="!(postClusterInitHttp.error | async)?.errors?.blobStorageS3DownloaderClientType">
+              {{(postClusterInitHttp.error | async)?.errors.blobStorageS3DownloaderClientType}}
           </div>
         </div>
         <div class="formrow">

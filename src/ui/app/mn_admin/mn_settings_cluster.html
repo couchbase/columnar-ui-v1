@@ -60,15 +60,8 @@
                    id="scheme-s3"
                    name="blob-storage-scheme"
                    disabled
-                   ng-checked="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 's3' && !settingsClusterCtl.blobStorageIsS3Compat">
-                <label for="scheme-s3" class="cbui-label-no-dim">AWS S3</label>
-                <input
-                   type="radio"
-                   id="scheme-s3-compat"
-                   name="blob-storage-scheme"
-                   disabled
-                   ng-checked="settingsClusterCtl.blobStorageIsS3Compat">
-                <label for="scheme-s3-compat" class="cbui-label-no-dim">S3-Compatible Storage</label>
+                   ng-checked="settingsClusterCtl.blobStorageIsS3">
+                <label for="scheme-s3" class="cbui-label-no-dim">S3</label>
                 <input
                    type="radio"
                    id="scheme-azblob"
@@ -92,7 +85,7 @@
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageBucket"
                  ng-disabled="!rbac.cluster.settings.write">
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsAwsS3OrS3Compat">
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3">
               <label>Bucket Region</label>
               <input
                  type="text"
@@ -106,8 +99,18 @@
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePrefix"
                  ng-disabled="!rbac.cluster.settings.write">
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat || settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
-              <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint'}}</label>
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3 || settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
+              <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint'}}
+                <span
+                   ng-if="settingsClusterCtl.blobStorageIsS3"
+                   class="fa-stack icon-info"
+                   uib-tooltip="Required for S3-compatible storage. Optional for AWS S3: leave blank for the standard endpoint of the bucket region, or set a VPC interface endpoint (e.g. https://bucket.vpce-....s3.us-east-1.vpce.amazonaws.com)."
+                   tooltip-placement="auto right"
+                   tooltip-trigger="mouseenter">
+                  <span class="icon fa-circle-thin fa-stack-2x"></span>
+                  <span class="icon fa-info fa-stack-1x"></span>
+                </span>
+              </label>
               <input
                  type="text"
                  autocorrect="off"
@@ -115,7 +118,7 @@
                  autocapitalize="off"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageEndpoint"
                  ng-disabled="!rbac.cluster.settings.write"
-                 placeholder="{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082'}}">
+                 placeholder="{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'e.g. https://mycompany.blob.core.windows.net/' : 'e.g. https://my-object-storage:18082 (optional for AWS S3)'}}">
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
               <label>Azure Client ID (use for User-Assigned Managed Identity)
@@ -138,34 +141,7 @@
                  ng-disabled="!rbac.cluster.settings.write"
                  placeholder="e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
             </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat"
-                 ng-class="{'cbui-label-inactive': settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp}">
-              <label>Storage Endpoint Certificate(s)
-                <span
-                   class="fa-stack icon-info"
-                   uib-tooltip="Optional. One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
-                   tooltip-placement="auto right"
-                   tooltip-trigger="mouseenter">
-                  <span class="icon fa-circle-thin fa-stack-2x"></span>
-                  <span class="icon fa-info fa-stack-1x"></span>
-                </span>
-              </label>
-              <textarea
-                 rows="6"
-                 style="font-family: monospace; font-size: 11px;"
-                 autocorrect="off"
-                 spellcheck="false"
-                 autocapitalize="off"
-                 ng-model="settingsClusterCtl.blobStorageSettings.blobStorageCertificates"
-                 ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp"
-                 placeholder="-----BEGIN CERTIFICATE-----
-...
------END CERTIFICATE-----
------BEGIN CERTIFICATE-----
-...
------END CERTIFICATE-----"></textarea>
-            </div>
-            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsAwsS3OrS3Compat">
+            <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3">
               <label>Authentication
                 <span
                    class="fa-stack icon-info"
@@ -248,7 +224,7 @@
               </label>
             </div>
             <div ng-show="settingsClusterCtl.showAdvancedBlobStorage" class="indent-1-5">
-              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3">
                 <input
                    type="checkbox"
                    id="for-force-path-style"
@@ -288,7 +264,7 @@
                   <p class="error">Warning: Disabling SSL verification in a production environment is highly insecure and exposes the system to serious risks, including Man-in-the-Middle (MITM) attacks.</p>
                 </div>
               </div>
-              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat">
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3">
                 <input
                    type="checkbox"
                    id="for-override-checksum-behavior"
@@ -306,7 +282,7 @@
                   <span class="icon fa-info fa-stack-1x"></span>
                 </span>
               </div>
-              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3Compat" ng-show="settingsClusterCtl.overrideChecksumBehavior">
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3" ng-show="settingsClusterCtl.overrideChecksumBehavior">
                 <div class="form-inline indent-1-5">
                   <input
                      type="radio"
@@ -324,6 +300,76 @@
                      ng-model="settingsClusterCtl.blobStorageSettings.blobStorageChecksumBehavior"
                      ng-disabled="!rbac.cluster.settings.write">
                   <label for="checksum-when-supported">When Supported</label>
+                </div>
+              </div>
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3"
+                   ng-class="{'cbui-label-inactive': settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp}">
+                <label>Storage Endpoint Certificate(s)
+                  <span
+                     class="fa-stack icon-info"
+                     uib-tooltip="Optional. One or more PEM-encoded certificates to trust when connecting to the storage endpoint. Multiple certificates can be provided to support rotation. Useful for self-signed or internal CA certificates."
+                     tooltip-placement="auto right"
+                     tooltip-trigger="mouseenter">
+                    <span class="icon fa-circle-thin fa-stack-2x"></span>
+                    <span class="icon fa-info fa-stack-1x"></span>
+                  </span>
+                </label>
+                <textarea
+                   rows="6"
+                   style="font-family: monospace; font-size: 11px;"
+                   autocorrect="off"
+                   spellcheck="false"
+                   autocapitalize="off"
+                   ng-model="settingsClusterCtl.blobStorageSettings.blobStorageCertificates"
+                   ng-disabled="!rbac.cluster.settings.write || settingsClusterCtl.blobStorageSettings.blobStorageDisableSslVerify || settingsClusterCtl.blobStorageEndpointIsHttp"
+                   placeholder="-----BEGIN CERTIFICATE-----
+  ...
+  -----END CERTIFICATE-----
+  -----BEGIN CERTIFICATE-----
+  ...
+  -----END CERTIFICATE-----"></textarea>
+              </div>
+              <div class="formrow" ng-if="settingsClusterCtl.blobStorageDownloaderClientTypeSupported">
+                <label>Parallel Downloader Client
+                  <span
+                     class="fa-stack icon-info"
+                     uib-tooltip="The AWS SDK client used for parallel downloads (cache fills and recovery). CRT gives the best throughput against AWS S3 but cannot use custom certificates. Some S3-compatible stores need the Async or Sync client."
+                     tooltip-placement="auto right"
+                     tooltip-trigger="mouseenter">
+                    <span class="icon fa-circle-thin fa-stack-2x"></span>
+                    <span class="icon fa-info fa-stack-1x"></span>
+                  </span>
+                </label>
+                <div class="form-inline">
+                  <input
+                     type="radio"
+                     name="blob-storage-downloader-client-type"
+                     id="downloader-crt"
+                     value="crt"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageS3DownloaderClientType"
+                     ng-disabled="!rbac.cluster.settings.write">
+                  <label for="downloader-crt">CRT (default)</label>
+                  <input
+                     type="radio"
+                     name="blob-storage-downloader-client-type"
+                     id="downloader-async"
+                     value="async"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageS3DownloaderClientType"
+                     ng-disabled="!rbac.cluster.settings.write">
+                  <label for="downloader-async">Async</label>
+                  <input
+                     type="radio"
+                     name="blob-storage-downloader-client-type"
+                     id="downloader-sync"
+                     value="sync"
+                     ng-model="settingsClusterCtl.blobStorageSettings.blobStorageS3DownloaderClientType"
+                     ng-disabled="!rbac.cluster.settings.write">
+                  <label for="downloader-sync">Sync</label>
+                </div>
+                <div
+                   ng-if="settingsClusterCtl.blobStorageEndpointIsAws && settingsClusterCtl.blobStorageSettings.blobStorageS3DownloaderClientType !== 'crt' && !settingsClusterCtl.blobStorageSettings.blobStorageCertificates"
+                   class="text-smaller text-muted margin-top-quarter">
+                  This endpoint is AWS S3 itself; the CRT client performs best against AWS S3.
                 </div>
               </div>
               <div class="formrow">

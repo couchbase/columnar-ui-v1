@@ -261,12 +261,21 @@ def run_wizard(page, check, opts):
     page.click('button[type="submit"]')
     page.wait_for_timeout(3000)
 
-    # "S3-compatible" is what exposes an endpoint field at all; plain S3 has no
-    # endpoint input. Note the cluster stores this as scheme "s3" plus an
-    # endpoint and path-style addressing, not as "s3-compat".
+    # "S3-Compatible Storage" is a wizard-only preset: the cluster stores it as
+    # scheme "s3" plus explicit values (endpoint, path-style addressing,
+    # when_required checksums, the async parallel downloader). Plain "AWS S3"
+    # keeps its endpoint optional, under Advanced, for a VPC interface endpoint.
     if page.locator('#s3-compat').count() == 0:
         check('wizard reaches blob storage configuration', ['no blob storage scheme controls'])
         return False
+    click_styled(page, 's3')
+    page.wait_for_timeout(500)
+    page.locator('label.disclosure', has_text='Advanced').first.click()
+    page.wait_for_timeout(500)
+    check('AWS S3 offers an optional endpoint under Advanced',
+          [] if page.locator('#bucket_endpoint_aws').count() > 0 else ['#bucket_endpoint_aws absent'])
+    check('AWS S3 has no top-level endpoint field',
+          [] if page.locator('#bucket_endpoint').count() == 0 else ['#bucket_endpoint present for AWS S3'])
     click_styled(page, 's3-compat')
     page.wait_for_timeout(800)
     if page.locator('#bucket_endpoint').count() == 0:
@@ -274,6 +283,8 @@ def run_wizard(page, check, opts):
               ['#bucket_endpoint absent after choosing s3-compat'])
         return False
     check('wizard reaches blob storage configuration', [])
+    check('S3-compatible preset selects the async downloader',
+          [] if page.is_checked('#downloader-async') else ['#downloader-async not selected'])
 
     page.fill('#bucket_endpoint', opts.s3_endpoint)
     page.fill('#bucket_name', opts.s3_bucket)
@@ -319,6 +330,15 @@ def verify_blob_storage(page, check, opts):
     if settings.get('blobStorageAnonymousAuth') is not True:
         problems.append(f'blobStorageAnonymousAuth: {settings.get("blobStorageAnonymousAuth")!r}')
     check('blob storage was configured through the UI', problems)
+    # what the S3-compatible preset is supposed to have written, as explicit values
+    preset = []
+    for key, expected in (('blobStorageScheme', 's3'),
+                          ('blobStoragePathStyleAddressing', True),
+                          ('blobStorageChecksumBehavior', 'when_required'),
+                          ('blobStorageS3DownloaderClientType', 'async')):
+        if settings.get(key) != expected:
+            preset.append(f'{key}: {settings.get(key)!r} != {expected!r}')
+    check('S3-compatible preset stored as explicit settings', preset)
 
 
 # --- Analytics workbench ----------------------------------------------------

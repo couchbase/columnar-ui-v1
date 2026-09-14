@@ -33,6 +33,18 @@ class MnHelperService {
     UIRouter
   ]}
 
+  // An endpoint under amazonaws.com is AWS S3 itself (a regional or VPC interface endpoint), not an
+  // S3-compatible store; the CRT parallel downloader performs best there.
+  static isAwsEndpoint(endpoint) {
+    if (!endpoint) return false;
+    try {
+      var host = new URL(endpoint.includes('://') ? endpoint : 'https://' + endpoint).hostname.toLowerCase();
+      return host.endsWith('.amazonaws.com') || host.endsWith('.amazonaws.com.cn');
+    } catch (e) {
+      return false;
+    }
+  }
+
   static isIpLiteralEndpoint(endpoint) {
     if (!endpoint) return false;
     try {

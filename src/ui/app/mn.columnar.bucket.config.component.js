@@ -50,4 +50,12 @@ class MnColumnarbucketConfig extends MnLifeCycleHooksToStream {
     return MnHelperService.isIpLiteralEndpoint(this.group.get('blobStorageEndpoint').value);
   }
 
+  // an AWS endpoint on a non-CRT downloader is usually the S3-Compatible preset applied to a real S3 bucket
+  showAwsEndpointCrtHint() {
+    if (!this.group) return false;
+    var certs = this.group.get('blobStorageCertificates').value;
+    return MnHelperService.isAwsEndpoint(this.group.get('blobStorageEndpoint').value) &&
+      this.group.get('blobStorageS3DownloaderClientType').value !== 'crt' && !(certs && certs.trim());
+  }
+
 }

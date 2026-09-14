@@ -223,11 +223,12 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     return $http(config);
   }
 
-  function postBlobStorageSettings(currentSettings, credentialsChanged) {
+  function postBlobStorageSettings(currentSettings, credentialsChanged, sendDownloaderClientType,
+                                   persistedDownloaderClientType) {
     var formParams = new URLSearchParams();
 
     var scheme = currentSettings.blobStorageScheme; // 's3', 'azblob', or 'gs'
-    var isAwsS3OrS3Compat = scheme === 's3';
+    var isS3 = scheme === 's3';
     var isAzBlob = scheme === 'azblob';
 
     // Determine if the endpoint is plain HTTP — SSL settings are irrelevant in that case
@@ -241,7 +242,7 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     formParams.append('blobStorageDisableSslVerify', endpointIsHttp ? false : (currentSettings.blobStorageDisableSslVerify || false));
 
     // Region is only valid for S3
-    if (isAwsS3OrS3Compat) {
+    if (isS3) {
       formParams.append('blobStorageRegion', currentSettings.blobStorageRegion || '');
     }
 
@@ -262,16 +263,24 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
       }
     }
 
-    // blobStoragePathStyleAddressing and blobStorageChecksumBehavior are only valid for S3-compat
-    // (S3 with a custom endpoint); schemeConflictErr for azblob/gs, not applicable for pure AWS S3
-    var isS3Compat = isAwsS3OrS3Compat && !!currentSettings.blobStorageEndpoint;
-    if (isS3Compat) {
+    // blobStoragePathStyleAddressing, blobStorageChecksumBehavior and blobStorageS3DownloaderClientType are
+    // S3-only (schemeConflictErr for azblob/gs). Whether the store is AWS S3 or S3-compatible is not a property
+    // of the endpoint, so they are sent for every S3 cluster; the defaults are the AWS S3 values.
+    if (isS3) {
       formParams.append('blobStoragePathStyleAddressing', currentSettings.blobStoragePathStyleAddressing || false);
       if (currentSettings.overrideChecksumBehavior) {
         formParams.append('blobStorageChecksumBehavior', currentSettings.blobStorageChecksumBehavior || 'when_required');
       } else {
         // empty string means "use SDK defaults" (resets any previous non-default value)
         formParams.append('blobStorageChecksumBehavior', '');
+      }
+      // new in 2.3.0: a cluster below that columnar compat level refuses it, so only send it once every node
+      // can honour it -- and only when it is already explicit on the server, or the user moved it off the
+      // displayed engine default; an unset value stays unset across saves of unrelated fields
+      var downloaderClientType = currentSettings.blobStorageS3DownloaderClientType;
+      if (sendDownloaderClientType && downloaderClientType &&
+          (persistedDownloaderClientType || downloaderClientType !== 'crt')) {
+        formParams.append('blobStorageS3DownloaderClientType', downloaderClientType);
       }
     }
 
@@ -290,7 +299,7 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     // Anonymous mode: omit both fields; blobStorageAnonymousAuth=true is sufficient.
     // Chain mode (clearing static creds): send both as "" so the backend clears them together.
     // Static mode: send both non-empty values. If both are empty, credentials are unchanged.
-    if (isAwsS3OrS3Compat && credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
+    if (isS3 && credentialsChanged && !currentSettings.blobStorageAnonymousAuth) {
       if (currentSettings.blobStorageAccessKeyId &&
           currentSettings.blobStorageSecretAccessKey) {
         // static credentials — user provided new values for both

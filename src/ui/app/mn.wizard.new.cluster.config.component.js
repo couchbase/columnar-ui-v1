@@ -217,6 +217,7 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     rv.blobStoragePathStyleAddressing = this.newClusterConfigForm.get('bucketDetails.blobStoragePathStyleAddressing').value;
     rv.blobStorageChecksumBehavior = this.newClusterConfigForm.get('bucketDetails.blobStorageChecksumBehavior').value;
     rv.overrideChecksumBehavior = this.newClusterConfigForm.get('bucketDetails.overrideChecksumBehavior').value;
+    rv.blobStorageS3DownloaderClientType = this.newClusterConfigForm.get('bucketDetails.blobStorageS3DownloaderClientType').value;
     rv.blobStorageDisableSslVerify = this.newClusterConfigForm.get('bucketDetails.blobStorageDisableSslVerify').value;
     rv.blobStorageCertificates = this.newClusterConfigForm.get('bucketDetails.blobStorageCertificates').value;
     rv.numStoragePartitions = this.newClusterConfigForm.get('bucketDetails.numStoragePartitions').value;

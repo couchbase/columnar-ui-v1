@@ -150,8 +150,14 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
         vm.initialBlobStorageSettings) {
       var rawBlobStoragePromise = mnSettingsClusterService.postBlobStorageSettings(
         vm.blobStorageSettings,
-        vm.credentialsChanged
+        vm.credentialsChanged,
+        vm.blobStorageDownloaderClientTypeSupported,
+        vm.persistedDownloaderClientType
       ).then(function () {
+        if (vm.blobStorageDownloaderClientTypeSupported && vm.blobStorageSettings.blobStorageS3DownloaderClientType !== 'crt') {
+          // anything other than the displayed default was sent, and is explicit on the server now
+          vm.persistedDownloaderClientType = vm.blobStorageSettings.blobStorageS3DownloaderClientType;
+        }
         // If new credentials were provided, they are now the existing ones on the server.
         if (vm.blobStorageSettings.blobStorageAccessKeyId && vm.blobStorageSettings.blobStorageSecretAccessKey) {
           vm.hasExistingCredentials = true;
@@ -348,12 +354,20 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           if (Array.isArray(settings.blobStorageCertificates)) {
             settings.blobStorageCertificates = settings.blobStorageCertificates.join('\n');
           }
+          // one S3 provider post-provisioning: nothing here is derived from whether an endpoint is set
+          vm.blobStorageIsS3 = settings.blobStorageScheme === 's3';
+          // the downloader client type is a 2.3.0 setting; a mixed-version cluster below that refuses it
+          vm.blobStorageDownloaderClientTypeSupported = vm.blobStorageIsS3 &&
+            !!(mnPoolDefault.export.prodCompat && mnPoolDefault.export.prodCompat.atLeast230);
+          // an unset value means the engine default (crt). Show it as such, but remember what is persisted:
+          // the setting is only sent when the user changes it, or when it was already explicit, so saving an
+          // unrelated field does not turn the engine default into a pinned crt
+          vm.persistedDownloaderClientType = settings.blobStorageS3DownloaderClientType || '';
+          if (vm.blobStorageIsS3 && !settings.blobStorageS3DownloaderClientType) {
+            settings.blobStorageS3DownloaderClientType = 'crt';
+          }
           vm.blobStorageSettings = settings;
           vm.initialBlobStorageSettings = _.cloneDeep(settings);
-          vm.blobStorageSchemeName = getBlobStorageSchemeName(settings.blobStorageScheme, settings.blobStorageEndpoint);
-          vm.blobStorageIsS3Compat = settings.blobStorageScheme === 's3' && !!settings.blobStorageEndpoint;
-          vm.blobStorageIsAwsS3 = settings.blobStorageScheme === 's3' && !vm.blobStorageIsS3Compat;
-          vm.blobStorageIsAwsS3OrS3Compat = settings.blobStorageScheme === 's3';
           vm.blobStorageEndpointIsHttp = isEndpointHttp(settings.blobStorageEndpoint);
           vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(settings.blobStorageEndpoint);
           vm.blobStorageCredentialMode = getCredentialMode(settings);
@@ -379,6 +393,7 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
           $scope.$watch('settingsClusterCtl.blobStorageSettings.blobStorageEndpoint', function(val) {
             vm.blobStorageEndpointIsHttp = isEndpointHttp(val);
             vm.blobStorageEndpointIsIpLiteral = isEndpointIpLiteral(val);
+            vm.blobStorageEndpointIsAws = isEndpointAws(val);
             if (vm.blobStorageEndpointIsIpLiteral) {
               vm.blobStorageSettings.blobStoragePathStyleAddressing = true;
             }
@@ -559,20 +574,15 @@ function mnSettingsClusterController($scope, $q, $uibModal, $ocLazyLoad, mnPoolD
     }
   }
 
-  function getBlobStorageSchemeName(scheme, endpoint) {
-    if (!scheme || scheme === 'none' || scheme === '') {
-      return 'None';
+  // an endpoint under amazonaws.com is AWS S3 itself (a regional or VPC interface endpoint)
+  function isEndpointAws(endpoint) {
+    if (!endpoint) return false;
+    try {
+      var host = new URL(endpoint.includes('://') ? endpoint : 'https://' + endpoint).hostname.toLowerCase();
+      return host.endsWith('.amazonaws.com') || host.endsWith('.amazonaws.com.cn');
+    } catch (e) {
+      return false;
     }
-    if (scheme === 's3') {
-      return endpoint ? 'S3-Compatible Storage' : 'AWS S3';
-    }
-    if (scheme === 'azblob') {
-      return 'Azure Blob Storage';
-    }
-    if (scheme === 'gs') {
-      return 'Google Cloud Storage';
-    }
-    return scheme;
   }
 
   function isEndpointHttp(endpoint) {
