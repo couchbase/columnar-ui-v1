@@ -25,9 +25,10 @@ angular
 function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisticsNewService) {
   // Service roles and direct privileges are the engine's own, not ns_server's:
   // they are granted with SQL++ and live in the service's metadata, so they are
-  // read with a query rather than from /settings/rbac. Only USER grantees
-  // matter here - a grant to another role belongs on the Service RBAC tab,
-  // which is where these are administered.
+  // read with a query rather than from /settings/rbac. Grants to a role are
+  // read as well as grants to a user, but only to follow a user's roles to an
+  // administering one; they are not shown here, and are administered on the
+  // Service RBAC tab.
   //
   // Both halves come back in one statement because this rides the poller: two
   // reads would double what the users page costs the service every tick. A row
@@ -42,15 +43,18 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
   // rows left behind still say the old account and grant nothing.
   var ANALYTICS_GRANTS_QUERY =
       "SELECT a.Assignee AS Grantee, a.AssigneeDomain AS Domain, a.AssigneeId AS Id, " +
-      "a.AssignedRoleName AS RoleName " +
-      "FROM Metadata.`AssignedRole` AS a WHERE a.GranteeType = 'USER' " +
+      // Role grantees come back too, so a role granted an administering role can
+      // be followed to it. They are told apart by Type rather than by Domain,
+      // which a role row leaves null exactly as an external user's row does.
+      "a.AssignedRoleName AS RoleName, a.GranteeType AS Type " +
+      "FROM Metadata.`AssignedRole` AS a WHERE a.GranteeType IN ['USER', 'ROLE'] " +
       "UNION ALL " +
       // Every column aliased, including the ones whose names look right
       // already: SQL++ does not rename a UNION ALL branch positionally, so
       // without these the privilege half comes back as GranteeDomain and
       // GranteeUuid and the two halves are read with different keys.
       "SELECT p.Grantee AS Grantee, p.GranteeDomain AS Domain, p.GranteeUuid AS Id, " +
-      "NULL AS RoleName " +
+      "NULL AS RoleName, 'USER' AS Type " +
       "FROM Metadata.`Privilege` AS p " +
       "WHERE p.GranteeType = 'USER' AND p.Privilege != 'OWNERSHIP'";
 
@@ -104,6 +108,59 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
   // added to that list there and not here shows the wrong thing here.
   var ANALYTICS_MANAGE_ROLES = ["admin", "analytics_admin", "eventing_admin"];
 
+  // The service roles that carry the right to administer service RBAC. These
+  // are what the engine itself reads when it decides whether a statement may
+  // grant anything, so holding one administers this service's RBAC with no
+  // platform role beyond the one that reaches the service - a way in that a
+  // list of platform roles does not show. The same two gate the Service RBAC
+  // tab's actions; a name added there and not here marks nothing here.
+  var ADMIN_SERVICE_ROLES = ["sys_root", "sys_security_admin"];
+
+  function isAdminServiceRole(roleName) {
+    return ADMIN_SERVICE_ROLES.indexOf(roleName) >= 0;
+  }
+
+  // Which of the roles held carry that. The names are wanted rather than a
+  // yes/no because the cell lists the roles one by one, and the mark belongs
+  // against the one responsible for it.
+  function adminServiceRoles(roleNames, includedByRole) {
+    return (roleNames || []).filter(function (name) {
+      return isAdminServiceRole(name) ||
+        rolesIncludedBy(name, includedByRole).some(isAdminServiceRole);
+    });
+  }
+
+  // Every role this one contains, transitively. The half that earns its keep is
+  // the metadata one: a role granted to another role writes an AssignedRole
+  // row, and without following it a custom role that was granted
+  // sys_security_admin reads as an ordinary role while the Service RBAC tab
+  // calls its holder an administrator. The built-in half reaches no
+  // administering role today - the only built-in containing one is sys_root,
+  // which administers in its own right - and is followed anyway because the
+  // engine builds that containment in memory at startup and writes no row for
+  // it, so it is invisible to the query and would be missed the moment the
+  // shape of the built-ins changed. This is the same walk cw_rbac_service.js
+  // does, for the same reason.
+  function rolesIncludedBy(roleName, includedByRole, seen) {
+    seen = seen || {};
+    if (seen[roleName]) {
+      return [];
+    }
+    seen[roleName] = true;
+
+    var direct = ((BUILT_IN_ROLES[roleName] || {}).includes || [])
+      .concat((includedByRole && includedByRole[roleName]) || []);
+
+    return direct.reduce(function (all, name) {
+      if (all.indexOf(name) < 0) {
+        all.push(name);
+      }
+      return all.concat(rolesIncludedBy(name, includedByRole, seen).filter(function (n) {
+        return all.indexOf(n) < 0;
+      }));
+    }, []);
+  }
+
   // The platform role granting the bypass, or null. The name is wanted, not
   // just a yes/no: "all" on its own invites the question which role did that.
   function analyticsManageRole(user) {
@@ -120,6 +177,8 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
     getAnalyticsUnavailableDescription: getAnalyticsUnavailableDescription,
     getAnalyticsRoleDescription: getAnalyticsRoleDescription,
     analyticsManageRole: analyticsManageRole,
+    adminServiceRoles: adminServiceRoles,
+    getAnalyticsAdminRoleDescription: getAnalyticsAdminRoleDescription,
     getAnalyticsManageDescription: getAnalyticsManageDescription,
     addUser: addUser,
     deleteUser: deleteUser,
@@ -727,12 +786,19 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
       data: {statement: ANALYTICS_GRANTS_QUERY, source: "ui_users"},
       mnHttp: {isNotForm: true, group: "global"}
     }).then(function (resp) {
-      var grants = {roles: {}, privileges: {}, ids: {}, available: true};
+      var grants = {roles: {}, privileges: {}, ids: {}, includedByRole: {}, available: true};
       if (resp.data && resp.data.errors) {
         grants.available = false;
         return grants;
       }
       ((resp.data && resp.data.results) || []).forEach(function (row) {
+        // A grant to a role is not a row on this page; it is an edge to follow
+        // when deciding which of a user's roles administers RBAC.
+        if (String(row.Type || "USER").toUpperCase() === "ROLE") {
+          grants.includedByRole[row.Grantee] =
+            (grants.includedByRole[row.Grantee] || []).concat(row.RoleName);
+          return;
+        }
         var key = (row.Domain || "local") + ":" + row.Grantee;
         if (row.Id) {
           grants.ids[key] = row.Id;
@@ -748,7 +814,7 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
       // Unreachable, or refused. Either way the columns cannot be filled, and
       // saying so is the whole point of the flag: an empty answer and an answer
       // of "none" look identical in the table, and the second is a claim.
-      return {roles: {}, privileges: {}, ids: {}, available: false};
+      return {roles: {}, privileges: {}, ids: {}, includedByRole: {}, available: false};
     });
   }
 
@@ -772,6 +838,18 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
   function getAnalyticsUnavailableDescription() {
     return "Could not be read: the analytics service did not answer. This is not " +
       "a claim that the user holds nothing." + SERVICE_ROLE_FOOTER;
+  }
+
+  // The tooltip behind the mark. What the role itself does is the role's own
+  // tooltip; what this one adds is that holding it needs no platform role
+  // beyond the one that reaches the service, which is the part a reader
+  // scanning the platform-roles column would otherwise miss.
+  function getAnalyticsAdminRoleDescription(roleName) {
+    return (isAdminServiceRole(roleName)
+            ? "Administers service RBAC."
+            : "Administers service RBAC, through a role granted to it.") +
+      " Creating and dropping service roles and granting privileges needs no platform " +
+      "role beyond the one that reaches this service." + SERVICE_ROLE_FOOTER;
   }
 
   // The tooltip behind the direct-privilege count. Says what makes a privilege
@@ -803,6 +881,8 @@ function mnUserRolesFactory($q, $http, mnPoolDefault, mnStoreService, mnStatisti
             var stale = isStaleGrant(user, grants.ids[key]);
             user.analyticsRoles = stale ? [] : (grants.roles[key] || []);
             user.analyticsPrivileges = stale ? 0 : (grants.privileges[key] || 0);
+            user.analyticsAdminRoles =
+              adminServiceRoles(user.analyticsRoles, grants.includedByRole);
             user.analyticsManageRole = analyticsManageRole(user);
           });
           return state;

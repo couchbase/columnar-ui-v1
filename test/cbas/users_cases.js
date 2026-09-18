@@ -16,7 +16,7 @@ licenses/APL2.txt.
 // shows the wrong roles, or none.
 
 import {makeUsersEnv, ANALYTICS_QUERY_URL} from "./users_env.js";
-import {BUILT_IN_ROLES} from "/_p/ui/cbas/cw_rbac_service.js";
+import {BUILT_IN_ROLES, ADMIN_SERVICE_ROLES} from "/_p/ui/cbas/cw_rbac_service.js";
 import {ok, equal, contains} from "./assert.js";
 
 // Answers the analytics query with `rows`, and every other call with an empty
@@ -33,11 +33,13 @@ function withRows(env, rows) {
 
 export default [
 
-  ['the grants read asks only for user grantees, and skips ownership', function () {
-    // A grant to another role is not something to show against a user, and
-    // rolling it in would credit people with roles they do not hold. Ownership
-    // is recorded per object created, so counting it would report thousands of
-    // direct privileges against whoever built the databases.
+  ['the grants read asks for role grantees too, and skips ownership', function () {
+    // A grant to another role is not something to show against a user - rolling
+    // it in would credit people with roles they do not hold - but it is read,
+    // because a role that was granted an administering one has to be followed
+    // to it. Ownership is recorded per object created, so counting it would
+    // report thousands of direct privileges against whoever built the
+    // databases.
     const env = makeUsersEnv();
     withRows(env, []);
     env.settle(env.service.getAnalyticsGrants());
@@ -46,7 +48,11 @@ export default [
     ok(query, 'the service must ask the analytics service');
     contains(query.data.statement, "Metadata.`AssignedRole`");
     contains(query.data.statement, "Metadata.`Privilege`");
-    contains(query.data.statement, "GranteeType = 'USER'");
+    contains(query.data.statement, "GranteeType IN ['USER', 'ROLE']");
+    contains(query.data.statement, "a.GranteeType AS Type",
+             'the two kinds of grantee are told apart by Type, not by Domain');
+    contains(query.data.statement, "p.GranteeType = 'USER'",
+             'privileges are still read for users only; the mark is role-based');
     contains(query.data.statement, "OWNERSHIP");
     equal(env.requests.filter(r => r.url === ANALYTICS_QUERY_URL).length, 1,
           'one read, because this rides the users poller');
@@ -101,6 +107,24 @@ export default [
     equal(grants.privileges["local:jo"], 2);
     equal(grants.privileges["local:sam"], 1);
     equal(grants.privileges["local:nobody"], undefined, 'absent, so the column shows a dash');
+  }],
+
+  ['a grant to a role is followed, not shown against a user', function () {
+    // Both kinds of grantee come back from one read, so a role row that leaked
+    // into the user-keyed maps would invent a user named after the role - and,
+    // worse, would show that role's grants against any real user of that name.
+    // Type tells them apart; Domain cannot, because a role row leaves it null
+    // exactly as an external user's row does.
+    const env = makeUsersEnv();
+    withRows(env, [
+      {Grantee: "jo", Domain: "local", RoleName: "keeper", Type: "USER"},
+      {Grantee: "keeper", Domain: null, RoleName: "sys_security_admin", Type: "ROLE"}
+    ]);
+    const grants = env.settle(env.service.getAnalyticsGrants()).value;
+
+    equal(Object.keys(grants.roles).join(","), "local:jo", 'only the user is keyed');
+    equal(grants.includedByRole.keeper.join(","), "sys_security_admin",
+          'the edge is kept, to be followed later');
   }],
 
   ['a user with several roles keeps all of them', function () {
@@ -188,6 +212,133 @@ export default [
     equal(missing.length, 0, 'not described on Users & Groups: ' + missing.join(', '));
   }],
 
+  ['a role that administers service RBAC is marked, against that role', function () {
+    // Which platform roles outrank service RBAC is on this page already, in the
+    // "all" mark - it is read from /settings/rbac, so it survives the service
+    // being down. The other way in is a service role, and nothing on the
+    // platform reports it: sys_security_admin renders as one more string in a
+    // list beside roles that only read views. The names are wanted rather than
+    // a yes/no because the cell lists the roles one by one, and the mark has to
+    // land on the one to revoke.
+    const env = makeUsersEnv();
+    env.onHttp(function (config) {
+      if (config.url === ANALYTICS_QUERY_URL) {
+        return env.$q.resolve({data: {results: [
+          {Grantee: "sam", Domain: "local", RoleName: "sys_security_admin", Type: "USER"},
+          {Grantee: "sam", Domain: "local", RoleName: "analyst", Type: "USER"},
+          {Grantee: "jo", Domain: "local", RoleName: "analyst", Type: "USER"}
+        ]}});
+      }
+      return env.$q.resolve({data: {users: [{id: "sam", domain: "local"},
+                                            {id: "jo", domain: "local"}]}});
+    });
+    const by = {};
+    env.settle(env.service.getState({}, true)).value.users.forEach(u => { by[u.id] = u; });
+
+    equal(by.sam.analyticsAdminRoles.join(","), "sys_security_admin",
+          'the role that carries it, not every role held');
+    equal(by.jo.analyticsAdminRoles.length, 0, 'an ordinary role is not marked');
+  }],
+
+  ['containing other roles is not the same as administering RBAC', function () {
+    // The walk exists to follow roles to an administering one, so the danger is
+    // that it reads any role with something under it as administering. Three of
+    // the five built-ins contain another role and only one of those three
+    // administers anything.
+    const env = makeUsersEnv();
+    env.onHttp(function (config) {
+      if (config.url === ANALYTICS_QUERY_URL) {
+        return env.$q.resolve({data: {results: [
+          {Grantee: "sam", Domain: "local", RoleName: "sys_root", Type: "USER"},
+          {Grantee: "jo", Domain: "local", RoleName: "sys_data_admin", Type: "USER"}
+        ]}});
+      }
+      return env.$q.resolve({data: {users: [{id: "sam", domain: "local"},
+                                            {id: "jo", domain: "local"}]}});
+    });
+    const by = {};
+    env.settle(env.service.getState({}, true)).value.users.forEach(u => { by[u.id] = u; });
+
+    equal(by.sam.analyticsAdminRoles.join(","), "sys_root", 'it administers in its own right');
+    equal(by.jo.analyticsAdminRoles.length, 0,
+          'sys_data_admin reaches sys_view_reader, and stops well short of RBAC');
+  }],
+
+  ['a custom role granted an administering one is marked too', function () {
+    // This half does write a row, and the Service RBAC tab follows it. A page
+    // that only matched the two built-in names would call the holder ordinary
+    // while that tab called them an administrator, and one of the two would be
+    // believed.
+    const env = makeUsersEnv();
+    env.onHttp(function (config) {
+      if (config.url === ANALYTICS_QUERY_URL) {
+        return env.$q.resolve({data: {results: [
+          {Grantee: "sam", Domain: "local", RoleName: "keeper", Type: "USER"},
+          {Grantee: "keeper", Domain: null, RoleName: "deputy", Type: "ROLE"},
+          {Grantee: "deputy", Domain: null, RoleName: "sys_root", Type: "ROLE"}
+        ]}});
+      }
+      return env.$q.resolve({data: {users: [{id: "sam", domain: "local"}]}});
+    });
+    const user = env.settle(env.service.getState({}, true)).value.users[0];
+
+    equal(user.analyticsRoles.join(","), "keeper", 'still the one role the user holds');
+    equal(user.analyticsAdminRoles.join(","), "keeper",
+          'marked through deputy and sys_root, neither of which is shown');
+  }],
+
+  ['a cycle in role grants does not hang the page', function () {
+    // Nothing in the engine stops two roles being granted to each other, and
+    // this runs inside the users poller: a walk that did not remember where it
+    // had been would take the tab down every ten seconds.
+    const env = makeUsersEnv();
+    env.onHttp(function (config) {
+      if (config.url === ANALYTICS_QUERY_URL) {
+        return env.$q.resolve({data: {results: [
+          {Grantee: "sam", Domain: "local", RoleName: "left", Type: "USER"},
+          {Grantee: "left", Domain: null, RoleName: "right", Type: "ROLE"},
+          {Grantee: "right", Domain: null, RoleName: "left", Type: "ROLE"}
+        ]}});
+      }
+      return env.$q.resolve({data: {users: [{id: "sam", domain: "local"}]}});
+    });
+    equal(env.settle(env.service.getState({}, true)).value.users[0].analyticsAdminRoles.length, 0);
+  }],
+
+  ['the mark says what a platform role would not have told you', function () {
+    // The role's own tooltip already says what it allows. What this one adds is
+    // that holding it needs no platform role beyond the one that reaches the
+    // service - the part a reader scanning the platform-roles column would
+    // otherwise miss entirely.
+    const env = makeUsersEnv();
+    const direct = env.service.getAnalyticsAdminRoleDescription("sys_security_admin");
+    contains(direct, "Administers service RBAC.");
+    contains(direct, "no platform role beyond the one that reaches this service");
+
+    const inherited = env.service.getAnalyticsAdminRoleDescription("keeper");
+    contains(inherited, "through a role granted to it",
+             'a custom role is marked for a reason the name does not show');
+  }],
+
+  ['the two pages agree on which roles administer RBAC', function () {
+    // The Service RBAC tab gates its own actions on this list, and it lives in
+    // cbas-ui, which this repo cannot import from at runtime. A name added
+    // there and not here marks nothing here, and the two pages then disagree
+    // about who is an administrator.
+    const env = makeUsersEnv();
+    ADMIN_SERVICE_ROLES.forEach(function (role) {
+      equal(env.service.adminServiceRoles([role], {}).join(","), role,
+            role + ' administers RBAC on the Service RBAC tab but not here');
+    });
+
+    // And nothing here claims more than that tab does.
+    const extra = Object.keys(BUILT_IN_ROLES).filter(function (role) {
+      return env.service.adminServiceRoles([role], {}).length > 0 &&
+        ADMIN_SERVICE_ROLES.indexOf(role) < 0;
+    });
+    equal(extra.length, 0, 'marked here but not an administrator there: ' + extra.join(', '));
+  }],
+
   ['the column decorates the page and must never break it', function () {
     // Analytics being unreachable, or the viewer not being allowed to read its
     // metadata, costs the column - not the list of users.
@@ -202,6 +353,8 @@ export default [
     equal(settled.error, undefined, 'a failed read must not reject');
     equal(Object.keys(settled.value.roles).length, 0);
     equal(Object.keys(settled.value.privileges).length, 0);
+    equal(Object.keys(settled.value.includedByRole).length, 0,
+          'the same shape as a good answer, so the callers need no second path');
   }],
 
   ['an errors body is a failure too, not a set of roles', function () {

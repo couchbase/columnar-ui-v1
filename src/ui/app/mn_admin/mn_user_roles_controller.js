@@ -103,6 +103,14 @@ function mnUserRolesController($scope, $uibModal, mnPromiseHelper, mnUserRolesSe
   // and revoking is the Service RBAC tab's job.
   vm.getAnalyticsRoleDescription = mnUserRolesService.getAnalyticsRoleDescription;
   vm.getAnalyticsPrivilegesDescription = mnUserRolesService.getAnalyticsPrivilegesDescription;
+  vm.getAnalyticsAdminRoleDescription = mnUserRolesService.getAnalyticsAdminRoleDescription;
+  // Which of the roles listed in a row carry the right to administer service
+  // RBAC. The service hands back the names rather than a yes/no so the mark can
+  // go against the role responsible for it; the lookup is here rather than in
+  // the template because no template in this tree reaches for indexOf.
+  vm.isAnalyticsAdminRole = function (user, role) {
+    return (user.analyticsAdminRoles || []).indexOf(role) >= 0;
+  };
   vm.getAnalyticsUnavailableDescription = mnUserRolesService.getAnalyticsUnavailableDescription;
   vm.getAnalyticsManageDescription = function (roleId) {
     return mnUserRolesService.getAnalyticsManageDescription(roleId, vm.rolesByRole);
