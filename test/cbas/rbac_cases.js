@@ -194,6 +194,35 @@ export default [
     }), "(");
   }],
 
+  ['a library grant is USAGE, and has no DDL form to write', function () {
+    // USAGE is read when a function is defined against the library and never
+    // again, so it is an object privilege on a library that already exists.
+    equal(buildGrant({
+      privileges: ["USAGE"], objectType: "LIBRARY", ddl: false,
+      targetKind: "OBJECT", target: {database: "db", scope: "sales", name: "pylib"},
+      grantees: [ROLE("analyst")]
+    }), "GRANT USAGE ON LIBRARY `db`.`sales`.`pylib` TO ROLE `analyst`");
+
+    equal(buildGrant({
+      privileges: ["USAGE"], objectType: "LIBRARY", ddl: false,
+      targetKind: "SCOPE", target: {database: "db", scope: "sales"},
+      grantees: [ROLE("analyst")]
+    }), "GRANT USAGE ON ANY LIBRARY IN SCOPE `db`.`sales` TO ROLE `analyst`");
+
+    // Uploading and dropping a library is admin-only over the REST API, so
+    // there is no CREATE or DROP on one to offer.
+    let failed = false;
+    try {
+      buildGrant({
+        privileges: ["CREATE"], objectType: "LIBRARY", ddl: true,
+        targetKind: "ANY", target: {}, grantees: [ROLE("analyst")]
+      });
+    } catch (error) {
+      failed = true;
+    }
+    ok(failed, 'a library has no DDL target form, so no DDL grant can be built');
+  }],
+
   ['a target form the grammar does not accept is refused, not written', function () {
     let failed = false;
     try {
