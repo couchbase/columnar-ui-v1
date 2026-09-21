@@ -20,7 +20,7 @@ licenses/APL2.txt.
               'disclosed': state.openedWrappers[group.name],
               'has-selection': !state.openedWrappers[group.name] && hasSelectedItems(group.name)
               }">
-      {{::group.name | mnReplaceWord:'Analytics':'Non-Administrative'}}
+      {{::group | mnColumnarSection}}
     </label>
     <div
        class="margin-left-half"

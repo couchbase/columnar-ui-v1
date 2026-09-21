@@ -60,6 +60,7 @@ angular
   .filter('mnColumnarService', mnColumnarService)
   .filter('mnColumnarState', mnColumnarState)
   .filter('mnColumnarRoles', mnColumnarRoles)
+  .filter('mnColumnarSection', mnColumnarSection)
   .filter('mnReplaceWord', mnReplaceWord)
 
 
@@ -662,32 +663,49 @@ function mnFormatServices() {
   }
 }
 
+// The roles this UI offers, and the section each is presented under.
+//
+// Keyed on the role atom rather than on the folder it arrives in: a folder's
+// name is a label chosen by the server profile (ui_folder_labels), which
+// presents the analytics folder under the product name, so matching the label
+// drops the entire section the moment the product is renamed -- MB-74090.
+var columnarRoleSections = {
+  "admin": "Administrative",
+  "ro_admin": "Administrative",
+  "security_admin": "Administrative",
+  "user_admin_local": "Administrative",
+  "user_admin_external": "Administrative",
+  "cluster_admin": "Administrative",
+  "external_stats_reader": "Administrative",
+  "analytics_admin": "Administrative",
+  "analytics_access": "Non-Administrative"
+};
+
+function sectionOfRole(role) {
+  return columnarRoleSections.hasOwnProperty(role.role) &&
+    columnarRoleSections[role.role];
+}
+
 function mnColumnarState() {
-  return function (service) {
-    return service && service.filter(function (s) {
-      return (s.name === "Administrative" || s.name === "Analytics");
+  return function (folders) {
+    return folders && folders.filter(function (folder) {
+      return folder.roles.some(sectionOfRole);
     })
   }
 }
 
 function mnColumnarRoles() {
-  return function (service) {
-    return service.filter(function (s) {
-      switch (s.role) {
-        case "admin":
-        case "ro_admin":
-        case "security_admin":
-        case "user_admin_local":
-        case "user_admin_external":
-        case "cluster_admin":
-        case "external_stats_reader":
-        case "analytics_access":
-        case "analytics_admin":
-          return true;
-        default:
-          return false;
-      }
-    })
+  return function (roles) {
+    return roles.filter(sectionOfRole)
+  }
+}
+
+// Each folder we keep holds roles of a single section, so the first role
+// surviving mnColumnarRoles names the folder's heading.
+function mnColumnarSection() {
+  return function (folder) {
+    var role = folder.roles.find(sectionOfRole);
+    return role ? sectionOfRole(role) : folder.name;
   }
 }
 
