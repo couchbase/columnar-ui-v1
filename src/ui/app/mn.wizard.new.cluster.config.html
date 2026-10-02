@@ -10,26 +10,6 @@ licenses/APL2.txt.
 
 <div class="panel dialog-med dialog dialog-wizard height-85vh">
 
-  <ng-template #tipContent_serviceMem>
-    <p>Memory quotas let Couchbase manage its memory usage between different
-      services without running out of memory or degrading performance.
-      The DATA SERVICE quota, for instance, is the allocation of
-      physical RAM you want to set aside for storing your data in Couchbase Server.
-      Other services like INDEXING use their memory allocations in different ways.
-    </p>
-    <p>
-      THE DEFAULTS ARE A SAFE PLACE TO START.
-    </p>
-    <a
-       href="https://docs.couchbase.com/enterprise-analytics/{{majorMinorVersion | async}}/learn/buckets-memory-and-storage/memory.html"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="block margin-bottom-1"
-       [mnSpinner]="majorMinorVersion | async">
-      Learn more about memory quotas for Couchbase services.
-    </a>
-  </ng-template>
-
     <ng-template #tipContent_columnarMem>
         <p> The memory quota to be allocated for Operational Insights
         </p>

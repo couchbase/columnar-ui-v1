@@ -41,7 +41,7 @@ function mnSettingsNotificationsController(mnPromiseHelper, mnSettingsNotificati
         if (vm.updates && vm.updates.links && !vm.updates.links.upgrade) {
           // Prefer newVersion, fallback to implementationVersion
           const versionSource = vm.updates.newVersion || vm.implementationVersion;
-          let majorMinor = "latest";
+          let majorMinor = "current";
           if (versionSource) {
             const match = versionSource.match(/(\d+\.\d+\.\d+(?:-[\w\d]+)?)$/);
             if (match) {
@@ -50,7 +50,7 @@ function mnSettingsNotificationsController(mnPromiseHelper, mnSettingsNotificati
             }
           }
           vm.updates.links.upgrade =
-              "https://docs.couchbase.com/enterprise-analytics/" +
+              "https://docs.couchbase.com/operational-insights/" +
               majorMinor +
               "/install/upgrade.html";
         }

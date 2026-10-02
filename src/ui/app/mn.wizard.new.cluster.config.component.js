@@ -51,7 +51,6 @@ class MnWizardNewClusterConfigComponent extends MnLifeCycleHooksToStream {
     super();
 
     this.postClusterInitHttp = mnWizardService.stream.postClusterInitHttp;
-    this.majorMinorVersion = mnAdminService.stream.majorMinorVersion;
 
     this.wizardForm = mnWizardService.wizardForm;
     this.newClusterConfigForm = mnWizardService.wizardForm.newClusterConfig;
