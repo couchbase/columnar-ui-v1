@@ -47,7 +47,8 @@ EXPECTED_NAV = ['Dashboard', 'Servers', 'Security', 'Settings', 'Logs', 'Workben
 # Pages removed from this fork. Their states are gone, so uiRouter's otherwise()
 # handler should bounce these to the dashboard rather than render anything.
 REMOVED_ROUTES = ['/replications', '/views', '/buckets', '/collections',
-                  '/index', '/settings/sampleBuckets', '/settings/autoCompaction']
+                  '/index', '/settings/sampleBuckets', '/settings/autoCompaction',
+                  '/security/secrets']
 
 LIVE_ROUTES = ['/overview', '/servers', '/logs', '/settings', '/security']
 

@@ -40,11 +40,6 @@ licenses/APL2.txt.
        class="resp-hide-sml">Certificates</a>
     <a
        ng-show="pools.isEnterprise && rbac.cluster.admin.security.read"
-       ui-sref="app.admin.security.secrets"
-       ui-sref-active="selected"
-       class="resp-hide-sml">Encryption at Rest</a>
-    <a
-       ng-show="pools.isEnterprise && rbac.cluster.admin.security.read"
        ui-sref="app.admin.security.audit"
        ui-sref-active="selected">Audit</a>
     <a
@@ -63,10 +58,6 @@ licenses/APL2.txt.
            ng-show="pools.isEnterprise"
            ui-sref="app.admin.security.certificate"
            ui-sref-active="selected">Certificates</a>
-         <a
-           ng-show="pools.isEnterprise"
-           ui-sref-active="selected"
-           class="resp-hide-sml">Encryption at Rest</a>
         <a
            ui-sref="app.admin.security.other"
            ui-sref-active="selected">Other Settings</a>
