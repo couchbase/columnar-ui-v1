@@ -83,21 +83,21 @@
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageBucket"
-                 ng-disabled="!rbac.cluster.settings.write">
+                 disabled>
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3">
               <label>Bucket Region</label>
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStorageRegion"
-                 ng-disabled="!rbac.cluster.settings.write">
+                 disabled>
             </div>
             <div class="formrow">
               <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Container Path Prefix' : 'Bucket Path Prefix'}}</label>
               <input
                  type="text"
                  ng-model="settingsClusterCtl.blobStorageSettings.blobStoragePrefix"
-                 ng-disabled="!rbac.cluster.settings.write">
+                 disabled>
             </div>
             <div class="formrow" ng-if="settingsClusterCtl.blobStorageIsS3 || settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob'">
               <label>{{settingsClusterCtl.blobStorageSettings.blobStorageScheme === 'azblob' ? 'Blob Storage Endpoint' : 'Storage Endpoint'}}

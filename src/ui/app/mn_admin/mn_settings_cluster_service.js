@@ -235,16 +235,11 @@ function mnSettingsClusterServiceFactory($http, $q, IEC, mnPools, mnPoolDefault)
     var endpointIsHttp = currentSettings.blobStorageEndpoint &&
         !currentSettings.blobStorageEndpoint.toLowerCase().startsWith('https://');
 
+    // The bucket, prefix and region say where the cluster's data is, and cannot be changed once it is
+    // initialized (MB-74389), so they are not sent.
     // Endpoint and SSL fields are valid for all schemes
-    formParams.append('blobStorageBucket', currentSettings.blobStorageBucket || '');
-    formParams.append('blobStoragePrefix', currentSettings.blobStoragePrefix || '');
     formParams.append('blobStorageEndpoint', currentSettings.blobStorageEndpoint || '');
     formParams.append('blobStorageDisableSslVerify', endpointIsHttp ? false : (currentSettings.blobStorageDisableSslVerify || false));
-
-    // Region is only valid for S3
-    if (isS3) {
-      formParams.append('blobStorageRegion', currentSettings.blobStorageRegion || '');
-    }
 
     // Certificates: split PEM blocks; clear if endpoint is plain HTTP or SSL verify is disabled
     if (endpointIsHttp || currentSettings.blobStorageDisableSslVerify) {
