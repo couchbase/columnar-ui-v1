@@ -893,19 +893,132 @@ export default [
     equal(env.lastStatement(), "CREATE ROLE `auditor`");
   }],
 
-  ['dropping a role says how much goes with it', function () {
+  // The engine refuses to drop a role that is both granted to someone and
+  // conveys something - privileges of its own, inherited ones, or a built-in
+  // role, which stores none - rather than strip it from its holders. A drop
+  // confirmed here would only come back refused.
+  ['a role held by someone and carrying privileges is refused, not confirmed', function () {
     const env = page();
     const analyst = env.controller.roles.filter(r => r.name === "analyst")[0];
     env.controller.dropRole(analyst);
     const scope = env.modal.scope();
     env.digest();
 
-    contains(scope.options.message, "1 user(s) or role(s) will lose",
-             'the warning has to name the blast radius');
-    equal(scope.options.statement, "DROP ROLE `analyst`");
+    contains(scope.options.message, "cannot be dropped", 'it has to say no');
+    contains(scope.options.message, "jo", 'and name who holds it');
+    contains(scope.options.message, "1 privilege", 'and what they would lose');
+    contains(scope.options.message, "Revoke it from them", 'and what to do instead');
+    equal(scope.options.statement, "", 'there is no statement to show');
+
+    const labels = Array.from(env.render().querySelectorAll('button'))
+      .map(b => b.textContent.trim());
+    ok(labels.indexOf('Drop Role') < 0, 'nothing to confirm: ' + labels.join(', '));
+    ok(labels.indexOf('Close') >= 0, 'only a way out: ' + labels.join(', '));
+
+    env.modal.cancel();
+    equal(env.statements.length, 0, 'a refused drop must not reach the engine');
+  }],
+
+  ['a role whose privileges are all inherited is in use all the same', function () {
+    // The engine follows role-to-role grants at any depth; counting only the
+    // role's own rows would offer a drop of `lead` that it then refuses.
+    const env = page({
+      roles: [{RoleName: "analyst", Creator: "admin"},
+              {RoleName: "lead", Creator: "admin"}],
+      assignments: [
+        {Assignee: "lead", GranteeType: "ROLE", AssignedRoleName: "analyst"},
+        {Assignee: "sam", AssigneeDomain: "external", GranteeType: "USER", AssignedRoleName: "lead"}
+      ]
+    });
+    const lead = env.controller.roles.filter(r => r.name === "lead")[0];
+    equal(lead.privileges.length, 0, 'the fixture: lead holds no privilege itself');
+    env.controller.dropRole(lead);
+    env.digest();
+
+    contains(env.modal.scope().options.message, "cannot be dropped");
+    contains(env.modal.scope().options.message, "1 privilege");
+  }],
+
+  ['a role holding a built-in role is in use, though it stores no privileges', function () {
+    const env = page({
+      roles: [{RoleName: "ops", Creator: "admin"},
+              {RoleName: "sys_data_reader", Creator: "@sys"}],
+      privileges: [],
+      assignments: [
+        {Assignee: "ops", GranteeType: "ROLE", AssignedRoleName: "sys_data_reader"},
+        {Assignee: "jo", AssigneeDomain: "local", GranteeType: "USER", AssignedRoleName: "ops"}
+      ]
+    });
+    const ops = env.controller.roles.filter(r => r.name === "ops")[0];
+    env.controller.dropRole(ops);
+    env.digest();
+
+    contains(env.modal.scope().options.message, "cannot be dropped");
+    contains(env.modal.scope().options.message, "sys_data_reader",
+             'what the holders would lose is the built-in role');
+  }],
+
+  ['a role nobody holds is dropped, and the dialog says what goes with it', function () {
+    const env = page({
+      roles: [{RoleName: "analyst", Creator: "admin"},
+              {RoleName: "lead", Creator: "admin"}],
+      privileges: [{
+        Grantee: "lead", GranteeType: "ROLE", Privilege: "SELECT",
+        Object: {ObjectType: "COLLECTION", DatabaseName: "db", ScopeName: "sales", ObjectName: "orders"}
+      }],
+      assignments: [{Assignee: "lead", GranteeType: "ROLE", AssignedRoleName: "analyst"}]
+    });
+    const lead = env.controller.roles.filter(r => r.name === "lead")[0];
+    env.controller.dropRole(lead);
+    const scope = env.modal.scope();
+    env.digest();
+
+    omits(scope.options.message, "cannot be dropped");
+    contains(scope.options.message, "1 privilege granted to it");
+    contains(scope.options.message, "its hold on the role analyst",
+             'its own grants of other roles go with it');
+    equal(scope.options.statement, "DROP ROLE `lead`");
 
     env.modal.ok();
-    equal(env.lastStatement(), "DROP ROLE `analyst`");
+    equal(env.lastStatement(), "DROP ROLE `lead`");
+  }],
+
+  ['a held role that conveys nothing can still be dropped', function () {
+    const env = page({
+      roles: [{RoleName: "empty", Creator: "admin"}],
+      privileges: [],
+      assignments: [{
+        Assignee: "jo", AssigneeDomain: "local", GranteeType: "USER", AssignedRoleName: "empty"
+      }]
+    });
+    const empty = env.controller.roles.filter(r => r.name === "empty")[0];
+    env.controller.dropRole(empty);
+    env.digest();
+
+    contains(env.modal.scope().options.message, "its grant to 1 user or role");
+    env.modal.ok();
+    equal(env.lastStatement(), "DROP ROLE `empty`");
+  }],
+
+  ['the engine refusing a drop anyway is shown in its own words', function () {
+    // A grant made since the page was read: the page offered the drop, and the
+    // engine is the one that knows better.
+    const refusal = "Role analyst cannot be dropped because it conveys privileges and is " +
+      "granted to a user or role; revoke its grants, or the privileges and roles it holds, first";
+    const env = page({assignments: []});
+    const analyst = env.controller.roles.filter(r => r.name === "analyst")[0];
+    env.onHttp(function (config) {
+      if (config.url === env.queryURL && config.data.statement.indexOf("DROP ROLE") === 0) {
+        return env.$q.resolve({data: {errors: [{code: 24341, msg: refusal}]}});
+      }
+      return undefined;
+    });
+    env.controller.dropRole(analyst);
+    env.digest();
+    env.modal.ok();
+    env.digest();
+
+    contains(env.controller.error, "Dropping the role failed: " + refusal);
   }],
 
   ['a revoke from the table undoes exactly the grant on that row', function () {
@@ -919,7 +1032,7 @@ export default [
   }],
 
   ['cancelling a confirmation runs nothing', function () {
-    const env = page();
+    const env = page({assignments: []});
     const analyst = env.controller.roles.filter(r => r.name === "analyst")[0];
     env.controller.dropRole(analyst);
     env.digest();

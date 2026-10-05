@@ -193,6 +193,21 @@ MUTATIONS = [
      """  .factory("cwRbacService", ["$q", "$http", "cwConstantsService", cwRbacServiceFactory]);""",
      """  .factory("cwRbacService", ["$q", "$http", "cwConstantsService", "cwQueryService", cwRbacServiceFactory]);"""),
 
+    ('a role the engine will refuse to drop is offered a confirmation anyway',
+     'cw_rbac_controller.js',
+     """      role.inUse = role.members.length > 0 &&""",
+     """      role.inUse = false &&"""),
+
+    ('a role whose privileges are all inherited reads as conveying nothing',
+     'cw_rbac_controller.js',
+     """        (role.allPrivileges.length > 0 || role.heldBuiltIns.length > 0);""",
+     """        (role.privileges.length > 0 || role.heldBuiltIns.length > 0);"""),
+
+    ('holding a built-in role reads as conveying nothing',
+     'cw_rbac_controller.js',
+     """        (role.allPrivileges.length > 0 || role.heldBuiltIns.length > 0);""",
+     """        (role.allPrivileges.length > 0);"""),
+
     ('a grant to a user is written as a grant to a role of that name',
      'cw_rbac_controller.js',
      """    grantPrivilege({name: user.id, type: "USER", domain: user.domain}, granteeLabel(user));""",
