@@ -363,6 +363,31 @@ MUTATIONS = [
      'cw_rbac_grant_dialog.html',
      """             ng-model="options.privileges[privilege.privilege]">""",
      """             ng-model="options.privilege[privilege.privilege]">"""),
+
+    ('an Azure link drops Disable SSL Verify on its way to the server',
+     'cw_query_service.js',
+     """        formData.disableSslVerify = scope.azure_link.disable_ssl_verify;\n""",
+     ''),
+
+    ('a GCS link drops Disable SSL Verify on its way to the server',
+     'cw_query_service.js',
+     """      formData.disableSslVerify = scope.gcs_link.disable_ssl_verify;\n""",
+     ''),
+
+    ('editing a GCS link forgets that SSL verification was disabled',
+     'cw_query_service.js',
+     """      scope.gcs_link.disable_ssl_verify = !!apiData.disableSslVerify;\n""",
+     ''),
+
+    ('the Azure dialog never offers Disable SSL Verify',
+     'cw_cbas_link_dialog.html',
+     """        <div class="formrow" ng-if="!azureEndpointIsHttp">""",
+     """        <div class="formrow" ng-if="false">"""),
+
+    ('a GCS link over plain http still offers to disable SSL verification',
+     'cw_cbas_link_dialog.html',
+     """        <div class="formrow" ng-if="!gcsEndpointIsHttp">""",
+     """        <div class="formrow" ng-if="true">"""),
 ]
 
 

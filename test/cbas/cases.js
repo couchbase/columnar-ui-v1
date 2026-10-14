@@ -8,14 +8,32 @@ be governed by the Apache License, Version 2.0, included in the file
 licenses/APL2.txt.
 */
 
-// What the catalog and Iceberg-collection dialogs do, judged by the statement
-// the workbench would have sent. A dialog's job is to turn a handful of form
-// fields into DDL, and every mistake that matters shows up in that string.
+// What the catalog, Iceberg-collection and link dialogs do, judged by what the
+// workbench would have sent: the DDL statement, or the link request. A dialog's
+// job is to turn a handful of form fields into that, and every mistake that
+// matters shows up there.
 
 import {makeEnv} from "./env.js";
 import {ok, equal, contains, omits} from "./assert.js";
 
 const REGIONS = ["us-east-1", "us-east-2", "eu-west-1"];
+
+// Each cloud link type, the dialog object holding its fields, and the id of its
+// Disable SSL Verify checkbox.
+const CLOUD_LINKS = [["s3", "s3_link", "s3_disable_ssl_verify"],
+                     ["azureblob", "azure_link", "azure_disable_ssl_verify"],
+                     ["azuredatalake", "azure_link", "azure_disable_ssl_verify"],
+                     ["gcs", "gcs_link", "gcs_disable_ssl_verify"]];
+
+// A new link dialog of `type`, opened and ready to fill in.
+function linkDialog(type) {
+  const env = makeEnv();
+  env.controller.createNewLink();
+  env.scope = env.modal.scope();
+  env.scope.options.link_type = type;
+  env.digest();
+  return env;
+}
 
 // A catalog dialog, opened and ready to fill in. Vending is off by default,
 // exactly as it ships.
@@ -336,6 +354,49 @@ export default [
 
     ok(statements.some(s => s.indexOf('AS VendedCredentials') >= 0),
        'the metadata query must project the property the dialogs read:\n' + statements.join('\n'));
+  }],
+
+
+  // ------------------------------------------------------------ link dialog
+
+  ['every cloud link offers Disable SSL Verify, except over plain http', function () {
+    for (const [type, link, id] of CLOUD_LINKS) {
+      const env = linkDialog(type);
+      env.scope.options[link].endpoint = "https://storage.example.com";
+      env.digest();
+      ok(env.render().querySelector('#' + id), type + ' over https');
+
+      env.scope.options[link].endpoint = "http://storage.example.com";
+      env.digest();
+      equal(env.render().querySelector('#' + id), null, type + ' over http has no TLS to verify');
+    }
+  }],
+
+  ['Disable SSL Verify reaches the server for every cloud link', function () {
+    for (const [type, link] of CLOUD_LINKS) {
+      for (const value of [true, false]) {
+        const env = linkDialog(type);
+        let sent;
+        env.onHttp(function (config) { sent = config.data; return env.$q.resolve({data: {}}); });
+        env.scope.options[link].disable_ssl_verify = value;
+        env.scope.options.link_name = "l";
+        env.cwQueryService.createLink(env.scope.options);
+        env.digest();
+        ok(sent, type + ': no request was sent');
+        equal(sent.disableSslVerify, value, type + ' sends ' + value);
+      }
+    }
+  }],
+
+  ['Disable SSL Verify is read back when a link is edited', function () {
+    for (const [type, link] of CLOUD_LINKS) {
+      const env = linkDialog(type);
+      env.cwQueryService.convertAPIdataToDialogScope({type: type, disableSslVerify: true}, env.scope.options);
+      equal(env.scope.options[link].disable_ssl_verify, true, type + ' set');
+      // the server omits the property when it is false
+      env.cwQueryService.convertAPIdataToDialogScope({type: type}, env.scope.options);
+      equal(env.scope.options[link].disable_ssl_verify, false, type + ' omitted');
+    }
   }],
 
 ];
