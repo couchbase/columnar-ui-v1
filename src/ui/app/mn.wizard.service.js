@@ -338,7 +338,7 @@ class MnWizardService {
         map((nodeConfig) => Math.floor(nodeConfig.storageTotals.ram.total / this.IEC.Mi)));
 
     this.stream.maxRAMMegs =
-      this.stream.totalRAMMegs.pipe(map(mnHelperService.calculateMaxMemorySize));
+      this.stream.totalRAMMegs.pipe(map((megs) => mnHelperService.calculateMaxMemorySize(megs)));
 
     this.stream.memoryQuotasFirst =
         combineLatest(

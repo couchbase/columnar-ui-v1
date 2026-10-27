@@ -132,8 +132,8 @@ class MnHelperService {
     return true;
   }
 
-  calculateMaxMemorySize(totalRAMMegs) {
-    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024)) - kvMemoryQuota;
+  calculateMaxMemorySize(totalRAMMegs, kvQuotaMegs = kvMemoryQuota) {
+    return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024)) - kvQuotaMegs;
   }
 
   validateEqual(key1, key2, erroName) {

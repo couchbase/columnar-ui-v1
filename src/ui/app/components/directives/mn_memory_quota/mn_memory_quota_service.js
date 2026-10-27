@@ -13,7 +13,6 @@ import _ from 'lodash';
 
 import mnHelper from "../../mn_helper.js";
 import mnPoolDefault from "../../mn_pool_default.js";
-import {kvMemoryQuota} from '../../../constants/constants.js';
 
 export default "mnMemoryQuotaService";
 
@@ -34,6 +33,9 @@ function mnMemoryQuotaServiceFactory($http, $window, mnPoolDefault, mnHelper, IE
 
   function prepareClusterQuotaSettings(currentPool, displayedServices, calculateMaxMemory, calculateTotal) {
     var ram = currentPool.storageTotals.ram;
+    // keep whatever kv quota the cluster has: 100 on one from before OI 3.1.0, which
+    // its older nodes require, and 0 on one created since
+    var kvQuota = currentPool.memoryQuota;
     if (calculateMaxMemory === undefined) {
       calculateMaxMemory = displayedServices.kv;
     }
@@ -52,12 +54,12 @@ function mnMemoryQuotaServiceFactory($http, $window, mnPoolDefault, mnHelper, IE
       rv.queryMemoryQuota = currentPool.queryMemoryQuota || 0;
     }
     if (currentPool.compat.atLeast55 && mnPoolDefault.export.isEnterprise) {
-      rv.memoryQuota = kvMemoryQuota;
+      rv.memoryQuota = kvQuota;
       rv.cbasMemoryQuota = currentPool.cbasMemoryQuota || 256;
       rv.eventingMemoryQuota = currentPool.eventingMemoryQuota || 256;
     }
     if (calculateMaxMemory) {
-      rv.maxMemorySize = ram ? mnHelper.calculateMaxMemorySize(ram.total / IEC.Mi) : 0;
+      rv.maxMemorySize = ram ? mnHelper.calculateMaxMemorySize(ram.total / IEC.Mi, kvQuota) : 0;
     } else {
       rv.maxMemorySize = false;
     }

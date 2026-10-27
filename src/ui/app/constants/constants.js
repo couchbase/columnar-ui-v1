@@ -74,7 +74,8 @@ let productName = "Operational Insights";
 
 let servicesEnterprise = ["kv","cbas"];
 let servicesCE = ["kv", "index", "fts", "n1ql"];
-let kvMemoryQuota = 100;
+// kv hosts no buckets here, so a new cluster gives it no quota
+let kvMemoryQuota = 0;
 
 export {
   productName,
