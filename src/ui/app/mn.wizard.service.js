@@ -340,11 +340,14 @@ class MnWizardService {
     this.stream.maxRAMMegs =
       this.stream.totalRAMMegs.pipe(map((megs) => mnHelperService.calculateMaxMemorySize(megs)));
 
+    this.stream.defaultRAMMegs =
+      this.stream.totalRAMMegs.pipe(map((megs) => mnHelperService.calculateDefaultMemorySize(megs)));
+
     this.stream.memoryQuotasFirst =
         combineLatest(
             this.stream.getSelfConfig,
             mnPoolsService.stream.quotaServices,
-            this.stream.maxRAMMegs
+            this.stream.defaultRAMMegs
         ).pipe(map(mnPoolsService.pluckMemoryQuotasFirst.bind(mnPoolsService)));
   }
 

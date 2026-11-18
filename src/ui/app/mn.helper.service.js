@@ -136,6 +136,12 @@ class MnHelperService {
     return Math.floor(Math.max(totalRAMMegs * 0.8, totalRAMMegs - 1024)) - kvQuotaMegs;
   }
 
+  calculateDefaultMemorySize(totalRAMMegs) {
+    // suggest 90% of total RAM for all quotas combined, but never more than the max allowed
+    return Math.min(Math.floor(totalRAMMegs * 0.9) - kvMemoryQuota,
+                    this.calculateMaxMemorySize(totalRAMMegs));
+  }
+
   validateEqual(key1, key2, erroName) {
     return function (group) {
       if (group.get(key1).value !== group.get(key2).value) {

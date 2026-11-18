@@ -89,10 +89,10 @@ class MnPoolsService {
   }
 
     pluckMemoryQuotasFirst(source) {
-        const [selfConfig, quotaServices, maxRAMMegs] = source;
+        const [selfConfig, quotaServices, defaultRAMMegs] = source;
         return quotaServices.reduce((acc, service) => {
             if (service === "cbas") {
-                acc[service] = maxRAMMegs;
+                acc[service] = defaultRAMMegs;
             } else {
                 acc[service] = selfConfig[this.getServiceQuotaName(service)];
             }
