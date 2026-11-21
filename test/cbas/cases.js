@@ -399,4 +399,51 @@ export default [
     }
   }],
 
+  // ------------------------------------------------------- ingestion status
+
+  ['each collection shows its own freshness lag, and each link the worst of them', function () {
+    const env = makeEnv();
+    const shadow = (dv, name, link) => ({DataverseName: dv, DatasetName: name, LinkName: link,
+                                         datasetFullyQualifiedName: dv + '.' + name});
+    const hotel = shadow('s1', 'hotel', 'Local'), airline = shadow('s1', 'airline', 'Local'),
+          route = shadow('s1', 'route', 'Local'), beer = shadow('s2', 'beer', 'Local');
+    env.cwQueryService.shadows.push(hotel, airline, route, beer);
+
+    // one state group spanning collections with different lags, as /api/v1/status/ingestion
+    // groups collections by everything but their lag
+    env.cwQueryService.applyShadowingStats({links: [{name: 'Local', state: [
+      {progress: 1.0, scopes: [{name: 's1', collections: [
+        {name: 'hotel', freshnessLag: 0}, {name: 'airline', freshnessLag: 65000}, {name: 'route'}]}]},
+      {progress: 1.0, scopes: [{name: 's2', collections: [{name: 'beer', freshnessLag: 400}]}]}]}]});
+
+    equal(hotel.freshness, 'up to date', 'hotel');
+    equal(airline.freshness, '1m 5s behind', 'airline');
+    equal(route.freshness, null, 'a lag the server does not know yet is not shown');
+    equal(beer.freshness, '< 1s behind', 'beer');
+
+    const link = {LinkName: 'Local'};
+    const all = env.cwQueryService.getLinkFreshness(link);
+    equal(all.worst, '1m 5s behind', 'worst over the link');
+    equal(all.behind, 2, 'behind over the link');
+    equal(all.known, 3, 'collections with a known lag');
+    const s2 = env.cwQueryService.getLinkFreshness(link, {DataverseName: 's2'});
+    equal(s2.worst, '< 1s behind', 'worst within one scope');
+    equal(s2.behind, 1, 'behind within one scope');
+  }],
+
+  ['a collection missing from the ingestion status loses its freshness lag', function () {
+    const env = makeEnv();
+    const hotel = {DataverseName: 's1', DatasetName: 'hotel', LinkName: 'Local',
+                   datasetFullyQualifiedName: 's1.hotel'};
+    env.cwQueryService.shadows.push(hotel);
+    env.cwQueryService.applyShadowingStats({links: [{name: 'Local', state: [
+      {progress: 1.0, scopes: [{name: 's1', collections: [{name: 'hotel', freshnessLag: 7000}]}]}]}]});
+    equal(hotel.freshness, '7s behind');
+
+    // a disconnected link drops out of the status, and its stale lag must not linger
+    env.cwQueryService.applyShadowingStats({links: []});
+    equal(hotel.freshness, null);
+    equal(env.cwQueryService.getLinkFreshness({LinkName: 'Local'}), null);
+  }],
+
 ];
