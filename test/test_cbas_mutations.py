@@ -388,6 +388,18 @@ MUTATIONS = [
      'cw_cbas_link_dialog.html',
      """        <div class="formrow" ng-if="!gcsEndpointIsHttp">""",
      """        <div class="formrow" ng-if="true">"""),
+
+    ('the items remaining in a backfill are not shown',
+     'cw_query_service.js',
+     """            shadow.itemsRemaining = collectionStats.itemsRemaining;
+""",
+     ''),
+
+    ('a disconnected collection keeps showing its last items remaining',
+     'cw_query_service.js',
+     """        shadow.itemsRemaining = null;
+        shadow.remaining = cwQueryService.datasetDisconnectedState;""",
+     """        shadow.remaining = cwQueryService.datasetDisconnectedState;"""),
 ]
 
 

@@ -446,4 +446,25 @@ export default [
     equal(env.cwQueryService.getLinkFreshness({LinkName: 'Local'}), null);
   }],
 
+  ['a collection shows how many items remain only when the server counted them', function () {
+    const env = makeEnv();
+    const shadow = (name) => ({DataverseName: 's1', DatasetName: name, LinkName: 'Local',
+                               datasetFullyQualifiedName: 's1.' + name});
+    const hotel = shadow('hotel'), route = shadow('route');
+    env.cwQueryService.shadows.push(hotel, route);
+
+    // itemsRemaining is reported only while a collection backfills from seqno 0
+    env.cwQueryService.applyShadowingStats({links: [{name: 'Local', state: [
+      {progress: 0.25, itemsRemaining: 1234567, timeLag: 65000,
+       scopes: [{name: 's1', collections: [{name: 'hotel'}]}]},
+      {progress: 0.927, scopes: [{name: 's1', collections: [{name: 'route'}]}]}]}]});
+    equal(hotel.itemsRemaining, 1234567, 'a backfill shows its count');
+    equal(route.itemsRemaining, null, 'a catch-up has no count, so none is shown');
+    equal(route.remaining, 1, 'though it is still not caught up');
+
+    // a disconnected link drops out of the status, and its stale count must not linger
+    env.cwQueryService.applyShadowingStats({links: []});
+    equal(hotel.itemsRemaining, null);
+  }],
+
 ];
